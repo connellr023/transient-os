@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2018 bzt (bztsrc@github)
+ * Modified by 2024 connellr023@github
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
