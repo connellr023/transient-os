@@ -24,6 +24,9 @@
  *
  */
 
+#ifndef GPIO_HPP
+#define GPIO_HPP
+
 #define MMIO_BASE 0x3F000000
 
 #define GPFSEL0 ((volatile unsigned int *)(MMIO_BASE + 0x00200000))
@@ -44,3 +47,5 @@
 #define GPPUD ((volatile unsigned int *)(MMIO_BASE + 0x00200094))
 #define GPPUDCLK0 ((volatile unsigned int *)(MMIO_BASE + 0x00200098))
 #define GPPUDCLK1 ((volatile unsigned int *)(MMIO_BASE + 0x0020009C))
+
+#endif

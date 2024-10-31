@@ -24,6 +24,9 @@
  *
  */
 
+#ifndef MBOX_HPP
+#define MBOX_HPP
+
 #include "gpio.hpp"
 
 #define MBOX_REQUEST 0
@@ -62,3 +65,5 @@ namespace mbox
 
     int call(unsigned char ch);
 }
+
+#endif // MBOX_HPP

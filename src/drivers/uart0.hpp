@@ -24,6 +24,9 @@
  *
  */
 
+#ifndef UART0_HPP
+#define UART0_HPP
+
 #include "gpio.hpp"
 
 /* PL011 UART registers */
@@ -43,3 +46,5 @@ namespace uart0
     void puts(char *s);
     void hex(unsigned int d);
 }
+
+#endif // UART0_HPP
