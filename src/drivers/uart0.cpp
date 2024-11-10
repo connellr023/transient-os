@@ -30,99 +30,92 @@
 /**
  * Set baud rate and characteristics (115200 8N1) and map to GPIO
  */
-void uart0::init()
-{
-    unsigned int r;
+void uart0::init() {
+  uint32_t r;
 
-    /* initialize UART */
-    *UART0_CR = 0; // turn off UART0
+  /* initialize UART */
+  *UART0_CR = 0; // turn off UART0
 
-    /* set up clock for consistent divisor values */
-    mbox::buffer[0] = 9 * 4;
-    mbox::buffer[1] = MBOX_REQUEST;
-    mbox::buffer[2] = MBOX_TAG_SETCLKRATE; // set clock rate
-    mbox::buffer[3] = 12;
-    mbox::buffer[4] = 8;
-    mbox::buffer[5] = 2;       // UART clock
-    mbox::buffer[6] = 4000000; // 4Mhz
-    mbox::buffer[7] = 0;       // clear turbo
-    mbox::buffer[8] = MBOX_TAG_LAST;
+  /* set up clock for consistent divisor values */
+  mbox::buffer[0] = 9 * 4;
+  mbox::buffer[1] = MBOX_REQUEST;
+  mbox::buffer[2] = MBOX_TAG_SETCLKRATE; // set clock rate
+  mbox::buffer[3] = 12;
+  mbox::buffer[4] = 8;
+  mbox::buffer[5] = 2;       // UART clock
+  mbox::buffer[6] = 4000000; // 4Mhz
+  mbox::buffer[7] = 0;       // clear turbo
+  mbox::buffer[8] = MBOX_TAG_LAST;
 
-    mbox::call(MBOX_CH_PROP);
+  mbox::call(MBOX_CH_PROP);
 
-    /* map UART0 to GPIO pins */
-    r = *GPFSEL1;
-    r &= ~((7 << 12) | (7 << 15)); // gpio14, gpio15
-    r |= (4 << 12) | (4 << 15);    // alt0
+  /* map UART0 to GPIO pins */
+  r = *GPFSEL1;
+  r &= ~((7 << 12) | (7 << 15)); // gpio14, gpio15
+  r |= (4 << 12) | (4 << 15);    // alt0
 
-    *GPFSEL1 = r;
-    *GPPUD = 0; // enable pins 14 and 15
+  *GPFSEL1 = r;
+  *GPPUD = 0; // enable pins 14 and 15
 
-    r = 150;
+  r = 150;
 
-    while (r--)
-        asm volatile("nop");
+  while (r--)
+    asm volatile("nop");
 
-    *GPPUDCLK0 = (1 << 14) | (1 << 15);
-    r = 150;
+  *GPPUDCLK0 = (1 << 14) | (1 << 15);
+  r = 150;
 
-    while (r--)
-        asm volatile("nop");
+  while (r--)
+    asm volatile("nop");
 
-    *GPPUDCLK0 = 0; // flush GPIO setup
+  *GPPUDCLK0 = 0; // flush GPIO setup
 
-    *UART0_ICR = 0x7FF; // clear interrupts
-    *UART0_IBRD = 2;    // 115200 baud
-    *UART0_FBRD = 0xB;
-    *UART0_LCRH = 0x7 << 4; // 8n1, enable FIFOs
-    *UART0_CR = 0x301;      // enable Tx, Rx, UART
+  *UART0_ICR = 0x7FF; // clear interrupts
+  *UART0_IBRD = 2;    // 115200 baud
+  *UART0_FBRD = 0xB;
+  *UART0_LCRH = 0x7 << 4; // 8n1, enable FIFOs
+  *UART0_CR = 0x301;      // enable Tx, Rx, UART
 }
 
 /**
  * Send a character
  */
-void uart0::send(unsigned int c)
-{
-    /* wait until we can send */
-    do
-    {
-        asm volatile("nop");
-    } while (*UART0_FR & 0x20);
-    /* write the character to the buffer */
-    *UART0_DR = c;
+void uart0::send(uint32_t c) {
+  /* wait until we can send */
+  do {
+    asm volatile("nop");
+  } while (*UART0_FR & 0x20);
+  /* write the character to the buffer */
+  *UART0_DR = c;
 }
 
 /**
  * Display a string
  */
-void uart0::puts(char *s)
-{
-    while (*s)
-    {
-        /* convert newline to carrige return + newline */
-        if (*s == '\n')
-            uart0::send('\r');
+void uart0::puts(char *s) {
+  while (*s) {
+    /* convert newline to carrige return + newline */
+    if (*s == '\n')
+      uart0::send('\r');
 
-        uart0::send(*s++);
-    }
+    uart0::send(*s++);
+  }
 }
 
 /**
  * Display a binary value in hexadecimal
  */
-void uart0::hex(unsigned int d)
-{
-    unsigned int n;
-    int c;
+void uart0::hex(uint32_t d) {
+  uint32_t n;
+  int c;
 
-    for (c = 28; c >= 0; c -= 4)
-    {
-        // get highest tetrad
-        n = (d >> c) & 0xF;
+  for (c = 28; c >= 0; c -= 4) {
+    // get highest tetrad
+    n = (d >> c) & 0xF;
 
-        // 0-9 => '0'-'9', 10-15 => 'A'-'F'
-        n += n > 9 ? 0x37 : 0x30;
+    // 0-9 => '0'-'9', 10-15 => 'A'-'F'
+    n += n > 9 ? 0x37 : 0x30;
 
-        uart0::send(n);
-    }
+    uart0::send(n);
+  }
 }

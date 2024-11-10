@@ -15,7 +15,7 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/kernel8.img: $(BUILD_DIR)/start.o $(OBJS)
-	ld.lld -m aarch64elf -nostdlib $(BUILD_DIR)/start.o $(OBJS) -T link.ld -o $(BUILD_DIR)/kernel8.elf
+	ld.lld -m aarch64elf $(BUILD_DIR)/start.o $(OBJS) -T link.ld -o $(BUILD_DIR)/kernel8.elf
 	llvm-objcopy -O binary $(BUILD_DIR)/kernel8.elf $(BUILD_DIR)/kernel8.img
 
 $(BUILD_DIR)/start.o: $(SRC_DIR)/start.s | $(BUILD_DIR)

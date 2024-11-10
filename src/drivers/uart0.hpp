@@ -28,23 +28,23 @@
 #define UART0_HPP
 
 #include "gpio.hpp"
+#include <stdint.h>
 
 /* PL011 UART registers */
-#define UART0_DR ((volatile unsigned int *)(MMIO_BASE + 0x00201000))
-#define UART0_FR ((volatile unsigned int *)(MMIO_BASE + 0x00201018))
-#define UART0_IBRD ((volatile unsigned int *)(MMIO_BASE + 0x00201024))
-#define UART0_FBRD ((volatile unsigned int *)(MMIO_BASE + 0x00201028))
-#define UART0_LCRH ((volatile unsigned int *)(MMIO_BASE + 0x0020102C))
-#define UART0_CR ((volatile unsigned int *)(MMIO_BASE + 0x00201030))
-#define UART0_IMSC ((volatile unsigned int *)(MMIO_BASE + 0x00201038))
-#define UART0_ICR ((volatile unsigned int *)(MMIO_BASE + 0x00201044))
+#define UART0_DR ((volatile uint32_t *)(MMIO_BASE + 0x00201000))
+#define UART0_FR ((volatile uint32_t *)(MMIO_BASE + 0x00201018))
+#define UART0_IBRD ((volatile uint32_t *)(MMIO_BASE + 0x00201024))
+#define UART0_FBRD ((volatile uint32_t *)(MMIO_BASE + 0x00201028))
+#define UART0_LCRH ((volatile uint32_t *)(MMIO_BASE + 0x0020102C))
+#define UART0_CR ((volatile uint32_t *)(MMIO_BASE + 0x00201030))
+#define UART0_IMSC ((volatile uint32_t *)(MMIO_BASE + 0x00201038))
+#define UART0_ICR ((volatile uint32_t *)(MMIO_BASE + 0x00201044))
 
-namespace uart0
-{
-    void init();
-    void send(unsigned int c);
-    void puts(char *s);
-    void hex(unsigned int d);
-}
+namespace uart0 {
+void init();
+void send(uint32_t c);
+void puts(char *s);
+void hex(uint32_t d);
+} // namespace uart0
 
 #endif // UART0_HPP

@@ -28,6 +28,7 @@
 #define MBOX_HPP
 
 #include "gpio.hpp"
+#include <stdint.h>
 
 #define MBOX_REQUEST 0
 
@@ -48,22 +49,21 @@
 #define MBOX_TAG_LAST 0
 
 #define VIDEOCORE_MBOX (MMIO_BASE + 0x0000B880)
-#define MBOX_READ ((volatile unsigned int *)(VIDEOCORE_MBOX + 0x0))
-#define MBOX_POLL ((volatile unsigned int *)(VIDEOCORE_MBOX + 0x10))
-#define MBOX_SENDER ((volatile unsigned int *)(VIDEOCORE_MBOX + 0x14))
-#define MBOX_STATUS ((volatile unsigned int *)(VIDEOCORE_MBOX + 0x18))
-#define MBOX_CONFIG ((volatile unsigned int *)(VIDEOCORE_MBOX + 0x1C))
-#define MBOX_WRITE ((volatile unsigned int *)(VIDEOCORE_MBOX + 0x20))
+#define MBOX_READ ((volatile uint32_t *)(VIDEOCORE_MBOX + 0x0))
+#define MBOX_POLL ((volatile uint32_t *)(VIDEOCORE_MBOX + 0x10))
+#define MBOX_SENDER ((volatile uint32_t *)(VIDEOCORE_MBOX + 0x14))
+#define MBOX_STATUS ((volatile uint32_t *)(VIDEOCORE_MBOX + 0x18))
+#define MBOX_CONFIG ((volatile uint32_t *)(VIDEOCORE_MBOX + 0x1C))
+#define MBOX_WRITE ((volatile uint32_t *)(VIDEOCORE_MBOX + 0x20))
 #define MBOX_RESPONSE 0x80000000
 #define MBOX_FULL 0x80000000
 #define MBOX_EMPTY 0x40000000
 
-namespace mbox
-{
-    /* a properly aligned buffer */
-    extern volatile unsigned int buffer[36];
+namespace mbox {
+/* a properly aligned buffer */
+extern volatile uint32_t buffer[36];
 
-    int call(unsigned char ch);
-}
+int call(uint8_t ch);
+} // namespace mbox
 
 #endif // MBOX_HPP

@@ -1,21 +1,22 @@
 #include "drivers/uart0.hpp"
+#include <stdint.h>
 
-int main()
-{
-    uart0::init();
+// https://github.com/s-matyukevich/raspberry-pi-os
 
-    while (1)
-    {
-        uart0::send('a');
+int main() {
+  uart0::init();
 
-        for (int i = 0; i < 10000; i++)
-            asm volatile("nop");
+  while (true) {
+    uart0::send('a');
 
-        uart0::send('v');
+    for (int i = 0; i < 10000; i++)
+      asm volatile("nop");
 
-        for (int i = 0; i < 10000; i++)
-            asm volatile("nop");
-    }
+    uart0::send('v');
 
-    return 0;
+    for (int i = 0; i < 10000; i++)
+      asm volatile("nop");
+  }
+
+  return 0;
 }
