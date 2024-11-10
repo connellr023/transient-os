@@ -33,12 +33,16 @@ enum class EntryError {
   ErrorInvalidEL0_32 = 15
 };
 
-void handle_invalid_entry(EntryError error);
+extern "C" void handle_invalid_entry(EntryError error);
 
-__attribute__((always_inline)) inline void entry();
-__attribute__((always_inline)) inline void exit();
+__attribute__((always_inline)) inline void interrupt_entry();
+__attribute__((always_inline)) inline void interrupt_exit();
 
-void handler();
+extern "C" void handle_interrupt();
+
+__attribute__((always_inline)) inline void init_interrupt_vector();
+__attribute__((always_inline)) inline void enable_interrupts();
+__attribute__((always_inline)) inline void disable_interrupts();
 } // namespace irq
 } // namespace kernel
 

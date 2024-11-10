@@ -26,15 +26,24 @@ void kernel::irq::handle_invalid_entry(EntryError error) {
   kernel::panic_handler();
 }
 
-void kernel::irq::handler() {
-  entry();
+void kernel::irq::handle_interrupt() {
+  interrupt_entry();
 
   uart0::puts("IRQ\n");
 
-  exit();
+  interrupt_exit();
 }
 
-void kernel::irq::entry() {
+void kernel::irq::init_interrupt_vector() {
+  asm volatile("adr x0, vectors\n\t"
+               "msr vbar_el1, x0");
+}
+
+void kernel::irq::enable_interrupts() { asm volatile("msr daifclr, #2"); }
+
+void kernel::irq::disable_interrupts() { asm volatile("msr daifset, #2"); }
+
+void kernel::irq::interrupt_entry() {
   asm volatile("sub sp, sp, %0\n\t"
                "stp x6, x7, [sp, #16 * 3]\n\t"
                "stp x8, x9, [sp, #16 * 4]\n\t"
@@ -51,7 +60,7 @@ void kernel::irq::entry() {
                "str x30, [sp, #16 * 15]\n\t" ::"i"(register_stack_frame_size));
 }
 
-void kernel::irq::exit() {
+void kernel::irq::interrupt_exit() {
   asm volatile("ldp x0, x1, [sp, #16 * 0]\n\t"
                "ldp x2, x3, [sp, #16 * 1]\n\t"
                "ldp x4, x5, [sp, #16 * 2]\n\t"
