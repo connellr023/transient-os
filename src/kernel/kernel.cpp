@@ -1,9 +1,41 @@
 #include "kernel.hpp"
+#include "../drivers/uart0.hpp"
 #include <stdint.h>
 
-__attribute__((always_inline)) inline void kernel::interrupt_entry() {
-  asm volatile("\n\t"
-               "\n\t"
+void kernel::init() { uart0::init(); }
+
+void kernel::irq::handle_invalid_entry(EntryError error) {
+  uint64_t exception_syndrome_reg;
+  asm volatile("mrs %0, esr_el1" : "=r"(exception_syndrome_reg));
+
+  uint64_t exception_link_reg;
+  asm volatile("mrs %0, elr_el1" : "=r"(exception_link_reg));
+
+  uart0::puts("Error type: ");
+  uart0::hex(static_cast<int>(error));
+  uart0::puts("\n");
+
+  uart0::puts("Exception syndrome register: ");
+  uart0::hex(exception_syndrome_reg);
+  uart0::puts("\n");
+
+  uart0::puts("Exception link register: ");
+  uart0::hex(exception_link_reg);
+  uart0::puts("\n");
+
+  kernel::panic_handler();
+}
+
+void kernel::irq::handler() {
+  entry();
+
+  uart0::puts("IRQ\n");
+
+  exit();
+}
+
+void kernel::irq::entry() {
+  asm volatile("sub sp, sp, %0\n\t"
                "stp x6, x7, [sp, #16 * 3]\n\t"
                "stp x8, x9, [sp, #16 * 4]\n\t"
                "stp x10, x11, [sp, #16 * 5]\n\t"
@@ -16,10 +48,10 @@ __attribute__((always_inline)) inline void kernel::interrupt_entry() {
                "stp x24, x25, [sp, #16 * 12]\n\t"
                "stp x26, x27, [sp, #16 * 13]\n\t"
                "stp x28, x29, [sp, #16 * 14]\n\t"
-               "str x30, [sp, #16 * 15]\n\t");
+               "str x30, [sp, #16 * 15]\n\t" ::"i"(register_stack_frame_size));
 }
 
-__attribute__((always_inline)) inline void kernel::interrupt_exit() {
+void kernel::irq::exit() {
   asm volatile("ldp x0, x1, [sp, #16 * 0]\n\t"
                "ldp x2, x3, [sp, #16 * 1]\n\t"
                "ldp x4, x5, [sp, #16 * 2]\n\t"
@@ -35,7 +67,8 @@ __attribute__((always_inline)) inline void kernel::interrupt_exit() {
                "ldp x24, x25, [sp, #16 * 12]\n\t"
                "ldp x26, x27, [sp, #16 * 13]\n\t"
                "ldp x28, x29, [sp, #16 * 14]\n\t"
-               "ldr x30, [sp, #16 * 15]\n\t");
+               "ldr x30, [sp, #16 * 15]\n\t"
+               "add sp, sp, %0\n\t" ::"i"(register_stack_frame_size));
 }
 
 void kernel::default_panic_handler() {

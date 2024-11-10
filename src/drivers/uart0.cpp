@@ -92,7 +92,7 @@ void uart0::send(uint32_t c) {
 /**
  * Display a string
  */
-void uart0::puts(char *s) {
+void uart0::puts(const char *s) {
   while (*s) {
     /* convert newline to carrige return + newline */
     if (*s == '\n')
@@ -105,11 +105,11 @@ void uart0::puts(char *s) {
 /**
  * Display a binary value in hexadecimal
  */
-void uart0::hex(uint32_t d) {
-  uint32_t n;
+void uart0::hex(uint64_t d) {
+  uint64_t n;
   int c;
 
-  for (c = 28; c >= 0; c -= 4) {
+  for (c = 60; c >= 0; c -= 4) {
     // get highest tetrad
     n = (d >> c) & 0xF;
 

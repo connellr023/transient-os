@@ -43,8 +43,8 @@
 namespace uart0 {
 void init();
 void send(uint32_t c);
-void puts(char *s);
-void hex(uint32_t d);
+void puts(const char *s);
+void hex(uint64_t d);
 } // namespace uart0
 
 #endif // UART0_HPP
