@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2018 bzt (bztsrc@github)
+ * Copyright (C) 2018 bzt (bztsrc//github)
+ * Modified by 2024 connellr023//github
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -23,33 +24,55 @@
  *
  */
 
+#include "system/sys_registers.hpp"
+
 .section ".text.boot"
 
-.global _start
-
+.globl _start
 _start:
-    // read cpu id, stop slave cores
-    mrs     x1, mpidr_el1
-    and     x1, x1, #3
-    cbz     x1, 2f
-    // cpu id > 0, stop
-1:  wfe
-    b       1b
-2:  // cpu id == 0
+    // Read cpu id, stop slave cores
+    mrs     x0, mpidr_el1
+    and     x0, x0, #0xFF
+    cbz     x0, master
+    // If cpu id > 0, stop
+hang:
+    b       hang
 
-    // set top of stack just before our code (stack grows to a lower address per AAPCS64)
+master:
+    // Set top of stack just before our code (stack grows to a lower address per AAPCS64)
     ldr     x1, =_start
     mov     sp, x1
 
-    // clear bss
+    // Clear bss section
     ldr     x1, =__bss_start
     ldr     w2, =__bss_size
-3:  cbz     w2, 4f
+
+c: 
+    cbz     w2, n
     str     xzr, [x1], #8
     sub     w2, w2, #1
-    cbnz    w2, 3b
+    cbnz    w2, c
 
-    // jump to C code, should not return
-4:  bl      main
-    // for failsafe, halt this core too
-    b       1b
+n:
+    ldr	x0, =SCTLR_VALUE_MMU_DISABLED
+	msr	sctlr_el1, x0		
+
+	ldr	x0, =HCR_VALUE
+	msr	hcr_el2, x0
+
+	ldr	x0, =SCR_VALUE
+	msr	scr_el3, x0
+
+	ldr	x0, =SPSR_VALUE
+	msr	spsr_el3, x0
+
+	adr	x0, el1_entry		
+	msr	elr_el3, x0
+
+    eret
+
+el1_entry:
+    // Jump to C code, should not return
+    bl      main
+    // For failsafe, halt this core too
+    b       hang

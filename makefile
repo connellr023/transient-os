@@ -22,7 +22,7 @@ $(BUILD_DIR)/kernel8.img: $(OBJS)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
 	@echo "Compiling $< to $@"
-	clang --target=aarch64-elf $(CFLAGS) -c $< -o $@
+	clang++ --target=aarch64-elf $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
@@ -32,7 +32,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.s | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
 	@echo "Compiling $< to $@"
-	clang --target=aarch64-elf $(CFLAGS) -c $< -o $@
+	clang++ --target=aarch64-elf -x assembler-with-cpp $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(BUILD_DIR_NAME)

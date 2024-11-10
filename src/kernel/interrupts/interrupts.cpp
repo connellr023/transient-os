@@ -1,5 +1,5 @@
-#include "interrupt_service_routine.hpp"
-#include "../drivers/uart0.hpp"
+#include "interrupts.hpp"
+#include "../../drivers/uart0.hpp"
 #include "../kernel.hpp"
 
 void kernel::interrupts::handle_invalid_entry(EntryError error) {

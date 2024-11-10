@@ -8,14 +8,15 @@ int main() {
   kernel::init();
 
   while (true) {
-    uart0::send('a');
+    uint64_t current_el;
+    asm volatile("mrs %0, CurrentEL" : "=r"(current_el));
+    current_el >>= 2;
 
-    for (int i = 0; i < 10000; i++)
-      asm volatile("nop");
+    uart0::puts("0x");
+    uart0::hex(current_el);
+    uart0::send('|');
 
-    uart0::send('v');
-
-    for (int i = 0; i < 10000; i++)
+    for (int i = 0; i < 100000; i++)
       asm volatile("nop");
   }
 

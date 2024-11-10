@@ -1,9 +1,9 @@
-.equ    reg_stack_frame_size    256
+#include "interrupts.hpp"
 
 .section    .text
 
 .macro  push_context
-        sub     sp, sp, \reg_stack_frame_size
+        sub     sp, sp, #REG_STACK_FRAME_SIZE
         stp     x0, x1, [sp, #16 * 0]
         stp     x2, x3, [sp, #16 * 1]
         stp     x4, x5, [sp, #16 * 2]
@@ -39,7 +39,7 @@
         ldp     x26, x27, [sp, #16 * 13]
         ldp     x28, x29, [sp, #16 * 14]
         ldr     x30, [sp, #16 * 15]
-        add     sp, sp, \reg_stack_frame_size
+        add     sp, sp, #REG_STACK_FRAME_SIZE
         eret
 .endm
 

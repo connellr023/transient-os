@@ -1,7 +1,9 @@
-#ifndef IRQ_HPP
-#define IRQ_HPP
+#ifndef INTERRUPTS_HPP
+#define INTERRUPTS_HPP
 
 #define REG_STACK_FRAME_SIZE 16 * 16
+
+#ifndef __ASSEMBLER__
 
 namespace kernel::interrupts {
 enum class EntryError {
@@ -33,4 +35,6 @@ void interrupt_service_routine();
 }
 } // namespace kernel::interrupts
 
-#endif // IRQ_HPP
+#endif // __ASSEMBLER__
+
+#endif // INTERRUPTS_HPP
