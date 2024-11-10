@@ -2,12 +2,12 @@
 
 .macro  vector_entry    label
 .align  7
-b       \label
+        b       \label
 .endm
 
 .macro  call_handle_invalid_entry    error_code
-mov     x0, \error_code
-bl      handle_invalid_entry
+        mov     x0, \error_code
+        bl      handle_invalid_entry
 .endm
 
 .align  11
@@ -19,7 +19,7 @@ vectors:
         vector_entry    error_invalid_el1t
 
         vector_entry    sync_invalid_el1h
-        vector_entry    handle_interrupt
+        vector_entry    el1_interrupt_handler   // See interrupt_service_routine.s
         vector_entry    fiq_invalid_el1h
         vector_entry    error_invalid_el1h
 
@@ -32,6 +32,12 @@ vectors:
         vector_entry    irq_invalid_el0_32
         vector_entry    fiq_invalid_el0_32
         vector_entry    error_invalid_el0_32
+
+.globl  init_interrupt_vector
+init_interrupt_vector:
+        adr     x0, vectors
+        msr     vbar_el1, x0
+        ret
 
 sync_invalid_el1t:
         call_handle_invalid_entry #0
