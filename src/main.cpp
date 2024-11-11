@@ -4,7 +4,7 @@
 
 // https://github.com/s-matyukevich/raspberry-pi-os
 
-int main() {
+extern "C" int main() {
   kernel::init();
 
   while (true) {

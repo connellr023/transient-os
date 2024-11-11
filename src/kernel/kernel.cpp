@@ -10,8 +10,7 @@ void kernel::init() {
 }
 
 void kernel::default_panic_handler() {
-  uart0::puts("Kernel panic!\n");
-
-  while (true)
-    ;
+  while (true) {
+    uart0::puts("Kernel panic!\n");
+  }
 }

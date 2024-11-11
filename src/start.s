@@ -48,30 +48,53 @@ master:
     ldr     w2, =__bss_size
 
 c: 
-    cbz     w2, n
+    cbz     w2, el3_entry
     str     xzr, [x1], #8
     sub     w2, w2, #1
     cbnz    w2, c
 
-n:
-    ldr	x0, =SCTLR_VALUE_MMU_DISABLED
-	msr	sctlr_el1, x0		
+el3_entry:
+    bl print_current_el
 
-	ldr	x0, =HCR_VALUE
-	msr	hcr_el2, x0
+    // Initialize SCTLR_EL2 and HCR_EL2 to save values before entering EL2
+    msr sctlr_el2, xzr
+    msr hcr_el2, xzr
 
-	ldr	x0, =SCR_VALUE
-	msr	scr_el3, x0
+    // Determine the EL2 execution state
+    mrs x0, scr_el3
+    orr x0, x0, #(1 << 10) // RW EL2 Execution state is AArch64
+    orr x0, x0, #(1 << 0) // NS EL2 Execution state is Non-secure
+    msr scr_el3, x0
+    mov x0, #0b01001 // DAIF = 0000
+    msr spsr_el3, x0 // M[4:0] = 01001 EL2h must match SCR_EL3.RW
 
-	ldr	x0, =SPSR_VALUE
-	msr	spsr_el3, x0
+    // Determine EL2 entry point
+    adr x0, el2_entry
+    msr elr_el3, x0
 
-	adr	x0, el1_entry		
-	msr	elr_el3, x0
+    eret
+
+el2_entry:
+    bl print_current_el
+
+    // Initialize SCTLR_EL1 to save values before entering EL1
+    msr sctlr_el1, xzr
+
+    // Determine the EL1 execution state
+    mrs x0, hcr_el2
+    orr x0, x0, #(1 << 31) // RW EL1 Execution state is AArch64
+    msr hcr_el2, x0
+    mov x0, #0b00101 // DAIF = 0000
+    msr spsr_el2, x0 // M[4:0] = 00101 EL1h must match HCR_EL2.RW
+
+    adr x0, el1_entry
+    msr elr_el2, x0
 
     eret
 
 el1_entry:
+    bl print_current_el
+
     // Jump to C code, should not return
     bl      main
     // For failsafe, halt this core too
