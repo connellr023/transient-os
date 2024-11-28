@@ -5,7 +5,6 @@
 
 void kernel::init() {
   uart0::init();
-  interrupts::init_interrupt_vector();
   interrupts::enable_interrupts();
 }
 

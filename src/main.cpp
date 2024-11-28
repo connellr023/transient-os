@@ -5,7 +5,8 @@
 // https://github.com/s-matyukevich/raspberry-pi-os
 
 extern "C" int main() {
-  kernel::init();
+  // kernel::init();
+  uart0::init();
 
   while (true) {
     uint64_t current_el;

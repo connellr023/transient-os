@@ -23,77 +23,68 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-
-#include "system/sys_registers.hpp"
-
 .section ".text.boot"
 
 .globl _start
 _start:
     // Read cpu id, stop slave cores
     mrs     x0, mpidr_el1
-    and     x0, x0, #0xFF
-    cbz     x0, master
+    tst     x0, 0x3
+    b.eq    master
     // If cpu id > 0, stop
 hang:
+    wfe
     b       hang
 
 master:
-    // Set top of stack just before our code (stack grows to a lower address per AAPCS64)
-    ldr     x1, =_start
-    mov     sp, x1
-
     // Clear bss section
     ldr     x1, =__bss_start
     ldr     w2, =__bss_size
 
-c: 
-    cbz     w2, el3_entry
+_c: 
+    cbz     w2, done_clear
     str     xzr, [x1], #8
     sub     w2, w2, #1
-    cbnz    w2, c
+    cbnz    w2, _c
 
-el3_entry:
-    bl print_current_el
+done_clear:
+    // Set top of stack just before our code (stack grows to a lower address per AAPCS64)
+    adrp    x1, _start
+    add     x1, x1, :lo12:_start
+    msr     sp_el1, x1
 
-    // Initialize SCTLR_EL2 and HCR_EL2 to save values before entering EL2
-    msr sctlr_el2, xzr
-    msr hcr_el2, xzr
+    // Enable AArch64 in EL1 by setting bits RW and SWIC to 1 in the
+	// Hypervisor Configuration Register (see p. D10-2492 and D10-2503 in
+	// the ARM Architecture Reference Manual). Since all other bits are 0,
+	// most instructions are not trapped, and the Physical SError, IRQ, and
+	// FIQ routings are set so that these exceptions are not taken to EL2,
+	// but are instead handled at EL1.
+	mov	    x0, (1 << 31)		// Enable AArch64
+	orr	    x0, x0, (1 << 1)	// SWIO is hardwired on the Pi
+	msr	    hcr_el2, x0
 
-    // Determine the EL2 execution state
-    mrs x0, scr_el3
-    orr x0, x0, #(1 << 10) // RW EL2 Execution state is AArch64
-    orr x0, x0, #(1 << 0) // NS EL2 Execution state is Non-secure
-    msr scr_el3, x0
-    mov x0, #0b01001 // DAIF = 0000
-    msr spsr_el3, x0 // M[4:0] = 01001 EL2h must match SCR_EL3.RW
+    // Set the Vector Base Address Register (EL1) to the address of the
+	// vectors defined below
+	adrp	x2, _vectors
+	add	    x2, x2, :lo12:_vectors
+	msr     vbar_el1, x2
 
-    // Determine EL2 entry point
-    adr x0, el2_entry
-    msr elr_el3, x0
+    // Change execution level to EL1:
+	//
+	// Set the Saved Program Status Register so that when entering EL1, the
+	// DAIF bits are set to 1111 (exceptions are masked) and the M[3:2] bits
+	// are set to 01 (EL1) and the M[0] bit is set to 0 (SP is always SP0)
+	// (see p. C5-386-387 in the ARM Architecture Reference Manual).
+	mov	    x2, 0x3C4
+	msr	    spsr_el2, x2
 
-    eret
-
-el2_entry:
-    bl print_current_el
-
-    // Initialize SCTLR_EL1 to save values before entering EL1
-    msr sctlr_el1, xzr
-
-    // Determine the EL1 execution state
-    mrs x0, hcr_el2
-    orr x0, x0, #(1 << 31) // RW EL1 Execution state is AArch64
-    msr hcr_el2, x0
-    mov x0, #0b00101 // DAIF = 0000
-    msr spsr_el2, x0 // M[4:0] = 00101 EL1h must match HCR_EL2.RW
-
-    adr x0, el1_entry
-    msr elr_el2, x0
+	adr	    x2, el1_entry
+	msr	    elr_el2, x2
 
     eret
 
 el1_entry:
-    bl print_current_el
+    mov     sp, x1
 
     // Jump to C code, should not return
     bl      main
