@@ -9,12 +9,14 @@ constexpr uint32_t thread_queue_capacity = 5;
 
 struct ThreadQueue {
 private:
-  ThreadControlBlock queue[thread_queue_capacity];
-  uint32_t head = 0;
-  uint32_t tail = 0;
-  uint32_t size = 0;
+  ThreadControlBlock queue[thread_queue_capacity]{};
+  uint32_t head;
+  uint32_t tail;
+  uint32_t size;
 
 public:
+  ThreadQueue() : head(0), tail(0), size(0){};
+
   bool enqueue(ThreadControlBlock tcb);
   bool remove(uint64_t thread_id);
 

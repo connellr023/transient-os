@@ -2,10 +2,11 @@
 
 using namespace kernel::threads;
 
-uint64_t thread_id_counter = 0;
-
 ThreadControlBlock::ThreadControlBlock() {
+  static uint64_t thread_id_counter = 0;
+
   this->thread_id = thread_id_counter++;
+  this->state = ThreadState::Ready;
 }
 
 void GeneralPurposeRegisterStates::read_from_sp(uint64_t *base) {

@@ -48,9 +48,17 @@ public:
   uint64_t sp;
 };
 
+enum class ThreadState {
+  Ready,
+  Running,
+  Blocked,
+  Terminated,
+};
+
 struct ThreadControlBlock {
 private:
   uint64_t thread_id;
+  ThreadState state;
   SpecialPurposeRegisterStates sp_registers{};
   GeneralPurposeRegisterStates gp_registers{};
 
@@ -58,7 +66,7 @@ public:
   ThreadControlBlock();
 
   uint64_t get_thread_id() const { return thread_id; }
-
+  ThreadState get_state() const { return state; }
   SpecialPurposeRegisterStates &get_sp_registers() { return sp_registers; }
   GeneralPurposeRegisterStates &get_gp_registers() { return gp_registers; }
 };
