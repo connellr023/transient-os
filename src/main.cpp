@@ -4,21 +4,11 @@
 
 // https://github.com/s-matyukevich/raspberry-pi-os
 
-extern "C" int main() {
-  // kernel::init();
-  uart0::init();
+int main() {
+  kernel::init();
 
   while (true) {
-    uint64_t current_el;
-    asm volatile("mrs %0, CurrentEL" : "=r"(current_el));
-    current_el >>= 2;
-
-    uart0::puts("0x");
-    uart0::hex(current_el);
-    uart0::send('|');
-
-    for (int i = 0; i < 100000; i++)
-      asm volatile("nop");
+    asm volatile("wfi");
   }
 
   return 0;
