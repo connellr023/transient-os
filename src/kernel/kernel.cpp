@@ -11,6 +11,8 @@ void kernel::init() {
   interrupts::enable_interrupts();
 }
 
+void kernel::init_thread(thread_handler_t handler, uint64_t stack_size) {}
+
 void kernel::default_panic_handler() {
   while (true) {
     uart0::puts("Kernel panic!\n");

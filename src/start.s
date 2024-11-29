@@ -42,11 +42,11 @@ master:
     ldr     x1, =__bss_start
     ldr     w2, =__bss_size
 
-_c:
+clear_bss:
     cbz     w2, done_clear
     str     xzr, [x1], #8
     sub     w2, w2, #1
-    cbnz    w2, _c
+    cbnz    w2, clear_bss
 
 done_clear:
     // Set top of stack just before our code (stack grows to a lower address per AAPCS64)

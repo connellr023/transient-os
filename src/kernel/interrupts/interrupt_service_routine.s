@@ -23,8 +23,8 @@ _irq_handler:
     mov x0, sp
 
     // Pass the stack pointer to the interrupt service routine
-    bl pre_isr
     bl interrupt_service_routine
+    bl post_isr
 
     // Restore state of all general purpose registers
     ldr x30, [sp], 16

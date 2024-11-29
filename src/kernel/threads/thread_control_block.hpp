@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+namespace kernel::threads {
 struct GeneralPurposeRegisterStates {
 public:
   uint64_t x0;
@@ -61,5 +62,6 @@ public:
   SpecialPurposeRegisterStates &get_sp_registers() { return sp_registers; }
   GeneralPurposeRegisterStates &get_gp_registers() { return gp_registers; }
 };
+} // namespace kernel::threads
 
 #endif // THREAD_CONTROL_BLOCK_HPP

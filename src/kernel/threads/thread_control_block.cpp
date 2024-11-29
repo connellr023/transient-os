@@ -1,5 +1,7 @@
 #include "thread_control_block.hpp"
 
+using namespace kernel::threads;
+
 uint64_t thread_id_counter = 0;
 
 ThreadControlBlock::ThreadControlBlock() {

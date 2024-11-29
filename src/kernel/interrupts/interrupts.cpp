@@ -26,7 +26,7 @@ void kernel::interrupts::init_timer() {
   *TIMER_CMP_1 = current_us;
 }
 
-void kernel::interrupts::pre_isr() {
+void kernel::interrupts::post_isr() {
   current_us += timer_interval_us;
 
   // Generate an interrupt when the timer reaches the current value
@@ -47,4 +47,10 @@ void kernel::interrupts::enable_interrupts() {
 
 void kernel::interrupts::disable_interrupts() {
   asm volatile("msr daifset, #2");
+}
+
+void kernel::interrupts::init_interrupt_vector() {
+  asm volatile("adrp x2, _vectors \n\t\
+                add x2, x2, :lo12:_vectors \n\t\
+                msr vbar_el1, x2");
 }
