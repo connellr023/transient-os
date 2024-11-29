@@ -18,9 +18,9 @@ public:
   ThreadQueue() : head(0), tail(0), size(0){};
 
   bool enqueue(ThreadControlBlock tcb);
-  bool remove(uint64_t thread_id);
+  void next();
 
-  const ThreadControlBlock &peek() const { return queue[head]; }
+  ThreadControlBlock peek() { return queue[head]; }
   uint32_t get_size() const { return size; }
 };
 } // namespace kernel::threads

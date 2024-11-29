@@ -1,7 +1,12 @@
 #ifndef INTERRUPTS_HPP
 #define INTERRUPTS_HPP
 
+#include <stdint.h>
+
 namespace kernel::interrupts {
+// us = microseconds
+constexpr uint32_t timer_interval_us = 200000;
+
 void enable_interrupt_controller();
 void enable_interrupts();
 void disable_interrupts();

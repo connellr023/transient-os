@@ -38,21 +38,24 @@ public:
   uint64_t x29;
   uint64_t x30;
 
-  void read_from_sp(uint64_t *base);
-  void restore_to_sp(uint64_t *base);
+  void save(uint64_t *base);
+  void restore(uint64_t *base);
 };
 
 struct SpecialPurposeRegisterStates {
 public:
-  uint64_t pc;
-  uint64_t sp;
+  uint64_t elr_el1;
+  uint64_t sp_el1;
+  uint64_t spsr_el1;
+
+  void save();
+  void restore();
 };
 
 enum class ThreadState {
   Ready,
   Running,
   Blocked,
-  Terminated,
 };
 
 struct ThreadControlBlock {
@@ -63,7 +66,8 @@ private:
   GeneralPurposeRegisterStates gp_registers{};
 
 public:
-  ThreadControlBlock();
+  ThreadControlBlock() : thread_id(0), state(ThreadState::Blocked){};
+  ThreadControlBlock(uint64_t spsr_el1, uint64_t elr_el1);
 
   uint64_t get_thread_id() const { return thread_id; }
   ThreadState get_state() const { return state; }

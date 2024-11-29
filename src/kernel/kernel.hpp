@@ -21,7 +21,7 @@ void init_thread(thread_handler_t handler, uint64_t stack_size);
 void init();
 
 void default_panic_handler();
-panic_handler_t panic_handler = default_panic_handler;
+extern panic_handler_t panic_handler;
 } // namespace kernel
 
 #endif // KERNEL_HPP

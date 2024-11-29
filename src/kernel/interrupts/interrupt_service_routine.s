@@ -2,6 +2,7 @@
 
 .globl _irq_handler
 _irq_handler:
+
     // Save that state of all general purpose registers
     stp x0, x1, [sp, -16]!
     stp x2, x3, [sp, -16]!
@@ -18,16 +19,15 @@ _irq_handler:
     stp x24, x25, [sp, -16]!
     stp x26, x27, [sp, -16]!
     stp x28, x29, [sp, -16]!
-    str x30, [sp, -16]!
+    stp x30, xzr, [sp, -16]!
 
+    // Pass the base address of the saved registers to the interrupt service routine
     mov x0, sp
-
-    // Pass the stack pointer to the interrupt service routine
     bl interrupt_service_routine
     bl post_isr
 
     // Restore state of all general purpose registers
-    ldr x30, [sp], 16
+    ldp x30, xzr, [sp], 16
     ldp x28, x29, [sp], 16
     ldp x26, x27, [sp], 16
     ldp x24, x25, [sp], 16
@@ -43,6 +43,10 @@ _irq_handler:
     ldp x4, x5, [sp], 16
     ldp x2, x3, [sp], 16
     ldp x0, x1, [sp], 16
+
+    // Stack pointer of next thread
+    // mrs x0, sp_el1
+    // mov sp, x0
 
     eret
 

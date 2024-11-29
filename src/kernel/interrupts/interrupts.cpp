@@ -8,14 +8,19 @@
 void kernel::interrupts::interrupt_service_routine(void *sp) {
   uint64_t *stack = static_cast<uint64_t *>(sp);
 
-  // Access saved registers
-  // ...
+  // // Save context of interrupted thread
+  // thread_queue.peek().get_gp_registers().save(stack);
+  // thread_queue.peek().get_sp_registers().save();
 
-  uart0::puts("Timed IRQ\n");
+  // // Goto next thread
+  // thread_queue.next();
+  // uart0::puts("Next\n");
+
+  // // Restore context of next thread
+  // thread_queue.peek().get_gp_registers().restore(stack);
+  // thread_queue.peek().get_sp_registers().restore();
 }
 
-// us = microseconds
-constexpr uint32_t timer_interval_us = 200000;
 uint32_t current_us = 0;
 
 void kernel::interrupts::init_timer() {
