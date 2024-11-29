@@ -20,6 +20,9 @@ _irq_handler:
     stp x28, x29, [sp, -16]!
     str x30, [sp, -16]!
 
+    mov x0, sp
+
+    // Pass the stack pointer to the interrupt service routine
     bl pre_isr
     bl interrupt_service_routine
 

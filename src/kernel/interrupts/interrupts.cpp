@@ -5,7 +5,12 @@
 #include "../kernel.hpp"
 #include <stdint.h>
 
-void kernel::interrupts::interrupt_service_routine() {
+void kernel::interrupts::interrupt_service_routine(void *sp) {
+  uint64_t *stack = static_cast<uint64_t *>(sp);
+
+  // Access saved registers
+  // ...
+
   uart0::puts("Timed IRQ\n");
 }
 

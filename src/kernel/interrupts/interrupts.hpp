@@ -10,7 +10,7 @@ void init_timer();
 extern "C" {
 void init_interrupt_vector();
 void pre_isr();
-void interrupt_service_routine();
+void interrupt_service_routine(void *sp);
 }
 } // namespace kernel::interrupts
 
