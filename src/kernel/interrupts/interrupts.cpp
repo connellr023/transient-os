@@ -6,7 +6,11 @@
 #include <stdint.h>
 
 void kernel::interrupts::interrupt_service_routine(void *sp) {
-  uint64_t *stack = static_cast<uint64_t *>(sp);
+  // uint64_t *stack = static_cast<uint64_t *>(sp);
+
+  for (int i = 0; i < 15; i++) {
+    uart0::puts("ISR\n");
+  }
 
   // // Save context of interrupted thread
   // thread_queue.peek().get_gp_registers().save(stack);
@@ -32,7 +36,7 @@ void kernel::interrupts::init_timer() {
 }
 
 void kernel::interrupts::post_isr() {
-  current_us += timer_interval_us;
+  current_us = *TIMER_COUNTER_LOW + timer_interval_us;
 
   // Generate an interrupt when the timer reaches the current value
   *TIMER_CMP_1 = current_us;

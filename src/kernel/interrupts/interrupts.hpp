@@ -5,7 +5,7 @@
 
 namespace kernel::interrupts {
 // us = microseconds
-constexpr uint32_t timer_interval_us = 200000;
+constexpr uint32_t timer_interval_us = 800000;
 
 void enable_interrupt_controller();
 void enable_interrupts();

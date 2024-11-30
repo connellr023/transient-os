@@ -2,25 +2,29 @@
 #include "kernel/kernel.hpp"
 #include <stdint.h>
 
-void test_task_1() {
-  while (true) {
-    uart0::puts("One\n");
-  }
-}
+// void test_task_1() {
+//   while (true) {
+//     uart0::puts("One\n");
+//   }
+// }
 
-void test_task_2() {
-  while (true) {
-    uart0::puts("Two\n");
-  }
-}
+// void test_task_2() {
+//   while (true) {
+//     uart0::puts("Two\n");
+//   }
+// }
 
 int main() {
-  kernel::init_thread(&test_task_1, 1024);
-  kernel::init_thread(&test_task_2, 1024);
+  // kernel::init_thread(&test_task_1, 1024);
+  // kernel::init_thread(&test_task_2, 1024);
 
   kernel::init();
 
   while (true) {
+    for (int i = 0; i < 15; i++) {
+      uart0::puts("Main\n");
+    }
+
     // uint8_t current_el;
     // asm volatile("mrs %0, CurrentEL" : "=r"(current_el));
     // current_el >>= 2;
@@ -34,8 +38,6 @@ int main() {
     // } else {
     //   uart0::puts("Main ELX\n");
     // }
-
-    asm volatile("wfi");
   }
 
   return 0;
