@@ -6,7 +6,6 @@
 
 namespace kernel {
 typedef void (*thread_handler_t)(void);
-typedef void (*panic_handler_t)(void);
 
 // These must match the values in config.txt
 constexpr uint64_t total_mem_mb = 1024; // total_mem
@@ -20,8 +19,7 @@ extern threads::ThreadQueue thread_queue;
 void init_thread(thread_handler_t handler, uint64_t stack_size);
 void init();
 
-void default_panic_handler();
-extern panic_handler_t panic_handler;
+void panic_handler();
 } // namespace kernel
 
 #endif // KERNEL_HPP

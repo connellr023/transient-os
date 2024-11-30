@@ -1,3 +1,4 @@
+#include "drivers/framebuffer.hpp"
 #include "drivers/uart0.hpp"
 #include "kernel/kernel.hpp"
 #include <stdint.h>
@@ -18,12 +19,16 @@ int main() {
   // kernel::init_thread(&test_task_1, 1024);
   // kernel::init_thread(&test_task_2, 1024);
 
+  // uart0::init();
+  framebuffer::init();
   kernel::init();
 
   while (true) {
-    for (int i = 0; i < 15; i++) {
-      uart0::puts("Main\n");
-    }
+    // for (int i = 0; i < 15; i++) {
+    //   uart0::puts("Main\n");
+    // }
+
+    framebuffer::fill_screen(0x00FF00);
 
     // uint8_t current_el;
     // asm volatile("mrs %0, CurrentEL" : "=r"(current_el));

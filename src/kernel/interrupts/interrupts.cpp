@@ -1,4 +1,5 @@
 #include "interrupts.hpp"
+#include "../../drivers/framebuffer.hpp"
 #include "../../drivers/interrupt_requests.hpp"
 #include "../../drivers/timer.hpp"
 #include "../../drivers/uart0.hpp"
@@ -8,9 +9,11 @@
 void kernel::interrupts::interrupt_service_routine(void *sp) {
   // uint64_t *stack = static_cast<uint64_t *>(sp);
 
-  for (int i = 0; i < 15; i++) {
-    uart0::puts("ISR\n");
-  }
+  framebuffer::fill_screen(0xFF0000);
+
+  // for (int i = 0; i < 15; i++) {
+  //   uart0::puts("ISR\n");
+  // }
 
   // // Save context of interrupted thread
   // thread_queue.peek().get_gp_registers().save(stack);

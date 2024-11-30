@@ -1,5 +1,4 @@
 #include "kernel.hpp"
-#include "../drivers/uart0.hpp"
 #include "interrupts/interrupts.hpp"
 #include "threads/thread_control_block.hpp"
 #include <stdint.h>
@@ -7,11 +6,9 @@
 using namespace kernel::threads;
 using namespace kernel::interrupts;
 
-kernel::panic_handler_t kernel::panic_handler = kernel::default_panic_handler;
 ThreadQueue kernel::thread_queue = ThreadQueue();
 
 void kernel::init() {
-  uart0::init();
   init_interrupt_vector();
   init_timer();
   enable_interrupt_controller();
@@ -29,7 +26,6 @@ void kernel::init_thread(thread_handler_t handler, uint64_t stack_size) {
       current_high_memory_end, reinterpret_cast<uint64_t>(handler));
 
   if (!thread_queue.enqueue(tcb)) {
-    uart0::puts("Failed to enqueue thread\n");
     panic_handler();
   }
 
@@ -38,8 +34,10 @@ void kernel::init_thread(thread_handler_t handler, uint64_t stack_size) {
   current_high_memory_end -= stack_size;
 }
 
-void kernel::default_panic_handler() {
+__attribute__((weak, noreturn)) void kernel::panic_handler() {
+  disable_interrupts();
+
   while (true) {
-    uart0::puts("Kernel panic!\n");
+    asm volatile("wfe");
   }
 }
