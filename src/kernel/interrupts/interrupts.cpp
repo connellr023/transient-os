@@ -9,7 +9,7 @@
 void kernel::interrupts::interrupt_service_routine(void *sp) {
   // uint64_t *stack = static_cast<uint64_t *>(sp);
 
-  framebuffer::fill_screen(0xFF0000);
+  // framebuffer::fill_screen(0xFF0000);
 
   // for (int i = 0; i < 15; i++) {
   //   uart0::puts("ISR\n");

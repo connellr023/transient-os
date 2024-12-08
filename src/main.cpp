@@ -19,16 +19,25 @@ int main() {
   // kernel::init_thread(&test_task_1, 1024);
   // kernel::init_thread(&test_task_2, 1024);
 
-  // uart0::init();
-  framebuffer::init();
+  if (!framebuffer::init()) {
+    while (true) {
+      uart0::puts("Framebuffer initialization failed\n");
+    }
+
+    return 1;
+  }
+
+  uart0::init();
   kernel::init();
 
+  framebuffer::fill_screen(0x00FFFF);
+
   while (true) {
+    framebuffer::fill_screen(0x00FF00);
+    asm volatile("wfi");
     // for (int i = 0; i < 15; i++) {
     //   uart0::puts("Main\n");
     // }
-
-    framebuffer::fill_screen(0x00FF00);
 
     // uint8_t current_el;
     // asm volatile("mrs %0, CurrentEL" : "=r"(current_el));
