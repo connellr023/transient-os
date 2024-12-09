@@ -4,52 +4,49 @@
 #include <stdint.h>
 
 namespace kernel::threads {
-struct GeneralPurposeRegisterStates {
+class CpuContext {
 public:
-  uint64_t x0;
-  uint64_t x1;
-  uint64_t x2;
-  uint64_t x3;
-  uint64_t x4;
-  uint64_t x5;
-  uint64_t x6;
-  uint64_t x7;
-  uint64_t x8;
-  uint64_t x9;
-  uint64_t x10;
-  uint64_t x11;
-  uint64_t x12;
-  uint64_t x13;
-  uint64_t x14;
-  uint64_t x15;
-  uint64_t x16;
-  uint64_t x17;
-  uint64_t x18;
-  uint64_t x19;
-  uint64_t x20;
-  uint64_t x21;
-  uint64_t x22;
-  uint64_t x23;
-  uint64_t x24;
-  uint64_t x25;
-  uint64_t x26;
-  uint64_t x27;
-  uint64_t x28;
-  uint64_t x29;
-  uint64_t x30;
+  uint64_t x0 = 0;
+  uint64_t x1 = 0;
+  uint64_t x2 = 0;
+  uint64_t x3 = 0;
+  uint64_t x4 = 0;
+  uint64_t x5 = 0;
+  uint64_t x6 = 0;
+  uint64_t x7 = 0;
+  uint64_t x8 = 0;
+  uint64_t x9 = 0;
+  uint64_t x10 = 0;
+  uint64_t x11 = 0;
+  uint64_t x12 = 0;
+  uint64_t x13 = 0;
+  uint64_t x14 = 0;
+  uint64_t x15 = 0;
+  uint64_t x16 = 0;
+  uint64_t x17 = 0;
+  uint64_t x18 = 0;
+  uint64_t x19 = 0;
+  uint64_t x20 = 0;
+  uint64_t x21 = 0;
+  uint64_t x22 = 0;
+  uint64_t x23 = 0;
+  uint64_t x24 = 0;
+  uint64_t x25 = 0;
+  uint64_t x26 = 0;
+  uint64_t x27 = 0;
+  uint64_t x28 = 0;
+  uint64_t x29 = 0; // Frame Pointer (FP)
+  uint64_t x30 = 0; // Link Register (LR)
+  uint64_t sp = 0;
+  uint64_t elr_el1 = 0;
+  uint64_t spsr_el1 = 0;
+
+  CpuContext() = default;
 
   void save(uint64_t *base);
-  void restore(uint64_t *base);
-};
+  void restore(uint64_t *base) const;
 
-struct SpecialPurposeRegisterStates {
-public:
-  uint64_t elr_el1;
-  uint64_t sp_el1;
-  uint64_t spsr_el1;
-
-  void save();
-  void restore();
+  void init_thread_stack();
 };
 
 enum class ThreadState {
@@ -58,21 +55,19 @@ enum class ThreadState {
   Blocked,
 };
 
-struct ThreadControlBlock {
+class ThreadControlBlock {
 private:
   uint64_t thread_id;
   ThreadState state;
-  SpecialPurposeRegisterStates sp_registers{};
-  GeneralPurposeRegisterStates gp_registers{};
+  CpuContext cpu_ctx{};
 
 public:
   ThreadControlBlock() : thread_id(0), state(ThreadState::Blocked){};
-  ThreadControlBlock(uint64_t spsr_el1, uint64_t elr_el1);
+  ThreadControlBlock(uint64_t sp, uint64_t elr_el1);
 
   uint64_t get_thread_id() const { return thread_id; }
   ThreadState get_state() const { return state; }
-  SpecialPurposeRegisterStates &get_sp_registers() { return sp_registers; }
-  GeneralPurposeRegisterStates &get_gp_registers() { return gp_registers; }
+  CpuContext &get_cpu_ctx() { return cpu_ctx; }
 };
 } // namespace kernel::threads
 

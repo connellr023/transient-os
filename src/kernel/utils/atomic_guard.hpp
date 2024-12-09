@@ -7,9 +7,13 @@ namespace kernel::utils {
 // RAII class to perform operations atomically
 class AtomicGuard {
 public:
-  AtomicGuard() { interrupts::disable_interrupts(); }
+  __attribute__((always_inline)) inline AtomicGuard() {
+    interrupts::disable_interrupts();
+  }
 
-  ~AtomicGuard() { interrupts::enable_interrupts(); }
+  __attribute__((always_inline)) inline ~AtomicGuard() {
+    interrupts::enable_interrupts();
+  }
 };
 } // namespace kernel::utils
 

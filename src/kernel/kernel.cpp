@@ -6,7 +6,7 @@
 using namespace kernel::threads;
 using namespace kernel::interrupts;
 
-ThreadQueue kernel::thread_queue = ThreadQueue();
+SchedulerQueue kernel::scheduler = SchedulerQueue();
 kernel::string_output_handler_t kernel_string_output_handler = nullptr;
 kernel::hex_output_handler_t kernel_hex_output_handler = nullptr;
 
@@ -43,7 +43,9 @@ void kernel::init_thread(thread_handler_t handler, uint64_t stack_size,
   ThreadControlBlock tcb = ThreadControlBlock(
       current_high_memory_end, reinterpret_cast<uint64_t>(handler));
 
-  if (!thread_queue.enqueue(tcb)) {
+  tcb.get_cpu_ctx().init_thread_stack();
+
+  if (!scheduler.enqueue(tcb)) {
     safe_put("Thread queue is full\n");
     panic_handler();
   }
@@ -65,11 +67,11 @@ void kernel::safe_hex(uint64_t value) {
   }
 }
 
-__attribute__((weak, noreturn)) void kernel::panic_handler() {
+void kernel::panic_handler() {
   disable_interrupts();
 
   while (true) {
-    safe_put("Kernel Panic!\n");
+    safe_put("Kernel panic!\n");
     asm volatile("wfe");
   }
 }

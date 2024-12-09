@@ -2,20 +2,27 @@
 
 using namespace kernel::threads;
 
-ThreadControlBlock::ThreadControlBlock(uint64_t spsr_el1, uint64_t elr_el1) {
+ThreadControlBlock::ThreadControlBlock(uint64_t sp, uint64_t elr_el1) {
   static uint64_t thread_id_counter = 0;
 
   this->thread_id = thread_id_counter++;
   this->state = ThreadState::Ready;
 
-  this->sp_registers.spsr_el1 = spsr_el1;
-  this->sp_registers.elr_el1 = elr_el1;
+  this->cpu_ctx.sp = sp;
+  this->cpu_ctx.elr_el1 = elr_el1;
 
   // Set SPSR_EL1 to be the same as the kernel's SPSR_EL1
-  asm volatile("mrs %0, spsr_el1" : "=r"(this->sp_registers.spsr_el1));
+  asm volatile("mrs %0, spsr_el1" : "=r"(this->cpu_ctx.spsr_el1));
 }
 
-void GeneralPurposeRegisterStates::save(uint64_t *base) {
+void CpuContext::init_thread_stack() {
+  this->restore(reinterpret_cast<uint64_t *>(this->sp));
+}
+
+void CpuContext::save(uint64_t *base) {
+  asm volatile("mrs %0, elr_el1" : "=r"(this->elr_el1));
+  asm volatile("mrs %0, spsr_el1" : "=r"(this->spsr_el1));
+
   this->x0 = base[0];
   this->x1 = base[1];
   this->x2 = base[2];
@@ -47,9 +54,10 @@ void GeneralPurposeRegisterStates::save(uint64_t *base) {
   this->x28 = base[28];
   this->x29 = base[29];
   this->x30 = base[30];
+  this->sp = base[31];
 }
 
-void GeneralPurposeRegisterStates::restore(uint64_t *base) {
+void CpuContext::restore(uint64_t *base) const {
   base[0] = this->x0;
   base[1] = this->x1;
   base[2] = this->x2;
@@ -81,16 +89,8 @@ void GeneralPurposeRegisterStates::restore(uint64_t *base) {
   base[28] = this->x28;
   base[29] = this->x29;
   base[30] = this->x30;
-}
+  base[31] = this->sp;
 
-void SpecialPurposeRegisterStates::save() {
-  asm volatile("mrs %0, elr_el1" : "=r"(this->elr_el1));
-  asm volatile("mrs %0, sp_el1" : "=r"(this->sp_el1));
-  asm volatile("mrs %0, spsr_el1" : "=r"(this->spsr_el1));
-}
-
-void SpecialPurposeRegisterStates::restore() {
   asm volatile("msr elr_el1, %0" : : "r"(this->elr_el1));
-  asm volatile("msr sp_el1, %0" : : "r"(this->sp_el1));
   asm volatile("msr spsr_el1, %0" : : "r"(this->spsr_el1));
 }

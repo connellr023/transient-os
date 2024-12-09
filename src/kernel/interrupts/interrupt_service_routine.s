@@ -1,7 +1,10 @@
+#include "interrupts.hpp"
+
 .section .text
 
 .macro push_registers
-    sub sp, sp, (16*16)
+    // Save that state of all general purpose registers
+    sub sp, sp, #STACK_FRAME_SIZE
     stp x0, x1, [sp, #16*0]
     stp x2, x3, [sp, #16*1]
     stp x4, x5, [sp, #16*2]
@@ -17,10 +20,18 @@
     stp x24, x25, [sp, #16*12]
     stp x26, x27, [sp, #16*13]
     stp x28, x29, [sp, #16*14]
-    str x30, [sp, #16*15]
+
+    // Save LR and SP
+    mov x1, sp
+    stp x30, x1, [sp, #16*15]
 .endm
 
 .macro pop_registers
+    // Restore LR and SP
+    ldp x30, x1, [sp, #16*15]
+    mov sp, x1
+
+    // Restore state of all general purpose registers
     ldp x0, x1, [sp, #16*0]
     ldp x2, x3, [sp, #16*1]
     ldp x4, x5, [sp, #16*2]
@@ -36,14 +47,11 @@
     ldp x24, x25, [sp, #16*12]
     ldp x26, x27, [sp, #16*13]
     ldp x28, x29, [sp, #16*14]
-    ldr x30, [sp, #16*15]
-    add sp, sp, (16*16)
+    add sp, sp, #STACK_FRAME_SIZE
 .endm
 
 .globl _irq_handler
 _irq_handler:
-
-    // Save that state of all general purpose registers
     push_registers
 
     // Pass the base address of the saved registers to the interrupt service routine
@@ -51,9 +59,7 @@ _irq_handler:
     bl interrupt_service_routine
     bl post_isr
 
-    // Restore state of all general purpose registers
     pop_registers
-
     eret
 
 .globl _synch_handler

@@ -9,25 +9,32 @@
 void kernel::interrupts::interrupt_service_routine(void *sp) {
   uint64_t *stack = static_cast<uint64_t *>(sp);
 
+  // if (!is_first_isr) {
+  //   safe_put("First ISR\n");
+  //   is_first_isr = true;
+
+  //   // Restore state of first thread
+  //   scheduler.peek().get_cpu_ctx().restore(stack);
+
+  //   return;
+  // }
+
   safe_put("ISR\n");
 
   // Save context of interrupted thread
-  // thread_queue.peek().get_gp_registers().save(stack);
-  // thread_queue.peek().get_sp_registers().save();
+  scheduler.peek().get_cpu_ctx().save(stack);
 
-  // Print address of next thread handler
-  safe_put("Next thread handler: 0x");
-  safe_hex(thread_queue.peek().get_sp_registers().elr_el1);
+  // Print address of next thread handler safe_put("Next thread handler: 0x");
+  safe_hex(scheduler.peek().get_cpu_ctx().elr_el1);
   safe_put("\n");
 
   // Goto next thread
-  thread_queue.next();
+  scheduler.next();
 
   safe_put("Next thread\n");
 
   // Restore context of next thread
-  // thread_queue.peek().get_gp_registers().restore(stack);
-  // thread_queue.peek().get_sp_registers().restore();
+  scheduler.peek().get_cpu_ctx().restore(stack);
 }
 
 uint32_t current_us = 0;
