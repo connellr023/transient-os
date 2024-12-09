@@ -10,13 +10,17 @@ OBJS = $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(SRCS:.c=.o))
 OBJS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(OBJS:.cpp=.o))
 OBJS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(OBJS:.s=.o))
 
+# Compiler and linker flags
+CFLAGS = -fno-exceptions -fno-rtti
+LDFLAGS = -nostdlib
+
 all: $(BUILD_DIR)/kernel8.img
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/kernel8.img: $(OBJS)
-	ld.lld -m aarch64elf -nostdlib $(OBJS) -T link.ld -o $(BUILD_DIR)/kernel8.elf
+	ld.lld -m aarch64elf $(LDFLAGS) $(OBJS) -T link.ld -o $(BUILD_DIR)/kernel8.elf
 	llvm-objcopy -O binary $(BUILD_DIR)/kernel8.elf $(BUILD_DIR)/kernel8.img
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)

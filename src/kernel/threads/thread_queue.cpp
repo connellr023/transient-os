@@ -19,7 +19,5 @@ void ThreadQueue::next() {
     return;
   }
 
-  while (this->queue[this->head].get_state() == ThreadState::Blocked) {
-    this->head = (this->head + 1) % thread_queue_capacity;
-  }
+  this->head = (this->head + 1) % this->size;
 }

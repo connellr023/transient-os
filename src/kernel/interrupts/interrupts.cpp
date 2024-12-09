@@ -7,24 +7,25 @@
 #include <stdint.h>
 
 void kernel::interrupts::interrupt_service_routine(void *sp) {
-  // uint64_t *stack = static_cast<uint64_t *>(sp);
+  uint64_t *stack = static_cast<uint64_t *>(sp);
 
-  safe_string_output("ISR\n");
-  // framebuffer::fill_screen(0x002BFF);
+  safe_put("ISR\n");
 
-  // for (int i = 0; i < 15; i++) {
-  //   uart0::puts("ISR\n");
-  // }
-
-  // // Save context of interrupted thread
+  // Save context of interrupted thread
   // thread_queue.peek().get_gp_registers().save(stack);
   // thread_queue.peek().get_sp_registers().save();
 
-  // // Goto next thread
-  // thread_queue.next();
-  // uart0::puts("Next\n");
+  // Print address of next thread handler
+  safe_put("Next thread handler: 0x");
+  safe_hex(thread_queue.peek().get_sp_registers().elr_el1);
+  safe_put("\n");
 
-  // // Restore context of next thread
+  // Goto next thread
+  thread_queue.next();
+
+  safe_put("Next thread\n");
+
+  // Restore context of next thread
   // thread_queue.peek().get_gp_registers().restore(stack);
   // thread_queue.peek().get_sp_registers().restore();
 }
@@ -83,26 +84,26 @@ void kernel::interrupts::synch_exception_handler() {
   asm volatile("mrs %0, far_el1" : "=r"(far));
 
   // Log ESR_EL1 (Exception Class and ISS)
-  safe_string_output("Synchronous exception cause (EC): 0x");
-  safe_hex_output(ec);
-  safe_string_output("\n");
+  safe_put("Synchronous exception cause (EC): 0x");
+  safe_hex(ec);
+  safe_put("\n");
 
-  safe_string_output("Instruction Specific Syndrome (ISS): 0x");
-  safe_hex_output(iss);
-  safe_string_output("\n");
+  safe_put("Instruction Specific Syndrome (ISS): 0x");
+  safe_hex(iss);
+  safe_put("\n");
 
   // Log ELR_EL1 (Faulting instruction address)
-  safe_string_output("Exception Link Register (ELR_EL1): 0x");
-  safe_hex_output(elr);
-  safe_string_output("\n");
+  safe_put("Exception Link Register (ELR_EL1): 0x");
+  safe_hex(elr);
+  safe_put("\n");
 
   // Log FAR_EL1 (Fault Address Register, if applicable)
-  safe_string_output("Fault Address Register (FAR_EL1): 0x");
-  safe_hex_output(far);
-  safe_string_output("\n");
+  safe_put("Fault Address Register (FAR_EL1): 0x");
+  safe_hex(far);
+  safe_put("\n");
 
   // Halt execution for debugging
-  safe_string_output("System halted due to synchronous exception.\n");
+  safe_put("System halted due to synchronous exception.\n");
 
   while (true) {
     asm volatile("wfe");
@@ -110,9 +111,17 @@ void kernel::interrupts::synch_exception_handler() {
 }
 
 void kernel::interrupts::fiq_exception_handler() {
-  safe_string_output("FIQ\n");
+  safe_put("FIQ\n");
+
+  while (true) {
+    asm volatile("wfe");
+  }
 }
 
 void kernel::interrupts::serror_exception_handler() {
-  safe_string_output("SError\n");
+  safe_put("SError\n");
+
+  while (true) {
+    asm volatile("wfe");
+  }
 }

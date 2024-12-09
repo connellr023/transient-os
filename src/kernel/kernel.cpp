@@ -21,7 +21,7 @@ void kernel::init(string_output_handler_t output_handler,
   current_el >>= 2;
 
   if (current_el != 1) {
-    safe_string_output("Not running in EL1\n");
+    safe_put("Not running in EL1\n");
     panic_handler();
   }
 
@@ -32,18 +32,19 @@ void kernel::init(string_output_handler_t output_handler,
   enable_interrupts();
 }
 
-void kernel::init_thread(thread_handler_t handler, uint64_t stack_size) {
-  static uint64_t current_high_memory_end = (high_memory_end + 0xf) & ~0xf;
+void kernel::init_thread(thread_handler_t handler, uint64_t stack_size,
+                         void *arg) {
+  static uint64_t current_high_memory_end = mem_align_16(high_memory_end);
 
   // Align the stack size to 16 bytes
-  stack_size = (stack_size + 0xf) & ~0xf;
+  stack_size = mem_align_16(stack_size);
 
   // Setup thread control block
   ThreadControlBlock tcb = ThreadControlBlock(
       current_high_memory_end, reinterpret_cast<uint64_t>(handler));
 
   if (!thread_queue.enqueue(tcb)) {
-    safe_string_output("Thread queue is full\n");
+    safe_put("Thread queue is full\n");
     panic_handler();
   }
 
@@ -52,13 +53,13 @@ void kernel::init_thread(thread_handler_t handler, uint64_t stack_size) {
   current_high_memory_end -= stack_size;
 }
 
-void kernel::safe_string_output(const char *str) {
+void kernel::safe_put(const char *str) {
   if (kernel_string_output_handler != nullptr) {
     kernel_string_output_handler(str);
   }
 }
 
-void kernel::safe_hex_output(uint64_t value) {
+void kernel::safe_hex(uint64_t value) {
   if (kernel_hex_output_handler != nullptr) {
     kernel_hex_output_handler(value);
   }
@@ -68,7 +69,7 @@ __attribute__((weak, noreturn)) void kernel::panic_handler() {
   disable_interrupts();
 
   while (true) {
-    safe_string_output("Kernel Panic!\n");
+    safe_put("Kernel Panic!\n");
     asm volatile("wfe");
   }
 }
