@@ -1,10 +1,10 @@
-#include "interrupts.hpp"
+#include "../threads/thread_control_block.hpp"
 
 .section .text
 
 .macro push_registers
     // Save that state of all general purpose registers
-    sub sp, sp, #STACK_FRAME_SIZE
+    sub sp, sp, #CPU_CTX_STACK_SIZE
     stp x0, x1, [sp, #16*0]
     stp x2, x3, [sp, #16*1]
     stp x4, x5, [sp, #16*2]
@@ -20,17 +20,10 @@
     stp x24, x25, [sp, #16*12]
     stp x26, x27, [sp, #16*13]
     stp x28, x29, [sp, #16*14]
-
-    // Save LR and SP
-    mov x1, sp
-    stp x30, x1, [sp, #16*15]
+    stp x30, xzr, [sp, #16*15]
 .endm
 
 .macro pop_registers
-    // Restore LR and SP
-    ldp x30, x1, [sp, #16*15]
-    mov sp, x1
-
     // Restore state of all general purpose registers
     ldp x0, x1, [sp, #16*0]
     ldp x2, x3, [sp, #16*1]
@@ -47,7 +40,8 @@
     ldp x24, x25, [sp, #16*12]
     ldp x26, x27, [sp, #16*13]
     ldp x28, x29, [sp, #16*14]
-    add sp, sp, #STACK_FRAME_SIZE
+    ldp x30, xzr, [sp, #16*15]
+    add sp, sp, #CPU_CTX_STACK_SIZE
 .endm
 
 .globl _irq_handler
@@ -57,7 +51,14 @@ _irq_handler:
     // Pass the base address of the saved registers to the interrupt service routine
     mov x0, sp
     bl interrupt_service_routine
+
+    // Access returned stack pointer of next thread
+    mov x1, x0
+
     bl post_isr
+
+    // Update the stack pointer to the next thread
+    mov sp, x1
 
     pop_registers
     eret

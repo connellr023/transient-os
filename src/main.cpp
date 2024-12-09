@@ -30,6 +30,7 @@ int main() {
   }
 
   kernel::init_thread(&test_task_1, 1024);
+  // kernel::init_thread(&test_task_1, 1024);
   // kernel::init_thread(&test_task_2, 1024);
 
   uart0::init();
@@ -38,8 +39,8 @@ int main() {
   framebuffer::fill_screen(0x00FFFF);
 
   while (true) {
-    asm volatile("mov x0, 0x69");
-    asm volatile("mov x1, 0x420");
+    AtomicGuard guard;
+    uart0::puts("Main\n");
   }
 
   return 0;
