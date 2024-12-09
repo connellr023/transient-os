@@ -9,7 +9,8 @@
 void kernel::interrupts::interrupt_service_routine(void *sp) {
   // uint64_t *stack = static_cast<uint64_t *>(sp);
 
-  safe_output("ISR\n");
+  safe_string_output("ISR\n");
+  // framebuffer::fill_screen(0x002BFF);
 
   // for (int i = 0; i < 15; i++) {
   //   uart0::puts("ISR\n");
@@ -68,9 +69,50 @@ void kernel::interrupts::init_interrupt_vector() {
 }
 
 void kernel::interrupts::synch_exception_handler() {
-  safe_output("Synchronous Exception\n");
+  uint64_t esr, elr, far;
+
+  // Read the ESR_EL1 (Exception Syndrome Register)
+  asm volatile("mrs %0, esr_el1" : "=r"(esr));
+  const uint64_t ec = esr >> 26;       // Exception Class (EC)
+  const uint64_t iss = esr & 0xFFFFFF; // Instruction Specific Syndrome (ISS)
+
+  // Read the ELR_EL1 (Exception Link Register)
+  asm volatile("mrs %0, elr_el1" : "=r"(elr));
+
+  // Read the FAR_EL1 (Fault Address Register)
+  asm volatile("mrs %0, far_el1" : "=r"(far));
+
+  // Log ESR_EL1 (Exception Class and ISS)
+  safe_string_output("Synchronous exception cause (EC): 0x");
+  safe_hex_output(ec);
+  safe_string_output("\n");
+
+  safe_string_output("Instruction Specific Syndrome (ISS): 0x");
+  safe_hex_output(iss);
+  safe_string_output("\n");
+
+  // Log ELR_EL1 (Faulting instruction address)
+  safe_string_output("Exception Link Register (ELR_EL1): 0x");
+  safe_hex_output(elr);
+  safe_string_output("\n");
+
+  // Log FAR_EL1 (Fault Address Register, if applicable)
+  safe_string_output("Fault Address Register (FAR_EL1): 0x");
+  safe_hex_output(far);
+  safe_string_output("\n");
+
+  // Halt execution for debugging
+  safe_string_output("System halted due to synchronous exception.\n");
+
+  while (true) {
+    asm volatile("wfe");
+  }
 }
 
-void kernel::interrupts::fiq_exception_handler() { safe_output("FIQ\n"); }
+void kernel::interrupts::fiq_exception_handler() {
+  safe_string_output("FIQ\n");
+}
 
-void kernel::interrupts::serror_exception_handler() { safe_output("SError\n"); }
+void kernel::interrupts::serror_exception_handler() {
+  safe_string_output("SError\n");
+}

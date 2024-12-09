@@ -7,11 +7,25 @@ using namespace kernel::threads;
 using namespace kernel::interrupts;
 
 ThreadQueue kernel::thread_queue = ThreadQueue();
-kernel::output_handler_t kernel_output_handler = nullptr;
+kernel::string_output_handler_t kernel_string_output_handler = nullptr;
+kernel::hex_output_handler_t kernel_hex_output_handler = nullptr;
 
-void kernel::init(output_handler_t output_handler) {
-  kernel_output_handler = output_handler;
+void kernel::init(string_output_handler_t output_handler,
+                  hex_output_handler_t hex_handler) {
+  kernel_string_output_handler = output_handler;
+  kernel_hex_output_handler = hex_handler;
 
+  // Ensure we are in EL1
+  uint64_t current_el;
+  asm volatile("mrs %0, CurrentEL" : "=r"(current_el));
+  current_el >>= 2;
+
+  if (current_el != 1) {
+    safe_string_output("Not running in EL1\n");
+    panic_handler();
+  }
+
+  // Initialize the interrupt controller and timer
   init_interrupt_vector();
   init_timer();
   enable_interrupt_controller();
@@ -29,7 +43,7 @@ void kernel::init_thread(thread_handler_t handler, uint64_t stack_size) {
       current_high_memory_end, reinterpret_cast<uint64_t>(handler));
 
   if (!thread_queue.enqueue(tcb)) {
-    safe_output("Thread queue is full\n");
+    safe_string_output("Thread queue is full\n");
     panic_handler();
   }
 
@@ -38,9 +52,15 @@ void kernel::init_thread(thread_handler_t handler, uint64_t stack_size) {
   current_high_memory_end -= stack_size;
 }
 
-void kernel::safe_output(const char *str) {
-  if (kernel_output_handler != nullptr) {
-    kernel_output_handler(str);
+void kernel::safe_string_output(const char *str) {
+  if (kernel_string_output_handler != nullptr) {
+    kernel_string_output_handler(str);
+  }
+}
+
+void kernel::safe_hex_output(uint64_t value) {
+  if (kernel_hex_output_handler != nullptr) {
+    kernel_hex_output_handler(value);
   }
 }
 
@@ -48,7 +68,7 @@ __attribute__((weak, noreturn)) void kernel::panic_handler() {
   disable_interrupts();
 
   while (true) {
-    safe_output("Kernel Panic!\n");
+    safe_string_output("Kernel Panic!\n");
     asm volatile("wfe");
   }
 }

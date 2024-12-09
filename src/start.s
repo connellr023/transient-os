@@ -49,9 +49,9 @@ clear_bss:
     cbnz    w2, clear_bss
 
 done_clear:
-    // Set top of stack just before our code (stack grows to a lower address per AAPCS64)
-    adrp    x1, _start
-    add     x1, x1, :lo12:_start
+    // Set top of stack (stack grows to a lower address per AAPCS64)
+    adrp    x1, _stack_top
+    add     x1, x1, :lo12:_stack_top
     msr     sp_el1, x1
 
     // Enable AArch64 in EL1 by setting bits RW and SWIC to 1 in the

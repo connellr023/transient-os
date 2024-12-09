@@ -1,5 +1,6 @@
 #include "drivers/framebuffer.hpp"
 #include "drivers/uart0.hpp"
+#include "kernel/interrupts/interrupts.hpp"
 #include "kernel/kernel.hpp"
 #include <stdint.h>
 
@@ -28,32 +29,19 @@ int main() {
   }
 
   uart0::init();
-  kernel::init(&uart0::puts);
+  kernel::init(&uart0::puts, &uart0::hex);
 
   framebuffer::fill_screen(0x00FFFF);
 
   while (true) {
-    uart0::puts("Main\n");
-    framebuffer::fill_screen(0x00FF00);
+    // Print to UART atomically
+    kernel::interrupts::disable_interrupts();
+    uart0::puts("Main Atomic!\n");
+    kernel::interrupts::enable_interrupts();
 
-    asm volatile("wfi");
-    // for (int i = 0; i < 15; i++) {
-    //   uart0::puts("Main\n");
-    // }
-
-    // uint8_t current_el;
-    // asm volatile("mrs %0, CurrentEL" : "=r"(current_el));
-    // current_el >>= 2;
-
-    // if (current_el == 1) {
-    //   uart0::puts("Main EL1\n");
-    // } else if (current_el == 2) {
-    //   uart0::puts("Main EL2\n");
-    // } else if (current_el == 3) {
-    //   uart0::puts("Main EL3\n");
-    // } else {
-    //   uart0::puts("Main ELX\n");
-    // }
+    // uart0::puts("Main\n");
+    // framebuffer::draw_rect(100, 100, 200, 200, 0xFF0000);
+    //  uart0::puts("Main\n");
   }
 
   return 0;

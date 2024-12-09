@@ -68,7 +68,8 @@ bool framebuffer::init() {
 
 void framebuffer::draw_pixel(uint32_t x, uint32_t y, uint32_t color) {
   const uint32_t offs = (y * pitch) + (x * 4);
-  *(reinterpret_cast<uint32_t *>(lfb + offs)) = color;
+  *(reinterpret_cast<uint32_t *>(lfb + offs)) =
+      is_rgb ? color : bgr_to_rgb(color);
 }
 
 void framebuffer::fill_screen(uint32_t color) {
