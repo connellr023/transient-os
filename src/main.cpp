@@ -28,12 +28,14 @@ int main() {
   }
 
   uart0::init();
-  kernel::init();
+  kernel::init(&uart0::puts);
 
   framebuffer::fill_screen(0x00FFFF);
 
   while (true) {
+    uart0::puts("Main\n");
     framebuffer::fill_screen(0x00FF00);
+
     asm volatile("wfi");
     // for (int i = 0; i < 15; i++) {
     //   uart0::puts("Main\n");

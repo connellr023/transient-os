@@ -9,7 +9,7 @@
 void kernel::interrupts::interrupt_service_routine(void *sp) {
   // uint64_t *stack = static_cast<uint64_t *>(sp);
 
-  // framebuffer::fill_screen(0xFF0000);
+  safe_output("ISR\n");
 
   // for (int i = 0; i < 15; i++) {
   //   uart0::puts("ISR\n");
@@ -66,3 +66,11 @@ void kernel::interrupts::init_interrupt_vector() {
                 add x2, x2, :lo12:_vectors \n\t\
                 msr vbar_el1, x2");
 }
+
+void kernel::interrupts::synch_exception_handler() {
+  safe_output("Synchronous Exception\n");
+}
+
+void kernel::interrupts::fiq_exception_handler() { safe_output("FIQ\n"); }
+
+void kernel::interrupts::serror_exception_handler() { safe_output("SError\n"); }
