@@ -29,14 +29,15 @@ int main() {
     return 1;
   }
 
+  uart0::init();
+  kernel::init_debug_io(&uart0::puts, &uart0::hex);
+
   kernel::init_thread(&test_task_1, 1024);
   // kernel::init_thread(&test_task_1, 1024);
   // kernel::init_thread(&test_task_2, 1024);
 
-  uart0::init();
-  kernel::init(&uart0::puts, &uart0::hex);
-
   framebuffer::fill_screen(0x00FFFF);
+  kernel::start();
 
   while (true) {
     AtomicGuard guard;

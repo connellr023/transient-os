@@ -21,10 +21,12 @@ constexpr uint64_t high_memory_end = 5e8;
 
 extern threads::SchedulerQueue scheduler;
 
+void init_debug_io(string_output_handler_t output_handler = nullptr,
+                   hex_output_handler_t hex_handler = nullptr);
 void init_thread(thread_handler_t handler, uint64_t stack_size,
                  void *arg = nullptr);
-void init(string_output_handler_t output_handler = nullptr,
-          hex_output_handler_t hex_handler = nullptr);
+
+void start();
 
 void safe_put(const char *str);
 void safe_hex(uint64_t value);

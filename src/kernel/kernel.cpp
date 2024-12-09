@@ -10,11 +10,13 @@ SchedulerQueue kernel::scheduler = SchedulerQueue();
 kernel::string_output_handler_t kernel_string_output_handler = nullptr;
 kernel::hex_output_handler_t kernel_hex_output_handler = nullptr;
 
-void kernel::init(string_output_handler_t output_handler,
-                  hex_output_handler_t hex_handler) {
+void kernel::init_debug_io(string_output_handler_t output_handler,
+                           hex_output_handler_t hex_handler) {
   kernel_string_output_handler = output_handler;
   kernel_hex_output_handler = hex_handler;
+}
 
+void kernel::start() {
   // Ensure we are in EL1
   uint64_t current_el;
   asm volatile("mrs %0, CurrentEL" : "=r"(current_el));
