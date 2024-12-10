@@ -6,7 +6,7 @@
 #include "../kernel.hpp"
 #include <stdint.h>
 
-uint64_t kernel::interrupts::interrupt_service_routine(uint64_t sp) {
+uint64_t kernel::interrupts::isr(uint64_t sp) {
   safe_put("ISR\n");
 
   // Save context of interrupted thread
@@ -134,4 +134,20 @@ void kernel::interrupts::serror_exception_handler() {
   while (true) {
     asm volatile("wfe");
   }
+}
+
+uint64_t _kernel_isr(uint64_t sp) { return kernel::interrupts::isr(sp); }
+
+void _kernel_post_isr() { kernel::interrupts::post_isr(); }
+
+void _kernel_synch_exception_handler() {
+  kernel::interrupts::synch_exception_handler();
+}
+
+void _kernel_fiq_exception_handler() {
+  kernel::interrupts::fiq_exception_handler();
+}
+
+void _kernel_serror_exception_handler() {
+  kernel::interrupts::serror_exception_handler();
 }

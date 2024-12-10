@@ -4,12 +4,10 @@
 
 using namespace kernel::threads;
 
-ThreadControlBlock::ThreadControlBlock(uint64_t initial_sp, uint64_t initial_pc)
-    : cpu_ctx(initial_sp, initial_pc) {
+ThreadControlBlock::ThreadControlBlock(uint64_t page, uint64_t initial_pc)
+    : cpu_ctx(page, initial_pc), page(page), state(ThreadState::Ready) {
   static uint64_t thread_id_counter = 0;
-
   this->thread_id = thread_id_counter++;
-  this->state = ThreadState::Ready;
 
   // Set SPSR_EL1 to be the same as the kernel's SPSR_EL1
   uint64_t spsr_el1;

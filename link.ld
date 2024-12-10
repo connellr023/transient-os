@@ -27,15 +27,7 @@ SECTIONS
 
     /* Define BSS size in bytes */
     __bss_size = (__bss_end - __bss_start);
-
-    /* Optional stack section */
-    .stack (NOLOAD) : {
-        . = ALIGN(16);
-        _stack_bottom = .;
-        . += 0x4000; /* 16 KB stack space */
-        _stack_top = .;
-    }
-
+    
     /* Define end of binary */
     _end = .;
 

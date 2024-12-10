@@ -32,8 +32,8 @@ int main() {
   uart0::init();
   kernel::init_dbg_out(&uart0::puts, &uart0::hex);
 
-  kernel::init_thread(0, 0); // Replaced by main thread after first interrupt
-  kernel::init_thread(&test_task_1, 1.28e8);
+  kernel::init_thread(0);
+  kernel::init_thread(&test_task_1);
 
   framebuffer::fill_screen(0x00FFFF);
   kernel::start();

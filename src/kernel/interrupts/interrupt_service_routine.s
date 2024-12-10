@@ -50,30 +50,33 @@ _irq_handler:
 
     // Pass the base address of the saved registers to the interrupt service routine
     mov x0, sp
-    bl interrupt_service_routine
+    bl _kernel_isr
 
     // Access returned stack pointer of next thread
     mov x19, x0
 
-    bl post_isr
+    bl _kernel_post_isr
 
     // Update the stack pointer to the next thread
     mov sp, x19
+
+    // mov x0, sp
+    // bl _test_thing
 
     pop_registers
     eret
 
 .globl _synch_handler
 _synch_handler:
-    bl synch_exception_handler
+    bl _kernel_synch_exception_handler
     eret
 
 .globl _fiq_handler
 _fiq_handler:
-    bl fiq_exception_handler
+    bl _kernel_fiq_exception_handler
     eret
 
 .globl _serror_handler
 _serror_handler:
-    bl serror_exception_handler
+    bl _kernel_serror_exception_handler
     eret

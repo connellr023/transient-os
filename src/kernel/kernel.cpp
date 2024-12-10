@@ -1,5 +1,6 @@
 #include "kernel.hpp"
 #include "interrupts/interrupts.hpp"
+#include "memory/memory.hpp"
 #include "threads/thread_control_block.hpp"
 #include <stdint.h>
 
@@ -34,16 +35,12 @@ void kernel::start() {
   enable_interrupts();
 }
 
-void kernel::init_thread(thread_handler_t handler, uint64_t stack_size,
-                         void *arg) {
-  static uint64_t current_high_memory_end = high_memory_end;
-
-  // Align the stack size to 16 bytes
-  stack_size = mem_align_16(stack_size);
+void kernel::init_thread(thread_handler_t handler) {
+  uint64_t page = memory::palloc();
 
   // Setup thread control block
-  ThreadControlBlock tcb = ThreadControlBlock(
-      current_high_memory_end, reinterpret_cast<uint64_t>(handler));
+  ThreadControlBlock tcb =
+      ThreadControlBlock(page, reinterpret_cast<uint64_t>(handler));
 
   tcb.get_cpu_ctx().init_thread_stack(&panic_handler);
 
@@ -51,11 +48,6 @@ void kernel::init_thread(thread_handler_t handler, uint64_t stack_size,
     safe_put("Thread queue is full\n");
     panic_handler();
   }
-
-  // Since stack grows downwards, we need to decrement the high memory end
-  // after each thread is initialized
-  current_high_memory_end -= stack_size;
-  current_high_memory_end = mem_align_16(current_high_memory_end);
 
   safe_put("Thread initialized\n");
 }
