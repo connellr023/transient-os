@@ -12,9 +12,25 @@ uint64_t kernel::interrupts::interrupt_service_routine(uint64_t sp) {
   // Save context of interrupted thread
   scheduler.peek().get_cpu_ctx().save(sp);
 
+  safe_put("Interrupted thread SP: 0x");
+  safe_hex(scheduler.peek().get_cpu_ctx().get_sp());
+  safe_put("\n");
+
+  safe_put("Interrupted thread PC: 0x");
+  safe_hex(scheduler.peek().get_cpu_ctx().get_pc());
+  safe_put("\n");
+
   // Goto next thread
   scheduler.next();
   safe_put("Next thread\n");
+
+  safe_put("Next thread SP: 0x");
+  safe_hex(scheduler.peek().get_cpu_ctx().get_sp());
+  safe_put("\n");
+
+  safe_put("Next thread PC: 0x");
+  safe_hex(scheduler.peek().get_cpu_ctx().get_pc());
+  safe_put("\n");
 
   // Restore context of next thread and return its stack pointer
   return scheduler.peek().get_cpu_ctx().restore();
@@ -60,6 +76,8 @@ void kernel::interrupts::init_interrupt_vector() {
 }
 
 void kernel::interrupts::synch_exception_handler() {
+  disable_interrupts();
+
   uint64_t esr, elr, far;
 
   // Read the ESR_EL1 (Exception Syndrome Register)
@@ -101,6 +119,7 @@ void kernel::interrupts::synch_exception_handler() {
 }
 
 void kernel::interrupts::fiq_exception_handler() {
+  disable_interrupts();
   safe_put("FIQ\n");
 
   while (true) {
@@ -109,6 +128,7 @@ void kernel::interrupts::fiq_exception_handler() {
 }
 
 void kernel::interrupts::serror_exception_handler() {
+  disable_interrupts();
   safe_put("SError\n");
 
   while (true) {

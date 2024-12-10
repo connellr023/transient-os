@@ -10,9 +10,9 @@ SchedulerQueue kernel::scheduler = SchedulerQueue();
 kernel::string_output_handler_t kernel_string_output_handler = nullptr;
 kernel::hex_output_handler_t kernel_hex_output_handler = nullptr;
 
-void kernel::init_debug_io(string_output_handler_t output_handler,
-                           hex_output_handler_t hex_handler) {
-  kernel_string_output_handler = output_handler;
+void kernel::init_dbg_out(string_output_handler_t string_handler,
+                          hex_output_handler_t hex_handler) {
+  kernel_string_output_handler = string_handler;
   kernel_hex_output_handler = hex_handler;
 }
 
@@ -36,7 +36,7 @@ void kernel::start() {
 
 void kernel::init_thread(thread_handler_t handler, uint64_t stack_size,
                          void *arg) {
-  static uint64_t current_high_memory_end = mem_align_16(high_memory_end);
+  static uint64_t current_high_memory_end = high_memory_end;
 
   // Align the stack size to 16 bytes
   stack_size = mem_align_16(stack_size);
@@ -45,7 +45,7 @@ void kernel::init_thread(thread_handler_t handler, uint64_t stack_size,
   ThreadControlBlock tcb = ThreadControlBlock(
       current_high_memory_end, reinterpret_cast<uint64_t>(handler));
 
-  tcb.get_cpu_ctx().init_thread_stack();
+  tcb.get_cpu_ctx().init_thread_stack(&panic_handler);
 
   if (!scheduler.enqueue(tcb)) {
     safe_put("Thread queue is full\n");
@@ -55,6 +55,9 @@ void kernel::init_thread(thread_handler_t handler, uint64_t stack_size,
   // Since stack grows downwards, we need to decrement the high memory end
   // after each thread is initialized
   current_high_memory_end -= stack_size;
+  current_high_memory_end = mem_align_16(current_high_memory_end);
+
+  safe_put("Thread initialized\n");
 }
 
 void kernel::safe_put(const char *str) {

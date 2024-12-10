@@ -53,12 +53,12 @@ _irq_handler:
     bl interrupt_service_routine
 
     // Access returned stack pointer of next thread
-    mov x1, x0
+    mov x19, x0
 
     bl post_isr
 
     // Update the stack pointer to the next thread
-    mov sp, x1
+    mov sp, x19
 
     pop_registers
     eret
