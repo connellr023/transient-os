@@ -10,14 +10,14 @@ uint64_t kernel::interrupts::isr(uint64_t sp) {
   safe_put("ISR\n");
 
   // Save context of interrupted thread
-  scheduler.peek().get_cpu_ctx().save(sp);
+  scheduler.peek().save_ctx(sp);
 
   safe_put("Interrupted thread SP: 0x");
-  safe_hex(scheduler.peek().get_cpu_ctx().get_sp());
+  safe_hex(scheduler.peek().get_sp());
   safe_put("\n");
 
   safe_put("Interrupted thread PC: 0x");
-  safe_hex(scheduler.peek().get_cpu_ctx().get_pc());
+  safe_hex(scheduler.peek().get_pc());
   safe_put("\n");
 
   // Goto next thread
@@ -25,15 +25,15 @@ uint64_t kernel::interrupts::isr(uint64_t sp) {
   safe_put("Next thread\n");
 
   safe_put("Next thread SP: 0x");
-  safe_hex(scheduler.peek().get_cpu_ctx().get_sp());
+  safe_hex(scheduler.peek().get_sp());
   safe_put("\n");
 
   safe_put("Next thread PC: 0x");
-  safe_hex(scheduler.peek().get_cpu_ctx().get_pc());
+  safe_hex(scheduler.peek().get_pc());
   safe_put("\n");
 
   // Restore context of next thread and return its stack pointer
-  return scheduler.peek().get_cpu_ctx().restore();
+  return scheduler.peek().restore_ctx();
 }
 
 uint32_t current_us = 0;

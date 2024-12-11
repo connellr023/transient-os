@@ -10,6 +10,7 @@ constexpr uint32_t scheduler_queue_capacity = 5;
 struct SchedulerQueue {
 private:
   ThreadControlBlock queue[scheduler_queue_capacity]{};
+
   uint32_t head;
   uint32_t tail;
   uint32_t size;

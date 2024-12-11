@@ -40,9 +40,8 @@ void kernel::init_thread(thread_handler_t handler) {
 
   // Setup thread control block
   ThreadControlBlock tcb =
-      ThreadControlBlock(page, reinterpret_cast<uint64_t>(handler));
-
-  tcb.get_cpu_ctx().init_thread_stack(&panic_handler);
+      ThreadControlBlock(page, reinterpret_cast<uint64_t>(handler),
+                         reinterpret_cast<uint64_t>(&panic_handler));
 
   if (!scheduler.enqueue(tcb)) {
     safe_put("Thread queue is full\n");
