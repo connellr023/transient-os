@@ -1,7 +1,6 @@
 #include "interrupts.hpp"
 #include "../../drivers/framebuffer.hpp"
 #include "../../drivers/interrupt_requests.hpp"
-#include "../../drivers/timer.hpp"
 #include "../kernel.hpp"
 #include "../threads/thread_control_block.hpp"
 #include <stdint.h>
