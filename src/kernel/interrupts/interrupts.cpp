@@ -6,28 +6,31 @@
 #include <stdint.h>
 
 void *kernel::interrupts::isr(void *interrupted_sp) {
+  using namespace threads;
   static bool is_first_isr = true;
 
   safe_put("ISR\n");
 
+  // Avoid corrupting the first thread's context when switching from main
   if (!is_first_isr) {
     is_first_isr = false;
 
     // Save context of interrupted thread
     scheduler.peek()->set_sp(interrupted_sp);
+    scheduler.peek()->set_state(ThreadState::Ready);
   }
 
   // Print SPSR_EL1
-  safe_put("SPSR_EL1: 0x");
-
   uint64_t spsr_el1;
-  asm volatile("mrs %0, spsr_el1" : "=r"(spsr_el1));
 
+  asm volatile("mrs %0, spsr_el1" : "=r"(spsr_el1));
+  safe_put("SPSR_EL1: 0x");
   safe_hex(spsr_el1);
   safe_put("\n");
 
   // Goto next thread
   scheduler.next();
+  scheduler.peek()->set_state(ThreadState::Running);
 
   // Restore context of next thread and return its stack pointer
   return scheduler.peek()->get_sp();
@@ -36,8 +39,8 @@ void *kernel::interrupts::isr(void *interrupted_sp) {
 uint32_t current_us = 0;
 
 void kernel::interrupts::trigger_isr() {
-  current_us = *TIMER_COUNTER_LOW + 1000;
-  *TIMER_CMP_1 = current_us;
+  uint32_t current_us = *TIMER_COUNTER_LOW;
+  *TIMER_CMP_1 = current_us + 1;
 
   asm volatile("wfi");
 }

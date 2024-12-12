@@ -12,10 +12,11 @@
 
 #ifndef __ASSEMBLER__
 
-#include "threads.hpp"
 #include <stdint.h>
 
 namespace kernel::threads {
+typedef void (*thread_handler_t)(void *);
+
 enum class ThreadState {
   Ready,
   Running,
@@ -30,16 +31,20 @@ private:
   ThreadState state;
   uint64_t sp;
   thread_handler_t handler;
+  void *arg;
   bool is_stack_initialized;
 
 public:
-  ThreadControlBlock(thread_handler_t handler, uint32_t burst_time);
+  ThreadControlBlock(thread_handler_t handler, uint32_t burst_time,
+                     void *arg = nullptr);
   ThreadControlBlock() : ThreadControlBlock(nullptr, 0) {}
 
   void init_stack(void *page);
 
   void set_sp(void *sp) { this->sp = reinterpret_cast<uint64_t>(sp); }
   void *get_sp() const { return reinterpret_cast<void *>(sp); }
+
+  void set_state(ThreadState state) { this->state = state; }
 
   void *get_page() const { return reinterpret_cast<void *>(page_addr); }
   uint64_t get_thread_id() const { return thread_id; }

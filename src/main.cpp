@@ -8,52 +8,86 @@
 using namespace kernel::utils;
 using namespace kernel::threads;
 
+struct SharedTestStruct {
+public:
+  uint64_t a;
+  uint64_t b;
+  uint64_t c;
+};
+
 void test_task_1(void *arg) {
+  SharedTestStruct *shared = reinterpret_cast<SharedTestStruct *>(arg);
+
   while (true) {
-    AtomicGuard guard;
-    uart0::puts("One current SP: \n");
-
-    uint64_t sp;
-    asm volatile("mov %0, sp" : "=r"(sp));
-
-    uart0::hex(sp);
-    uart0::puts("\n");
-  }
-}
-
-void test_task_2(void *arg) {
-  uint64_t k = 10000;
-
-  for (int i = 0; i < 5; i++) {
     {
       AtomicGuard guard;
-      uart0::puts("Two current SP: \n");
-
-      uint64_t sp;
-      asm volatile("mov %0, sp" : "=r"(sp));
-
-      uart0::hex(sp);
+      uart0::puts("Thread 1 arg.a: ");
+      uart0::hex(reinterpret_cast<uint64_t>(shared->a));
       uart0::puts("\n");
     }
-
-    k--;
   }
 }
+
+// void test_task_2(void *arg) {
+//   SharedTestStruct *shared = reinterpret_cast<SharedTestStruct *>(arg);
+
+//   while (true) {
+//     {
+//       AtomicGuard guard;
+//       uart0::puts("Thread 2 arg.b: ");
+//       uart0::hex(reinterpret_cast<uint64_t>(shared->b));
+//       uart0::puts("\n");
+//     }
+
+//     if (shared->b++ == 1000) {
+//       shared->b = 0;
+//       uart0::puts("Thread 2 b hitting 1k\n");
+//     }
+//   }
+// }
+
+// void test_task_3(void *arg) {
+//   SharedTestStruct *shared = reinterpret_cast<SharedTestStruct *>(arg);
+
+//   while (true) {
+//     {
+//       AtomicGuard guard;
+//       uart0::puts("Thread 3 arg.c: ");
+//       uart0::hex(reinterpret_cast<uint64_t>(shared->b));
+//       uart0::puts("\n");
+//     }
+//   }
+// }
 
 int main() {
   uart0::init();
   kernel::init_dbg_out(&uart0::puts, &uart0::hex);
 
-  ThreadControlBlock tcb_1 = ThreadControlBlock(&test_task_1, 1300);
-  ThreadControlBlock tcb_2 = ThreadControlBlock(&test_task_2, 1000);
+  SharedTestStruct shared = {0x12345678, 0x87654321, 0xdeadbeef};
 
-  kernel::init_thread(&tcb_1);
-  kernel::init_thread(&tcb_2);
+  ThreadControlBlock tcb_1(&test_task_1, 1300,
+                           reinterpret_cast<void *>(&shared));
+  // ThreadControlBlock tcb_2(&test_task_2, 1000,
+  //                          reinterpret_cast<void *>(&shared));
+  // ThreadControlBlock tcb_3(&test_task_3, 1500,
+  //                          reinterpret_cast<void *>(&shared));
+
+  if (!kernel::spawn_thread(&tcb_1)) {
+    uart0::puts("Failed to spawn thread 1\n");
+  }
+
+  // if (!kernel::spawn_thread(&tcb_2)) {
+  //   uart0::puts("Failed to spawn thread 2\n");
+  // }
+
+  // if (!kernel::spawn_thread(&tcb_3)) {
+  //   uart0::puts("Failed to spawn thread 3\n");
+  // }
 
   kernel::start();
 
   while (true) {
-    asm volatile("nop");
+    asm volatile("wfe");
   }
 
   return 0;

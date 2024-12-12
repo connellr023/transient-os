@@ -11,7 +11,7 @@ OBJS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(OBJS:.cpp=.o))
 OBJS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(OBJS:.s=.o))
 
 # Compiler and linker flags
-CFLAGS = -fno-exceptions -fno-rtti
+CFLAGS = -fno-exceptions -fno-rtti -Wall -Wextra -Werror
 LDFLAGS = -nostdlib
 
 all: $(BUILD_DIR)/kernel8.img

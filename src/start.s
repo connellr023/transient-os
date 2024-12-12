@@ -24,7 +24,7 @@
         *
         */
 
-#include "kernel/memory/memory.hpp"
+#include "kernel/memory/paging.hpp"
 
 .section ".text.boot"
 

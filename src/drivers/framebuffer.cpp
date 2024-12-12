@@ -73,8 +73,8 @@ void framebuffer::draw_pixel(uint32_t x, uint32_t y, uint32_t color) {
 }
 
 void framebuffer::fill_screen(uint32_t color) {
-  for (int row = 0; row < height; row++)
-    for (int col = 0; col < width; col++)
+  for (uint32_t row = 0; row < height; row++)
+    for (uint32_t col = 0; col < width; col++)
       draw_pixel(col, row, color);
 }
 

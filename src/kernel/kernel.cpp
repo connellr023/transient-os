@@ -1,12 +1,13 @@
 #include "kernel.hpp"
 #include "interrupts/interrupts.hpp"
-#include "memory/memory.hpp"
+#include "memory/paging.hpp"
 #include <stdint.h>
 
 using namespace kernel::threads;
 using namespace kernel::interrupts;
 
 SchedulerQueue kernel::scheduler = SchedulerQueue();
+
 kernel::string_output_handler_t kernel_string_output_handler = nullptr;
 kernel::hex_output_handler_t kernel_hex_output_handler = nullptr;
 
@@ -24,7 +25,10 @@ void kernel::start() {
 
   if (current_el != 1) {
     safe_put("Not running in EL1\n");
-    panic_handler();
+
+    while (true) {
+      asm volatile("wfe");
+    }
   }
 
   // Initialize the interrupt controller and timer
@@ -36,20 +40,26 @@ void kernel::start() {
   trigger_isr();
 }
 
-void kernel::init_thread(ThreadControlBlock *tcb) {
+bool kernel::spawn_thread(ThreadControlBlock *tcb) {
   void *page = memory::palloc();
 
   if (!page) {
-    safe_put("Failed to allocate memory for thread\n");
-    panic_handler();
+    return false;
   }
 
   tcb->init_stack(page);
 
   if (!scheduler.enqueue(tcb)) {
-    safe_put("Thread queue is full\n");
-    panic_handler();
+    memory::pfree(page);
+    return false;
   }
+
+  return true;
+}
+
+void kernel::yield_current_thread() {
+  scheduler.peek()->set_state(ThreadState::Ready);
+  trigger_isr();
 }
 
 void kernel::safe_put(const char *str) {
@@ -64,11 +74,22 @@ void kernel::safe_hex(uint64_t value) {
   }
 }
 
-void kernel::panic_handler() {
-  disable_interrupts();
+void kernel::thread_return_handler() {
+  interrupts::disable_interrupts();
 
-  while (true) {
-    safe_put("Kernel panic!\n");
-    asm volatile("wfe");
-  }
+  const ThreadControlBlock *current_tcb = scheduler.peek();
+
+  safe_put("Thread ID: ");
+  safe_hex(current_tcb->get_thread_id());
+  safe_put("completed!\n");
+
+  // Free thread page
+  memory::pfree(current_tcb->get_page());
+
+  // Remove thread from scheduler
+  scheduler.dequeue();
+
+  // Trigger context switch
+  interrupts::enable_interrupts();
+  interrupts::trigger_isr();
 }
