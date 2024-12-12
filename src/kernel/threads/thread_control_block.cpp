@@ -30,14 +30,14 @@ ThreadControlBlock::ThreadControlBlock(uint64_t initial_sp, uint64_t initial_pc,
 
 void ThreadControlBlock::save_ctx(uint64_t sp) {
   asm volatile("mrs %0, elr_el1" : "=r"(this->pc));
-  asm volatile("mrs %0, spsr_el1" : "=r"(this->spsr_el1));
+  // asm volatile("mrs %0, spsr_el1" : "=r"(this->spsr_el1));
 
   this->sp = sp;
 }
 
 uint64_t ThreadControlBlock::restore_ctx() const {
   asm volatile("msr elr_el1, %0" : : "r"(this->pc));
-  asm volatile("msr spsr_el1, %0" : : "r"(this->spsr_el1));
+  // asm volatile("msr spsr_el1, %0" : : "r"(this->spsr_el1));
 
   return this->sp;
 }

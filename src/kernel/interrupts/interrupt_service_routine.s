@@ -60,9 +60,6 @@ _irq_handler:
     // Update the stack pointer to the next thread
     mov sp, x19
 
-    // mov x0, sp
-    // bl _test_thing
-
     pop_registers
     eret
 
@@ -79,4 +76,9 @@ _fiq_handler:
 .globl _serror_handler
 _serror_handler:
     bl _kernel_serror_exception_handler
+    eret
+
+.globl _debug_handler
+_debug_handler:
+    bl _kernel_debug_exception_handler
     eret

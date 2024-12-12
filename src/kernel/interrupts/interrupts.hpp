@@ -19,6 +19,7 @@ void post_isr();
 void synch_exception_handler();
 void fiq_exception_handler();
 void serror_exception_handler();
+void debug_exception_handler();
 } // namespace kernel::interrupts
 
 // Unmangled function names for assembly linkage
@@ -28,6 +29,7 @@ void _kernel_post_isr();
 void _kernel_synch_exception_handler();
 void _kernel_fiq_exception_handler();
 void _kernel_serror_exception_handler();
+void _kernel_debug_exception_handler();
 }
 
 #endif // INTERRUPTS_HPP

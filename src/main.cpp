@@ -13,12 +13,12 @@ void test_task_1(void *arg) {
   }
 }
 
-// void test_task_2(void *arg) {
-//   while (true) {
-//     AtomicGuard guard;
-//     uart0::puts("Two\n");
-//   }
-// }
+void test_task_2(void *arg) {
+  while (true) {
+    AtomicGuard guard;
+    uart0::puts("Two\n");
+  }
+}
 
 int main() {
   if (!framebuffer::init()) {
@@ -34,6 +34,7 @@ int main() {
 
   kernel::init_thread(0);
   kernel::init_thread(&test_task_1);
+  kernel::init_thread(&test_task_2);
 
   framebuffer::fill_screen(0x00FFFF);
   kernel::start();

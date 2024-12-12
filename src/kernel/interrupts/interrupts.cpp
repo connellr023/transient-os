@@ -136,6 +136,15 @@ void kernel::interrupts::serror_exception_handler() {
   }
 }
 
+void kernel::interrupts::debug_exception_handler() {
+  disable_interrupts();
+  safe_put("Debug\n");
+
+  while (true) {
+    asm volatile("wfe");
+  }
+}
+
 uint64_t _kernel_isr(uint64_t sp) { return kernel::interrupts::isr(sp); }
 
 void _kernel_post_isr() { kernel::interrupts::post_isr(); }
@@ -150,4 +159,8 @@ void _kernel_fiq_exception_handler() {
 
 void _kernel_serror_exception_handler() {
   kernel::interrupts::serror_exception_handler();
+}
+
+void _kernel_debug_exception_handler() {
+  kernel::interrupts::debug_exception_handler();
 }
