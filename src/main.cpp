@@ -11,7 +11,13 @@ using namespace kernel::threads;
 void test_task_1(void *arg) {
   while (true) {
     AtomicGuard guard;
-    uart0::puts("One\n");
+    uart0::puts("One current SP: \n");
+
+    uint64_t sp;
+    asm volatile("mov %0, sp" : "=r"(sp));
+
+    uart0::hex(sp);
+    uart0::puts("\n");
   }
 }
 
@@ -21,11 +27,12 @@ void test_task_2(void *arg) {
   for (int i = 0; i < 5; i++) {
     {
       AtomicGuard guard;
-      uart0::puts("Two i: ");
-      uart0::hex(i);
-      uart0::puts("\n");
-      uart0::puts("Two k: ");
-      uart0::hex(k);
+      uart0::puts("Two current SP: \n");
+
+      uint64_t sp;
+      asm volatile("mov %0, sp" : "=r"(sp));
+
+      uart0::hex(sp);
       uart0::puts("\n");
     }
 
@@ -33,20 +40,12 @@ void test_task_2(void *arg) {
   }
 }
 
-ThreadControlBlock tcb_1;
-ThreadControlBlock tcb_2;
-
 int main() {
   uart0::init();
   kernel::init_dbg_out(&uart0::puts, &uart0::hex);
 
-  tcb_1 = ThreadControlBlock(&test_task_1, 1300);
-  tcb_2 = ThreadControlBlock(&test_task_2, 1000);
-
-  // Print tcb_1 pc
-  uart0::puts("Thread 1 pc: 0x");
-  uart0::hex(reinterpret_cast<uint64_t>(&test_task_1));
-  uart0::puts("\n");
+  ThreadControlBlock tcb_1 = ThreadControlBlock(&test_task_1, 1300);
+  ThreadControlBlock tcb_2 = ThreadControlBlock(&test_task_2, 1000);
 
   kernel::init_thread(&tcb_1);
   kernel::init_thread(&tcb_2);

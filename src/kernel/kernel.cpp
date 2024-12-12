@@ -37,7 +37,7 @@ void kernel::start() {
 }
 
 void kernel::init_thread(ThreadControlBlock *tcb) {
-  uint64_t page = memory::palloc();
+  void *page = memory::palloc();
 
   if (!page) {
     safe_put("Failed to allocate memory for thread\n");

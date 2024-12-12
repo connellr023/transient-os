@@ -5,7 +5,7 @@
 #include "../threads/thread_control_block.hpp"
 #include <stdint.h>
 
-uint64_t kernel::interrupts::isr(uint64_t sp) {
+void *kernel::interrupts::isr(void *interrupted_sp) {
   static bool is_first_isr = true;
 
   safe_put("ISR\n");
@@ -14,29 +14,23 @@ uint64_t kernel::interrupts::isr(uint64_t sp) {
     is_first_isr = false;
 
     // Save context of interrupted thread
-    scheduler.peek()->save_ctx(sp);
+    scheduler.peek()->set_sp(interrupted_sp);
   }
+
+  // Print SPSR_EL1
+  safe_put("SPSR_EL1: 0x");
+
+  uint64_t spsr_el1;
+  asm volatile("mrs %0, spsr_el1" : "=r"(spsr_el1));
+
+  safe_hex(spsr_el1);
+  safe_put("\n");
 
   // Goto next thread
   scheduler.next();
 
-  if (scheduler.peek() == nullptr) {
-    safe_put("No threads to run!\n");
-    while (true) {
-      asm volatile("wfe");
-    }
-  }
-
-  safe_put("Next thread pc: 0x");
-  safe_hex(scheduler.peek()->get_pc());
-  safe_put("\n");
-
-  safe_put("Next thread sp: 0x");
-  safe_hex(scheduler.peek()->get_sp());
-  safe_put("\n");
-
   // Restore context of next thread and return its stack pointer
-  return scheduler.peek()->restore_ctx();
+  return scheduler.peek()->get_sp();
 }
 
 uint32_t current_us = 0;

@@ -51,10 +51,6 @@ clear_bss:
     cbnz        w2, clear_bss
 
 done_clear:
-    // Set top of stack (stack grows to a lower address per AAPCS64)
-    mov         x1, #LOW_MEMORY
-    msr         sp_el1, x1
-
     // Enable AArch64 in EL1 by setting bits RW and SWIC to 1 in the
     // Hypervisor Configuration Register (see p. D10-2492 and D10-2503 in
     // the ARM Architecture Reference Manual). Since all other bits are 0,
@@ -77,10 +73,21 @@ done_clear:
     adr         x2, el1_entry
     msr         elr_el2, x2
 
+    // Set top of stack for EL1
+    mov         x1, #SP_EL1_LOW_MEMORY
+    msr         sp_el1, x1
+
+    // Some other memory for SP_EL0
+    mov         x0, #SP_EL0_LOW_MEMORY
+    msr         sp_el0, x0
+
     eret
 
 el1_entry:
-    mov         sp, x1
+    // Switch to using SP_EL0
+    mov         sp, x0
+    mov         x0, #0
+    msr         spsel, x0
 
     // Jump to C code, should not return
     bl          main

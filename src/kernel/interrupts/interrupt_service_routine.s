@@ -21,9 +21,21 @@
     stp x26, x27, [sp, #16*13]
     stp x28, x29, [sp, #16*14]
     stp x30, xzr, [sp, #16*15]
+
+    // Save ELR_EL1 and SPSR_EL1
+    mrs x0, elr_el1
+    mrs x1, spsr_el1
+
+    stp x0, x1, [sp, #16*16]
 .endm
 
 .macro pop_registers
+    // Restore ELR_EL1 and SPSR_EL1
+    ldp x0, x1, [sp, #16*16]
+
+    msr elr_el1, x0
+    msr spsr_el1, x1
+
     // Restore state of all general purpose registers
     ldp x0, x1, [sp, #16*0]
     ldp x2, x3, [sp, #16*1]
@@ -59,6 +71,7 @@ _irq_handler:
 
     // Update the stack pointer to the next thread
     mov sp, x19
+    msr sp_el0, x19 // SP_EL0 is configured to be stack pointer for all exception levels
 
     pop_registers
     eret
