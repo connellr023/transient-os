@@ -1,7 +1,6 @@
 #include "kernel.hpp"
 #include "interrupts/interrupts.hpp"
 #include "memory/memory.hpp"
-#include "threads/thread_control_block.hpp"
 #include <stdint.h>
 
 using namespace kernel::threads;
@@ -30,25 +29,27 @@ void kernel::start() {
 
   // Initialize the interrupt controller and timer
   init_interrupt_vector();
-  init_timer();
   enable_interrupt_controller();
   enable_interrupts();
+
+  // Trigger the first context switch
+  trigger_isr();
 }
 
-void kernel::init_thread(thread_handler_t handler) {
+void kernel::init_thread(ThreadControlBlock *tcb) {
   uint64_t page = memory::palloc();
 
-  // Setup thread control block
-  ThreadControlBlock tcb =
-      ThreadControlBlock(page, reinterpret_cast<uint64_t>(handler),
-                         reinterpret_cast<uint64_t>(&panic_handler));
+  if (!page) {
+    safe_put("Failed to allocate memory for thread\n");
+    panic_handler();
+  }
+
+  tcb->init_stack(page);
 
   if (!scheduler.enqueue(tcb)) {
     safe_put("Thread queue is full\n");
     panic_handler();
   }
-
-  safe_put("Thread initialized\n");
 }
 
 void kernel::safe_put(const char *str) {

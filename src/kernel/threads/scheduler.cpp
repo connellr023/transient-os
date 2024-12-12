@@ -2,7 +2,7 @@
 
 using namespace kernel::threads;
 
-bool SchedulerQueue::enqueue(ThreadControlBlock tcb) {
+bool SchedulerQueue::enqueue(ThreadControlBlock *tcb) {
   if (this->size >= scheduler_queue_capacity) {
     return false;
   }
@@ -12,6 +12,16 @@ bool SchedulerQueue::enqueue(ThreadControlBlock tcb) {
   this->size++;
 
   return true;
+}
+
+void SchedulerQueue::dequeue() {
+  if (this->size == 0) {
+    return;
+  }
+
+  this->queue[this->head] = nullptr;
+  this->head = (this->head + 1) % this->size;
+  this->size--;
 }
 
 void SchedulerQueue::next() {

@@ -2,14 +2,14 @@
 
 using namespace kernel::memory;
 
-uint16_t memory_map[page_count] = {0};
+uint16_t memory_map[PAGE_COUNT] = {0};
 
 uint64_t kernel::memory::palloc() {
-  for (uint64_t i = 0; i < page_count; i++) {
+  for (uint64_t i = 0; i < PAGE_COUNT; i++) {
     if (memory_map[i] == 0) {
       memory_map[i] = 1;
 
-      return low_memory + (i * page_size);
+      return LOW_MEMORY + (i * PAGE_SIZE);
     }
   }
 
@@ -17,5 +17,5 @@ uint64_t kernel::memory::palloc() {
 }
 
 void kernel::memory::pfree(uint64_t page) {
-  memory_map[(page - low_memory) / page_size] = 0;
+  memory_map[(page - LOW_MEMORY) / PAGE_SIZE] = 0;
 }

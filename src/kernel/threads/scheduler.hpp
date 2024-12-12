@@ -9,7 +9,7 @@ constexpr uint32_t scheduler_queue_capacity = 5;
 
 struct SchedulerQueue {
 private:
-  ThreadControlBlock queue[scheduler_queue_capacity]{};
+  ThreadControlBlock *queue[scheduler_queue_capacity]{nullptr};
 
   uint32_t head;
   uint32_t tail;
@@ -18,10 +18,11 @@ private:
 public:
   SchedulerQueue() : head(0), tail(0), size(0){};
 
-  bool enqueue(ThreadControlBlock tcb);
+  bool enqueue(ThreadControlBlock *tcb);
+  void dequeue();
   void next();
 
-  ThreadControlBlock &peek() { return queue[head]; }
+  ThreadControlBlock *peek() { return queue[head]; }
   uint32_t get_size() const { return size; }
 };
 } // namespace kernel::threads

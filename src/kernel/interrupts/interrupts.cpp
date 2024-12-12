@@ -2,52 +2,55 @@
 #include "../../drivers/framebuffer.hpp"
 #include "../../drivers/interrupt_requests.hpp"
 #include "../../drivers/timer.hpp"
-#include "../../drivers/uart0.hpp"
 #include "../kernel.hpp"
+#include "../threads/thread_control_block.hpp"
 #include <stdint.h>
 
 uint64_t kernel::interrupts::isr(uint64_t sp) {
+  static bool is_first_isr = true;
+
   safe_put("ISR\n");
 
-  // Save context of interrupted thread
-  scheduler.peek().save_ctx(sp);
+  if (!is_first_isr) {
+    is_first_isr = false;
 
-  safe_put("Interrupted thread SP: 0x");
-  safe_hex(scheduler.peek().get_sp());
-  safe_put("\n");
-
-  safe_put("Interrupted thread PC: 0x");
-  safe_hex(scheduler.peek().get_pc());
-  safe_put("\n");
+    // Save context of interrupted thread
+    scheduler.peek()->save_ctx(sp);
+  }
 
   // Goto next thread
   scheduler.next();
-  safe_put("Next thread\n");
 
-  safe_put("Next thread SP: 0x");
-  safe_hex(scheduler.peek().get_sp());
+  if (scheduler.peek() == nullptr) {
+    safe_put("No threads to run!\n");
+    while (true) {
+      asm volatile("wfe");
+    }
+  }
+
+  safe_put("Next thread pc: 0x");
+  safe_hex(scheduler.peek()->get_pc());
   safe_put("\n");
 
-  safe_put("Next thread PC: 0x");
-  safe_hex(scheduler.peek().get_pc());
+  safe_put("Next thread sp: 0x");
+  safe_hex(scheduler.peek()->get_sp());
   safe_put("\n");
 
   // Restore context of next thread and return its stack pointer
-  return scheduler.peek().restore_ctx();
+  return scheduler.peek()->restore_ctx();
 }
 
 uint32_t current_us = 0;
 
-void kernel::interrupts::init_timer() {
-  current_us = *TIMER_COUNTER_LOW;
-  current_us += timer_interval_us;
-
-  // Generate an interrupt when the timer reaches the current value
+void kernel::interrupts::trigger_isr() {
+  current_us = *TIMER_COUNTER_LOW + 1000;
   *TIMER_CMP_1 = current_us;
+
+  asm volatile("wfi");
 }
 
 void kernel::interrupts::post_isr() {
-  current_us = *TIMER_COUNTER_LOW + timer_interval_us;
+  current_us = *TIMER_COUNTER_LOW + scheduler.peek()->get_burst_time();
 
   // Generate an interrupt when the timer reaches the current value
   *TIMER_CMP_1 = current_us;
@@ -67,12 +70,6 @@ void kernel::interrupts::enable_interrupts() {
 
 void kernel::interrupts::disable_interrupts() {
   asm volatile("msr daifset, #2");
-}
-
-void kernel::interrupts::init_interrupt_vector() {
-  asm volatile("adrp x2, _vectors \n\t\
-                add x2, x2, :lo12:_vectors \n\t\
-                msr vbar_el1, x2");
 }
 
 void kernel::interrupts::synch_exception_handler() {
@@ -134,33 +131,4 @@ void kernel::interrupts::serror_exception_handler() {
   while (true) {
     asm volatile("wfe");
   }
-}
-
-void kernel::interrupts::debug_exception_handler() {
-  disable_interrupts();
-  safe_put("Debug\n");
-
-  while (true) {
-    asm volatile("wfe");
-  }
-}
-
-uint64_t _kernel_isr(uint64_t sp) { return kernel::interrupts::isr(sp); }
-
-void _kernel_post_isr() { kernel::interrupts::post_isr(); }
-
-void _kernel_synch_exception_handler() {
-  kernel::interrupts::synch_exception_handler();
-}
-
-void _kernel_fiq_exception_handler() {
-  kernel::interrupts::fiq_exception_handler();
-}
-
-void _kernel_serror_exception_handler() {
-  kernel::interrupts::serror_exception_handler();
-}
-
-void _kernel_debug_exception_handler() {
-  kernel::interrupts::debug_exception_handler();
 }

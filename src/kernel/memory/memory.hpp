@@ -9,18 +9,16 @@
 #define SECTION_SIZE (1 << SECTION_SHIFT)
 
 #define LOW_MEMORY (2 * SECTION_SIZE)
+#define HIGH_MEMORY 0x3F000000
+
+#define PAGING_MEMORY (HIGH_MEMORY - LOW_MEMORY)
+#define PAGE_COUNT (PAGING_MEMORY / PAGE_SIZE)
 
 #ifndef __ASSEMBLER__
 
 #include <stdint.h>
 
 namespace kernel::memory {
-constexpr uint64_t low_memory = LOW_MEMORY;
-constexpr uint64_t high_memory = 0x3F000000;
-constexpr uint64_t paging_memory = high_memory - low_memory;
-constexpr uint64_t page_size = PAGE_SIZE;
-constexpr uint64_t page_count = paging_memory / page_size;
-
 uint64_t palloc();
 void pfree(uint64_t page);
 } // namespace kernel::memory
