@@ -24,7 +24,7 @@ void ThreadControlBlock::init_stack(void *page) {
   uint64_t *register_stack = reinterpret_cast<uint64_t *>(this->sp);
 
   // Initialize x1 to x29 (FP) to 0
-  for (int i = 1; i < LR_IDX; ++i) {
+  for (int i = 1; i < LR_IDX; i++) {
     register_stack[i] = 0;
   }
 

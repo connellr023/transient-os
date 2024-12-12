@@ -9,7 +9,16 @@ void *kernel::interrupts::isr(void *interrupted_sp) {
   using namespace threads;
   static bool is_first_isr = true;
 
-  safe_put("ISR\n");
+  safe_put("Entering interrupt service routine\n");
+
+  if (scheduler.get_size() == 0) {
+    safe_put("No threads to switch to\n");
+
+    // Halt kernel execution
+    while (true) {
+      asm volatile("wfe");
+    }
+  }
 
   // Avoid corrupting the first thread's context when switching from main
   if (!is_first_isr) {
@@ -19,14 +28,6 @@ void *kernel::interrupts::isr(void *interrupted_sp) {
     scheduler.peek()->set_sp(interrupted_sp);
     scheduler.peek()->set_state(ThreadState::Ready);
   }
-
-  // Print SPSR_EL1
-  uint64_t spsr_el1;
-
-  asm volatile("mrs %0, spsr_el1" : "=r"(spsr_el1));
-  safe_put("SPSR_EL1: 0x");
-  safe_hex(spsr_el1);
-  safe_put("\n");
 
   // Goto next thread
   scheduler.next();
@@ -40,7 +41,7 @@ uint32_t current_us = 0;
 
 void kernel::interrupts::trigger_isr() {
   uint32_t current_us = *TIMER_COUNTER_LOW;
-  *TIMER_CMP_1 = current_us + 1;
+  *TIMER_CMP_1 = current_us + 1000;
 
   asm volatile("wfi");
 }

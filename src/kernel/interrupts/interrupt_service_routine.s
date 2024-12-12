@@ -71,7 +71,10 @@ _irq_handler:
 
     // Update the stack pointer to the next thread
     mov sp, x19
-    msr sp_el0, x19 // SP_EL0 is configured to be stack pointer for all exception levels
+
+    // Prepare SP_EL0 for the next thread
+    add x19, x19, #CPU_CTX_STACK_SIZE
+    msr sp_el0, x19
 
     pop_registers
     eret
