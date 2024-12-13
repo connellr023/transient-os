@@ -16,39 +16,25 @@ public:
 };
 
 void test_task_1(void *arg) {
-  uint64_t k = 0;
-  uint64_t shared_struct = reinterpret_cast<uint64_t>(arg);
+  uint64_t k = 0x69;
+  int j = 0x420;
 
   while (true) {
-    // Print address of shared struct
+    // Print k
     {
       AtomicGuard guard;
-      uart0::puts("Thread 1 shared_struct: ");
-      uart0::hex(reinterpret_cast<uint64_t>(shared_struct));
+      uart0::puts("Thread 1 k: ");
+      uart0::hex(k);
       uart0::puts("\n");
     }
 
-    // Print k
-    // {
-    //   AtomicGuard guard;
-    //   uart0::puts("Thread 1 k: ");
-    //   uart0::hex(k);
-    //   uart0::puts("\n");
-    // }
-
-    // shared_struct->a++;
-    // shared_struct->b++;
-
-    // {
-    //   AtomicGuard guard;
-    //   uart0::puts("a: ");
-    //   uart0::hex(shared_struct->a);
-    //   uart0::puts(", b: ");
-    //   uart0::hex(shared_struct->b);
-    //   uart0::puts(", c: ");
-    //   uart0::hex(shared_struct->c);
-    //   uart0::puts("\n\n");
-    // }
+    // Print j
+    {
+      AtomicGuard guard;
+      uart0::puts("Thread 1 j: ");
+      uart0::hex(j);
+      uart0::puts("\n");
+    }
   }
 }
 

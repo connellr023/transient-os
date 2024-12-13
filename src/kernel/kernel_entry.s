@@ -53,7 +53,6 @@ done_clear:
     msr         sp_el0, x1
     mov         sp, x1
 
-    // Initially use SP_EL1 for stack
     // After first context switch, we will switch to using SP_EL0 in the low memory region
     mov         x0, #LOW_MEMORY
     msr         sp_el1, x0
