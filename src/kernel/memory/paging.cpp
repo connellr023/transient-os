@@ -9,7 +9,7 @@ void *kernel::memory::palloc() {
     if (!memory_map[i]) {
       memory_map[i] = true;
 
-      return reinterpret_cast<void *>(SP_EL1_LOW_MEMORY + (i * PAGE_SIZE));
+      return reinterpret_cast<void *>(LOW_MEMORY + (i * PAGE_SIZE));
     }
   }
 
@@ -18,5 +18,5 @@ void *kernel::memory::palloc() {
 
 void kernel::memory::pfree(void *page) {
   const uint64_t page_addr = reinterpret_cast<uint64_t>(page);
-  memory_map[(page_addr - SP_EL1_LOW_MEMORY) / PAGE_SIZE] = false;
+  memory_map[(page_addr - LOW_MEMORY) / PAGE_SIZE] = false;
 }

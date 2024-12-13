@@ -33,6 +33,7 @@ private:
   thread_handler_t handler;
   void *arg;
   bool is_stack_initialized;
+  bool is_complete;
 
 public:
   ThreadControlBlock(thread_handler_t handler, uint32_t burst_time,
@@ -45,6 +46,7 @@ public:
   void *get_sp() const { return reinterpret_cast<void *>(sp); }
 
   void set_state(ThreadState state) { this->state = state; }
+  void mark_complete() { this->is_complete = true; }
 
   void *get_page() const { return reinterpret_cast<void *>(page_addr); }
   uint64_t get_thread_id() const { return thread_id; }

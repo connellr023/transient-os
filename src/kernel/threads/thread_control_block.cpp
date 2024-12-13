@@ -8,7 +8,7 @@ ThreadControlBlock::ThreadControlBlock(thread_handler_t handler,
                                        uint32_t burst_time, void *arg)
     : thread_id(0), page_addr(0), burst_time(burst_time),
       state(ThreadState::Ready), sp(0), handler(handler), arg(arg),
-      is_stack_initialized(false) {
+      is_stack_initialized(false), is_complete(false) {
   static uint64_t thread_id_counter = 0;
   this->thread_id = thread_id_counter++;
 }
@@ -23,13 +23,16 @@ void ThreadControlBlock::init_stack(void *page) {
   // Initialize the thread stack
   uint64_t *register_stack = reinterpret_cast<uint64_t *>(this->sp);
 
-  // Initialize x1 to x29 (FP) to 0
-  for (int i = 1; i < LR_IDX; i++) {
+  // Initialize x1 to x28 equal to 0
+  for (int i = 1; i < FP_IDX; i++) {
     register_stack[i] = 0;
   }
 
   // Set thread argument
   register_stack[0] = reinterpret_cast<uint64_t>(this->arg);
+
+  // Set the frame pointer to the stack pointer
+  register_stack[FP_IDX] = this->sp;
 
   // Set the link register to the thread return handler of the kernel
   register_stack[LR_IDX] = reinterpret_cast<uint64_t>(&thread_return_handler);

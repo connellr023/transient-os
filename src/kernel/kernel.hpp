@@ -1,7 +1,6 @@
 #ifndef KERNEL_HPP
 #define KERNEL_HPP
 
-#include "../utils/mem_utils.hpp"
 #include "threads/scheduler.hpp"
 #include "threads/thread_control_block.hpp"
 #include <stdint.h>
@@ -16,7 +15,6 @@ void init_dbg_out(string_output_handler_t string_handler = nullptr,
                   hex_output_handler_t hex_handler = nullptr);
 
 bool spawn_thread(threads::ThreadControlBlock *tcb);
-void yield_current_thread();
 void thread_return_handler();
 
 void start();

@@ -15,10 +15,11 @@ void enable_interrupt_controller();
 void enable_interrupts();
 void disable_interrupts();
 
-void trigger_isr();
+void prepare_timer_interrupt(uint64_t interval);
+void trigger_timer_interrupt();
+void clear_timer_interrupt();
 
-void *isr(void *interrupted_sp) asm("_isr");
-void post_isr() asm("_post_isr");
+void *context_switch(void *interrupted_sp) asm("_context_switch");
 
 void init_interrupt_vector() asm("_init_interrupt_vector");
 

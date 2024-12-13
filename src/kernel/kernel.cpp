@@ -25,10 +25,7 @@ void kernel::start() {
 
   if (current_el != 1) {
     safe_put("Not running in EL1\n");
-
-    while (true) {
-      asm volatile("wfe");
-    }
+    asm volatile("wfe");
   }
 
   // Initialize the interrupt controller and timer
@@ -37,7 +34,7 @@ void kernel::start() {
   enable_interrupts();
 
   // Trigger the first context switch
-  trigger_isr();
+  trigger_timer_interrupt();
 }
 
 bool kernel::spawn_thread(ThreadControlBlock *tcb) {
@@ -57,11 +54,6 @@ bool kernel::spawn_thread(ThreadControlBlock *tcb) {
   return true;
 }
 
-void kernel::yield_current_thread() {
-  scheduler.peek()->set_state(ThreadState::Ready);
-  trigger_isr();
-}
-
 void kernel::safe_put(const char *str) {
   if (kernel_string_output_handler != nullptr) {
     kernel_string_output_handler(str);
@@ -77,7 +69,8 @@ void kernel::safe_hex(uint64_t value) {
 void kernel::thread_return_handler() {
   interrupts::disable_interrupts();
 
-  const ThreadControlBlock *current_tcb = scheduler.peek();
+  ThreadControlBlock *current_tcb = scheduler.peek();
+  current_tcb->mark_complete();
 
   safe_put("Thread ID: ");
   safe_hex(current_tcb->get_thread_id());
@@ -91,5 +84,5 @@ void kernel::thread_return_handler() {
 
   // Trigger context switch
   interrupts::enable_interrupts();
-  interrupts::trigger_isr();
+  interrupts::trigger_timer_interrupt();
 }

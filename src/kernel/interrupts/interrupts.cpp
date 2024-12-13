@@ -5,20 +5,11 @@
 #include "../threads/thread_control_block.hpp"
 #include <stdint.h>
 
-void *kernel::interrupts::isr(void *interrupted_sp) {
+void *kernel::interrupts::context_switch(void *interrupted_sp) {
   using namespace threads;
   static bool is_first_isr = true;
 
   safe_put("Entering interrupt service routine\n");
-
-  if (scheduler.get_size() == 0) {
-    safe_put("No threads to switch to\n");
-
-    // Halt kernel execution
-    while (true) {
-      asm volatile("wfe");
-    }
-  }
 
   // Avoid corrupting the first thread's context when switching from main
   if (!is_first_isr) {
@@ -33,26 +24,28 @@ void *kernel::interrupts::isr(void *interrupted_sp) {
   scheduler.next();
   scheduler.peek()->set_state(ThreadState::Running);
 
-  // Restore context of next thread and return its stack pointer
+  // Prepate timer for next context switch
+  prepare_timer_interrupt(scheduler.peek()->get_burst_time());
+  clear_timer_interrupt();
+
+  // Return the stack pointer of the next thread
   return scheduler.peek()->get_sp();
 }
 
 uint32_t current_us = 0;
 
-void kernel::interrupts::trigger_isr() {
-  uint32_t current_us = *TIMER_COUNTER_LOW;
-  *TIMER_CMP_1 = current_us + 1000;
+void kernel::interrupts::prepare_timer_interrupt(uint64_t interval) {
+  current_us = *TIMER_COUNTER_LOW;
+  *TIMER_CMP_1 = current_us + interval;
+}
 
+void kernel::interrupts::trigger_timer_interrupt() {
+  prepare_timer_interrupt(100);
   asm volatile("wfi");
 }
 
-void kernel::interrupts::post_isr() {
-  current_us = *TIMER_COUNTER_LOW + scheduler.peek()->get_burst_time();
-
-  // Generate an interrupt when the timer reaches the current value
-  *TIMER_CMP_1 = current_us;
-
-  // Clear the interrupt
+void kernel::interrupts::clear_timer_interrupt() {
+  // Clear the M1 bit in the control/status register
   *TIMER_CS = TIMER_CS_M1;
 }
 

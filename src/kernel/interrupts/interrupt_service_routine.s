@@ -3,8 +3,9 @@
 .section .text
 
 .macro push_registers
-    // Save that state of all general purpose registers
     sub sp, sp, #CPU_CTX_STACK_SIZE
+
+    // Save that state of all general purpose registers
     stp x0, x1, [sp, #16*0]
     stp x2, x3, [sp, #16*1]
     stp x4, x5, [sp, #16*2]
@@ -53,6 +54,7 @@
     ldp x26, x27, [sp, #16*13]
     ldp x28, x29, [sp, #16*14]
     ldp x30, xzr, [sp, #16*15]
+
     add sp, sp, #CPU_CTX_STACK_SIZE
 .endm
 
@@ -62,19 +64,14 @@ _irq_handler:
 
     // Pass the base address of the saved registers to the interrupt service routine
     mov x0, sp
-    bl _isr
-
-    // Access returned stack pointer of next thread
-    mov x19, x0
-
-    bl _post_isr
+    bl _context_switch
 
     // Update the stack pointer to the next thread
-    mov sp, x19
+    mov sp, x0
 
     // Prepare SP_EL0 for the next thread
-    add x19, x19, #CPU_CTX_STACK_SIZE
-    msr sp_el0, x19
+    add x0, x0, #CPU_CTX_STACK_SIZE
+    msr sp_el0, x0
 
     pop_registers
     eret

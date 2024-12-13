@@ -16,56 +16,78 @@ public:
 };
 
 void test_task_1(void *arg) {
-  // Print link register
-  {
-    AtomicGuard guard;
-    uint64_t lr;
-    asm volatile("mov %0, lr" : "=r"(lr));
+  uint64_t k = 0;
+  uint64_t shared_struct = reinterpret_cast<uint64_t>(arg);
 
-    uart0::puts("Thread 1 LR: ");
-    uart0::hex(lr);
-    uart0::puts("\n");
-  }
+  while (true) {
+    // Print address of shared struct
+    {
+      AtomicGuard guard;
+      uart0::puts("Thread 1 shared_struct: ");
+      uart0::hex(reinterpret_cast<uint64_t>(shared_struct));
+      uart0::puts("\n");
+    }
 
-  for (uint64_t i = 0; i < 40000000; i++) {
-    AtomicGuard guard;
-    uart0::puts("Thread 1 i: ");
-    uart0::hex(i);
-    uart0::puts("\n");
-  }
+    // Print k
+    // {
+    //   AtomicGuard guard;
+    //   uart0::puts("Thread 1 k: ");
+    //   uart0::hex(k);
+    //   uart0::puts("\n");
+    // }
 
-  {
-    AtomicGuard guard;
-    uart0::puts("Thread 1 returning\n");
+    // shared_struct->a++;
+    // shared_struct->b++;
+
+    // {
+    //   AtomicGuard guard;
+    //   uart0::puts("a: ");
+    //   uart0::hex(shared_struct->a);
+    //   uart0::puts(", b: ");
+    //   uart0::hex(shared_struct->b);
+    //   uart0::puts(", c: ");
+    //   uart0::hex(shared_struct->c);
+    //   uart0::puts("\n\n");
+    // }
   }
 }
 
 void test_task_2(void *arg) {
-  for (uint64_t i = 0; i < 50000000; i++) {
-    AtomicGuard guard;
-    uart0::puts("Thread 2 i: ");
-    uart0::hex(i);
-    uart0::puts("\n");
-  }
+  uint64_t shared_struct = reinterpret_cast<uint64_t>(arg);
+  int i = 0;
 
-  {
-    AtomicGuard guard;
-    uart0::puts("Thread 2 returning\n");
+  while (true) {
+    // Print address of shared struct
+    {
+      AtomicGuard guard;
+      uart0::puts("Thread 2 shared_struct: ");
+      uart0::hex(reinterpret_cast<uint64_t>(shared_struct));
+      uart0::puts("\n");
+    }
+
+    // shared_struct->c++;
+
+    // {
+    //   AtomicGuard guard;
+    //   uart0::puts("i: ");
+    //   uart0::hex(i);
+    //   uart0::puts("\n");
+    // }
+
+    // i++;
   }
 }
-
-// SharedTestStruct shared;
 
 int main() {
   uart0::init();
   kernel::init_dbg_out(&uart0::puts, &uart0::hex);
 
-  // shared.a = 0x69;
-  // shared.b = 0x420;
-  // shared.c = 0x1337;
+  uart0::puts("Hello, world!\n");
 
-  ThreadControlBlock tcb_1(&test_task_1, 1300);
-  ThreadControlBlock tcb_2(&test_task_2, 1000);
+  SharedTestStruct shared_struct = {.a = 0, .b = 0, .c = 0};
+
+  ThreadControlBlock tcb_1(&test_task_1, 1300, &shared_struct);
+  ThreadControlBlock tcb_2(&test_task_2, 1000, &shared_struct);
 
   if (!kernel::spawn_thread(&tcb_1)) {
     uart0::puts("Failed to spawn thread 1\n");
@@ -75,10 +97,13 @@ int main() {
     uart0::puts("Failed to spawn thread 2\n");
   }
 
+  uart0::puts("Starting kernel\n");
+
   kernel::start();
 
   while (true) {
-    asm volatile("wfe");
+    uart0::puts("Waiting for kernel to start\n");
+    asm volatile("wfi");
   }
 
   return 0;
