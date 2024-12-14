@@ -5,32 +5,6 @@
 #include "../threads/thread_control_block.hpp"
 #include <stdint.h>
 
-void *kernel::interrupts::context_switch(void *interrupted_sp) {
-  using namespace threads;
-  static bool is_first_isr = true;
-
-  // Avoid corrupting the first thread's context when switching from main
-  if (!is_first_isr) {
-    // Save context of interrupted thread
-    scheduler.peek()->set_sp(interrupted_sp);
-    scheduler.peek()->set_state(ThreadState::Ready);
-
-    // Goto next thread
-    scheduler.next();
-    scheduler.peek()->set_state(ThreadState::Running);
-  } else {
-    // Set flag to false after first ISR
-    is_first_isr = false;
-  }
-
-  // Prepare timer for next context switch
-  prepare_timer_interrupt(scheduler.peek()->get_burst_time());
-  clear_timer_interrupt();
-
-  // Return the stack pointer of the next thread
-  return scheduler.peek()->get_sp();
-}
-
 void kernel::interrupts::prepare_timer_interrupt(uint64_t interval) {
   static uint32_t current_us = 0;
 
@@ -53,9 +27,19 @@ void kernel::interrupts::enable_interrupt_controller() {
   *ENABLE_IRQS_1 = SYSTEM_TIMER_IRQ_1;
 }
 
+void *kernel::interrupts::irq_exception_handler(void *interrupted_sp) {
+  const ThreadControlBlock *next_tcb = context_switch(interrupted_sp);
+
+  // Prepare timer for next context switch
+  prepare_timer_interrupt(next_tcb->get_burst_time());
+  clear_timer_interrupt();
+
+  // Return the stack pointer of the next thread
+  return next_tcb->get_sp();
+}
+
 void kernel::interrupts::synch_exception_handler() {
   disable_interrupts();
-
   uint64_t esr, elr, far;
 
   // Read the ESR_EL1 (Exception Syndrome Register)

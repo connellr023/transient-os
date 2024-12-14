@@ -65,7 +65,7 @@ _irq_handler:
 
     // Pass the base address of the saved registers to the interrupt service routine
     mov x0, sp
-    bl _context_switch
+    bl _irq_exception_handler
 
     // Update the stack pointer to the next thread
     mov sp, x0
@@ -79,15 +79,21 @@ _irq_handler:
 
 .globl _synch_handler
 _synch_handler:
+    push_registers
     bl _synch_exception_handler
+    pop_registers
     eret
 
 .globl _fiq_handler
 _fiq_handler:
+    push_registers
     bl _fiq_exception_handler
+    pop_registers
     eret
 
 .globl _serror_handler
 _serror_handler:
+    push_registers
     bl _serror_exception_handler
+    pop_registers
     eret

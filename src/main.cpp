@@ -3,10 +3,8 @@
 #include "kernel/interrupts/interrupts.hpp"
 #include "kernel/kernel.hpp"
 #include "kernel/threads/thread_control_block.hpp"
-#include "kernel/utils/mutex.hpp"
 #include <stdint.h>
 
-using namespace kernel::utils;
 using namespace kernel::threads;
 
 struct SharedTestStruct {
@@ -16,9 +14,7 @@ public:
   uint64_t c;
 };
 
-Mutex uart_mutex = Mutex();
-
-constexpr uint64_t uart_buffer_size = 100;
+constexpr uint64_t uart_buffer_size = 1000;
 char uart_buffer[uart_buffer_size] = {0};
 uint64_t uart_read_index = 0;
 uint64_t uart_write_index = 0;
@@ -45,6 +41,23 @@ void produce_string(const char *s) {
   kernel::interrupts::enable_interrupts();
 }
 
+void produce_hex(uint64_t value) {
+  kernel::interrupts::disable_interrupts();
+
+  for (int i = 0; i < 16; i++) {
+    uint64_t nibble = (value >> (60 - i * 4)) & 0xF;
+
+    if (nibble < 10)
+      produce_char('0' + nibble);
+    else
+      produce_char('A' + nibble - 10);
+  }
+
+  produce_char('\n');
+
+  kernel::interrupts::enable_interrupts();
+}
+
 void uart_consumer_task(void *arg) {
   while (true) {
     kernel::interrupts::disable_interrupts();
@@ -63,8 +76,10 @@ void uart_consumer_task(void *arg) {
 }
 
 void test_task_1(void *arg) {
+  uint64_t shared = reinterpret_cast<uint64_t>(arg);
+
   while (true) {
-    produce_string("thread 1 - ");
+    produce_hex(shared);
 
     for (int i = 0; i < 100000; i++)
       asm volatile("nop");
@@ -72,8 +87,10 @@ void test_task_1(void *arg) {
 }
 
 void test_task_2(void *arg) {
+  uint64_t shared = *(reinterpret_cast<uint64_t *>(arg));
+
   while (true) {
-    produce_string("thread 2 - ");
+    produce_hex(shared);
 
     for (int i = 0; i < 10000; i++)
       asm volatile("nop");
@@ -86,9 +103,11 @@ int main() {
 
   uart0::puts("Hello, world!\n");
 
+  uint64_t test_shared = 0x69;
+
   ThreadControlBlock tcb_0(&uart_consumer_task, 1000);
-  ThreadControlBlock tcb_1(&test_task_1, 1800);
-  ThreadControlBlock tcb_2(&test_task_2, 1200);
+  ThreadControlBlock tcb_1(&test_task_1, 1800, &test_shared);
+  ThreadControlBlock tcb_2(&test_task_2, 1200, &test_shared);
 
   kernel::spawn_thread(&tcb_0);
   kernel::spawn_thread(&tcb_1);

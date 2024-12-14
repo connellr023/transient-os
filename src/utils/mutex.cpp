@@ -1,7 +1,6 @@
 #include "mutex.hpp"
-#include "../interrupts/interrupts.hpp"
+#include "../kernel/interrupts/interrupts.hpp"
 
-using namespace kernel::utils;
 using namespace kernel::interrupts;
 
 void Mutex::acquire() {

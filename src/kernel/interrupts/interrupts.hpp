@@ -19,10 +19,9 @@ void prepare_timer_interrupt(uint64_t interval);
 void trigger_timer_interrupt();
 void clear_timer_interrupt();
 
-void *context_switch(void *interrupted_sp) asm("_context_switch");
-
 void init_interrupt_vector() asm("_init_interrupt_vector");
 
+void *irq_exception_handler(void *interrupted_sp) asm("_irq_exception_handler");
 void synch_exception_handler() asm("_synch_exception_handler");
 void fiq_exception_handler() asm("_fiq_exception_handler");
 void serror_exception_handler() asm("_serror_exception_handler");

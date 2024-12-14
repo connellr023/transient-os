@@ -6,16 +6,18 @@
 #include <stdint.h>
 
 namespace kernel {
+using namespace threads;
+
 typedef void (*string_output_handler_t)(const char *);
 typedef void (*hex_output_handler_t)(uint64_t);
-
-extern threads::SchedulerQueue scheduler;
 
 void init_dbg_out(string_output_handler_t string_handler = nullptr,
                   hex_output_handler_t hex_handler = nullptr);
 
-bool spawn_thread(threads::ThreadControlBlock *tcb);
-void join_thread(threads::ThreadControlBlock *tcb);
+ThreadControlBlock *context_switch(void *interrupted_sp);
+
+bool spawn_thread(ThreadControlBlock *tcb);
+void join_thread(ThreadControlBlock *tcb);
 
 void thread_return_handler();
 

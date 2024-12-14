@@ -6,7 +6,7 @@
 using namespace kernel::threads;
 using namespace kernel::interrupts;
 
-SchedulerQueue kernel::scheduler = SchedulerQueue();
+SchedulerQueue scheduler = SchedulerQueue();
 
 kernel::string_output_handler_t kernel_string_output_handler = nullptr;
 kernel::hex_output_handler_t kernel_hex_output_handler = nullptr;
@@ -35,6 +35,26 @@ void kernel::start() {
 
   // Trigger the first context switch
   trigger_timer_interrupt();
+}
+
+ThreadControlBlock *kernel::context_switch(void *interrupted_sp) {
+  static bool is_first_context_switch = true;
+
+  // Avoid corrupting the first thread's context when switching from main
+  if (!is_first_context_switch) {
+    // Save context of interrupted thread
+    scheduler.peek()->set_sp(interrupted_sp);
+    scheduler.peek()->set_state(ThreadState::Ready);
+
+    // Goto next thread
+    scheduler.next();
+    scheduler.peek()->set_state(ThreadState::Running);
+  } else {
+    // Set flag to false after first context switch
+    is_first_context_switch = false;
+  }
+
+  return scheduler.peek();
 }
 
 bool kernel::spawn_thread(ThreadControlBlock *tcb) {
