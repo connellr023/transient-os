@@ -12,8 +12,8 @@
 
 namespace kernel::interrupts {
 void enable_interrupt_controller();
-void enable_interrupts();
-void disable_interrupts();
+void enable_interrupts() asm("_enable_interrupts");
+void disable_interrupts() asm("_disable_interrupts");
 
 void prepare_timer_interrupt(uint64_t interval);
 void trigger_timer_interrupt();

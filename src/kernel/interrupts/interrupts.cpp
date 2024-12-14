@@ -5,12 +5,9 @@
 #include "../threads/thread_control_block.hpp"
 #include <stdint.h>
 
-bool is_first_isr = true;
-
 void *kernel::interrupts::context_switch(void *interrupted_sp) {
   using namespace threads;
-
-  safe_put("Entering interrupt service routine\n");
+  static bool is_first_isr = true;
 
   // Avoid corrupting the first thread's context when switching from main
   if (!is_first_isr) {
@@ -21,20 +18,10 @@ void *kernel::interrupts::context_switch(void *interrupted_sp) {
     // Goto next thread
     scheduler.next();
     scheduler.peek()->set_state(ThreadState::Running);
-
-    // Print interrupted thread SP
-    safe_put("Interrupted thread SP: ");
-    safe_hex(reinterpret_cast<uint64_t>(interrupted_sp));
-    safe_put("\n");
   } else {
     // Set flag to false after first ISR
     is_first_isr = false;
   }
-
-  // Print next thread SP
-  safe_put("Next thread SP: ");
-  safe_hex(reinterpret_cast<uint64_t>(scheduler.peek()->get_sp()));
-  safe_put("\n");
 
   // Prepare timer for next context switch
   prepare_timer_interrupt(scheduler.peek()->get_burst_time());
@@ -44,9 +31,9 @@ void *kernel::interrupts::context_switch(void *interrupted_sp) {
   return scheduler.peek()->get_sp();
 }
 
-uint32_t current_us = 0;
-
 void kernel::interrupts::prepare_timer_interrupt(uint64_t interval) {
+  static uint32_t current_us = 0;
+
   current_us = *TIMER_COUNTER_LOW;
   *TIMER_CMP_1 = current_us + interval;
 }
@@ -64,14 +51,6 @@ void kernel::interrupts::clear_timer_interrupt() {
 void kernel::interrupts::enable_interrupt_controller() {
   // Enable the system timer IRQ
   *ENABLE_IRQS_1 = SYSTEM_TIMER_IRQ_1;
-}
-
-void kernel::interrupts::enable_interrupts() {
-  asm volatile("msr daifclr, #2");
-}
-
-void kernel::interrupts::disable_interrupts() {
-  asm volatile("msr daifset, #2");
 }
 
 void kernel::interrupts::synch_exception_handler() {

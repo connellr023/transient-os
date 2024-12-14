@@ -7,6 +7,16 @@ _init_interrupt_vector:
         msr     vbar_el1, x0
         ret
 
+.globl _enable_interrupts
+_enable_interrupts:
+        msr     daifclr, #2
+        ret
+
+.globl _disable_interrupts
+_disable_interrupts:
+        msr     daifset, #2
+        ret
+
 .align 11
 .globl _vectors
 _vectors:

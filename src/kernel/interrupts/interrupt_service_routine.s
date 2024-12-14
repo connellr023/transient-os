@@ -21,21 +21,23 @@
     stp x24, x25, [sp, #16*12]
     stp x26, x27, [sp, #16*13]
     stp x28, x29, [sp, #16*14]
-    stp x30, xzr, [sp, #16*15]
 
     // Save ELR_EL1 and SPSR_EL1
-    mrs x0, elr_el1
-    mrs x1, spsr_el1
+    mrs x22, elr_el1
+    mrs x23, spsr_el1
 
-    stp x0, x1, [sp, #16*16]
+    // Push lr, elr_el1, and spsr_el1 onto the stack
+    stp x30, x22, [sp, #16*15]
+    str x23, [sp, #16*16]
 .endm
 
 .macro pop_registers
-    // Restore ELR_EL1 and SPSR_EL1
-    ldp x0, x1, [sp, #16*16]
+    // Restore spsr_el1, elr_el1, and lr
+    ldr x23, [sp, #16*16]
+    ldp x30, x22, [sp, #16*15]
 
-    msr elr_el1, x0
-    msr spsr_el1, x1
+    msr elr_el1, x22
+    msr spsr_el1, x23
 
     // Restore state of all general purpose registers
     ldp x0, x1, [sp, #16*0]
@@ -53,7 +55,6 @@
     ldp x24, x25, [sp, #16*12]
     ldp x26, x27, [sp, #16*13]
     ldp x28, x29, [sp, #16*14]
-    ldp x30, xzr, [sp, #16*15]
 
     add sp, sp, #CPU_CTX_STACK_SIZE
 .endm

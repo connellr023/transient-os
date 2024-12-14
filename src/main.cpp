@@ -19,18 +19,14 @@ void test_task_1(void *arg) {
   SharedTestStruct *shared_struct = reinterpret_cast<SharedTestStruct *>(arg);
 
   for (uint64_t i = 0; i < 0xFFUL; i++) {
-    {
-      AtomicGuard guard;
-      uart0::puts("Thread 1 i: ");
-      uart0::hex(i);
-      uart0::puts("\n");
-    }
+    asm volatile("nop");
   }
 
-  {
-    AtomicGuard guard;
-    uart0::puts("Thread 1 returning\n");
-  }
+  kernel::interrupts::disable_interrupts();
+  uart0::puts("Thread 1 shared struct address at end: ");
+  uart0::hex(reinterpret_cast<uint64_t>(shared_struct));
+  uart0::puts("\n");
+  kernel::interrupts::enable_interrupts();
 
   while (true) {
     asm volatile("wfi");
@@ -38,21 +34,27 @@ void test_task_1(void *arg) {
 }
 
 void test_task_2(void *arg) {
+  int j = 0;
   SharedTestStruct *shared_struct = reinterpret_cast<SharedTestStruct *>(arg);
+  int64_t test = 0x69;
 
-  for (uint64_t i = 0x69; i < 0xFFUL; i += 2) {
-    {
-      AtomicGuard guard;
-      uart0::puts("Thread 2 i: ");
-      uart0::hex(i);
-      uart0::puts("\n");
-    }
+  for (uint64_t i = 0; i < 0xFFUL; i += 2) {
+    asm volatile("nop");
   }
 
-  {
-    AtomicGuard guard;
-    uart0::puts("Thread 2 returning\n");
+  kernel::interrupts::disable_interrupts();
+  uart0::puts("Thread 2 test value: ");
+  uart0::hex(test);
+  uart0::puts("\n");
+  kernel::interrupts::enable_interrupts();
+
+  kernel::interrupts::disable_interrupts();
+  for (int i = 0; i < 3; i++) {
+    uart0::puts("Thread 2 shared struct address at end: ");
+    uart0::hex(reinterpret_cast<uint64_t>(shared_struct));
+    uart0::puts("\n");
   }
+  kernel::interrupts::enable_interrupts();
 
   while (true) {
     asm volatile("wfi");
