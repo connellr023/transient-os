@@ -49,13 +49,13 @@ void uart0::init() {
 
   mbox::call(MBOX_CH_PROP);
 
-  /* map UART0 to GPIO pins */
+  /* Map UART0 to GPIO pins */
   r = *GPFSEL1;
   r &= ~((7 << 12) | (7 << 15)); // gpio14, gpio15
   r |= (4 << 12) | (4 << 15);    // alt0
 
   *GPFSEL1 = r;
-  *GPPUD = 0; // enable pins 14 and 15
+  *GPPUD = 0; // Enable pins 14 and 15
 
   r = 150;
 
@@ -81,9 +81,16 @@ void uart0::init() {
  * Send a character
  */
 void uart0::send(uint32_t c) {
+  constexpr uint64_t max_attempts = 10000;
+  uint64_t attempts = 0;
+
   /* Wait until we can send */
   do {
     asm volatile("nop");
+
+    if (attempts++ >= max_attempts) {
+      return;
+    }
   } while (*UART0_FR & 0x20);
 
   /* Write the character to the buffer */

@@ -72,10 +72,6 @@ void kernel::thread_return_handler() {
   ThreadControlBlock *current_tcb = scheduler.peek();
   current_tcb->mark_complete();
 
-  safe_put("Thread ID: ");
-  safe_hex(current_tcb->get_thread_id());
-  safe_put("completed!\n");
-
   // Free thread page
   memory::pfree(current_tcb->get_page());
 
