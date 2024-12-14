@@ -27,7 +27,7 @@
 #include "mbox.hpp"
 
 /* mailbox message buffer */
-volatile uint32_t __attribute__((aligned(16))) mbox::buffer[36];
+alignas(16) volatile uint32_t mbox::buffer[36];
 
 /**
  * Make a mailbox call. Returns 0 on failure, non-zero on success

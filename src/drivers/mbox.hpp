@@ -60,7 +60,7 @@
 #define MBOX_EMPTY 0x40000000
 
 namespace mbox {
-/* a properly aligned buffer */
+/* A properly aligned buffer */
 extern volatile uint32_t buffer[36];
 
 int call(uint8_t ch);
