@@ -5,26 +5,38 @@
 #include "../threads/thread_control_block.hpp"
 #include <stdint.h>
 
+bool is_first_isr = true;
+
 void *kernel::interrupts::context_switch(void *interrupted_sp) {
   using namespace threads;
-  static bool is_first_isr = true;
 
   safe_put("Entering interrupt service routine\n");
 
   // Avoid corrupting the first thread's context when switching from main
   if (!is_first_isr) {
-    is_first_isr = false;
-
     // Save context of interrupted thread
     scheduler.peek()->set_sp(interrupted_sp);
     scheduler.peek()->set_state(ThreadState::Ready);
+
+    // Goto next thread
+    scheduler.next();
+    scheduler.peek()->set_state(ThreadState::Running);
+
+    // Print interrupted thread SP
+    safe_put("Interrupted thread SP: ");
+    safe_hex(reinterpret_cast<uint64_t>(interrupted_sp));
+    safe_put("\n");
+  } else {
+    // Set flag to false after first ISR
+    is_first_isr = false;
   }
 
-  // Goto next thread
-  scheduler.next();
-  scheduler.peek()->set_state(ThreadState::Running);
+  // Print next thread SP
+  safe_put("Next thread SP: ");
+  safe_hex(reinterpret_cast<uint64_t>(scheduler.peek()->get_sp()));
+  safe_put("\n");
 
-  // Prepate timer for next context switch
+  // Prepare timer for next context switch
   prepare_timer_interrupt(scheduler.peek()->get_burst_time());
   clear_timer_interrupt();
 

@@ -47,22 +47,21 @@ done_clear:
     adr         x2, el1_entry
     msr         elr_el2, x2
 
-    // Start stack pointer for kernel initialization stack right below code
-    adrp        x1, _start
-    add         x1, x1, :lo12:_start
-    msr         sp_el0, x1
-    mov         sp, x1
+    adrp        x0, _start
+    add         x0, x0, #:lo12:_start
+    msr         sp_el0, x0
 
-    // After first context switch, we will switch to using SP_EL0 in the low memory region
-    mov         x0, #LOW_MEMORY
-    msr         sp_el1, x0
-
-    // Select SP_EL0 for EL1
-    msr         spsel, xzr
+    // Set top of stack for SP_EL1
+    sub         x1, x0, #PAGE_SIZE
+    msr         sp_el1, x1
 
     eret
 
 el1_entry:
+    // Switch to using SP_EL0
+    msr         spsel, xzr
+    mov         sp, x0
+
     // Enter main kernel initialization function
     bl          main
     b           hang

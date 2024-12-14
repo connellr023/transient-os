@@ -16,51 +16,46 @@ public:
 };
 
 void test_task_1(void *arg) {
-  uint64_t k = 0x69;
-  int j = 0x420;
+  SharedTestStruct *shared_struct = reinterpret_cast<SharedTestStruct *>(arg);
+
+  for (uint64_t i = 0; i < 0xFFUL; i++) {
+    {
+      AtomicGuard guard;
+      uart0::puts("Thread 1 i: ");
+      uart0::hex(i);
+      uart0::puts("\n");
+    }
+  }
+
+  {
+    AtomicGuard guard;
+    uart0::puts("Thread 1 returning\n");
+  }
 
   while (true) {
-    // Print k
-    {
-      AtomicGuard guard;
-      uart0::puts("Thread 1 k: ");
-      uart0::hex(k);
-      uart0::puts("\n");
-    }
-
-    // Print j
-    {
-      AtomicGuard guard;
-      uart0::puts("Thread 1 j: ");
-      uart0::hex(j);
-      uart0::puts("\n");
-    }
+    asm volatile("wfi");
   }
 }
 
 void test_task_2(void *arg) {
-  uint64_t shared_struct = reinterpret_cast<uint64_t>(arg);
-  int i = 0;
+  SharedTestStruct *shared_struct = reinterpret_cast<SharedTestStruct *>(arg);
 
-  while (true) {
-    // Print address of shared struct
+  for (uint64_t i = 0x69; i < 0xFFUL; i += 2) {
     {
       AtomicGuard guard;
-      uart0::puts("Thread 2 shared_struct: ");
-      uart0::hex(reinterpret_cast<uint64_t>(shared_struct));
+      uart0::puts("Thread 2 i: ");
+      uart0::hex(i);
       uart0::puts("\n");
     }
+  }
 
-    // shared_struct->c++;
+  {
+    AtomicGuard guard;
+    uart0::puts("Thread 2 returning\n");
+  }
 
-    // {
-    //   AtomicGuard guard;
-    //   uart0::puts("i: ");
-    //   uart0::hex(i);
-    //   uart0::puts("\n");
-    // }
-
-    // i++;
+  while (true) {
+    asm volatile("wfi");
   }
 }
 
@@ -72,8 +67,8 @@ int main() {
 
   SharedTestStruct shared_struct = {.a = 0, .b = 0, .c = 0};
 
-  ThreadControlBlock tcb_1(&test_task_1, 1300, &shared_struct);
-  ThreadControlBlock tcb_2(&test_task_2, 1000, &shared_struct);
+  ThreadControlBlock tcb_1(&test_task_1, 2000, &shared_struct);
+  ThreadControlBlock tcb_2(&test_task_2, 2000, &shared_struct);
 
   if (!kernel::spawn_thread(&tcb_1)) {
     uart0::puts("Failed to spawn thread 1\n");

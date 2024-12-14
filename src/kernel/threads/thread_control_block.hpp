@@ -3,7 +3,6 @@
 
 #define CPU_CTX_STACK_SIZE (17 * 16) // 17 pairs of 8 byte registers
 
-#define FP_IDX 29
 #define LR_IDX 30
 #define ELR_EL1_IDX 32
 #define SPSR_EL1_IDX 33
