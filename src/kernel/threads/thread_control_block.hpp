@@ -7,8 +7,6 @@
 #define ELR_EL1_IDX 31
 #define SPSR_EL1_IDX 32
 
-#define INITIAL_SPSR_EL1 0x00000344
-
 #ifndef __ASSEMBLER__
 
 #include <stdint.h>
@@ -45,7 +43,9 @@ public:
   void *get_sp() const { return reinterpret_cast<void *>(sp); }
 
   void set_state(ThreadState state) { this->state = state; }
+
   void mark_complete() { this->is_complete = true; }
+  bool get_is_complete() const { return is_complete; }
 
   void *get_page() const { return reinterpret_cast<void *>(page_addr); }
   uint64_t get_thread_id() const { return thread_id; }

@@ -1,6 +1,7 @@
 #include "thread_control_block.hpp"
 #include "../kernel.hpp"
 #include "../memory/paging.hpp"
+#include "../sys_registers.hpp"
 
 using namespace kernel::threads;
 
@@ -39,7 +40,7 @@ void ThreadControlBlock::init_stack(void *page) {
   register_stack[ELR_EL1_IDX] = reinterpret_cast<uint64_t>(this->handler);
 
   // Set SPSR_EL1 to the initial value
-  register_stack[SPSR_EL1_IDX] = INITIAL_SPSR_EL1;
+  register_stack[SPSR_EL1_IDX] = INITIAL_SPSR_EL1_VALUE;
 
   this->is_stack_initialized = true;
 }

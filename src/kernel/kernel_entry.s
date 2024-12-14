@@ -1,4 +1,5 @@
 #include "memory/paging.hpp"
+#include "sys_registers.hpp"
 
 .section ".text.boot"
 
@@ -25,30 +26,19 @@ clear_bss:
     cbnz        w2, clear_bss
 
 done_clear:
-    // Enable AArch64 in EL1 by setting bits RW and SWIC to 1 in the
-    // Hypervisor Configuration Register (see p. D10-2492 and D10-2503 in
-    // the ARM Architecture Reference Manual). Since all other bits are 0,
-    // most instructions are not trapped, and the Physical SError, IRQ, and
-    // FIQ routings are set so that these exceptions are not taken to EL2,
-    // but are instead handled at EL1.
-    mov         x0, (1<<31)// Enable AArch64
-    orr         x0, x0, (1<<1)// SWIO is hardwired on the Pi
+    ldr         x0, =SCTLR_EL1_VALUE
+    msr         sctlr_el1, x0
+
+    ldr         x0, =HCR_EL2_VALUE
     msr         hcr_el2, x0
 
-    // Change execution level to EL1:
-    //
-    // Set the Saved Program Status Register so that when entering EL1, the
-    // DAIF bits are set to 1111 (exceptions are masked) and the M[3:2] bits
-    // are set to 01 (EL1) and the M[0] bit is set to 0 (SP is always SP0)
-    // (see p. C5-386-387 in the ARM Architecture Reference Manual).
-    mov         x2, 0x3C4
+    mov         x2, #SPSR_EL2_VALUE
     msr         spsr_el2, x2
 
     adr         x2, el1_entry
     msr         elr_el2, x2
 
-    adrp        x0, _start
-    add         x0, x0, #:lo12:_start
+    ldr         x0, =_start
     msr         sp_el0, x0
 
     // Set top of stack for SP_EL1

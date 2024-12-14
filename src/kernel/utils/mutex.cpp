@@ -9,7 +9,11 @@ void Mutex::acquire() {
 
   while (this->is_locked) {
     enable_interrupts();
-    asm volatile("nop");
+
+    for (int i = 0; i < 1000; i++) {
+      asm volatile("nop");
+    }
+
     disable_interrupts();
   }
 

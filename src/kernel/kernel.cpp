@@ -54,6 +54,12 @@ bool kernel::spawn_thread(ThreadControlBlock *tcb) {
   return true;
 }
 
+void kernel::join_thread(ThreadControlBlock *tcb) {
+  while (!tcb->get_is_complete()) {
+    asm volatile("wfi");
+  }
+}
+
 void kernel::safe_put(const char *str) {
   if (kernel_string_output_handler != nullptr) {
     kernel_string_output_handler(str);
