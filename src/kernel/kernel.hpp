@@ -14,7 +14,7 @@ typedef void (*hex_output_handler_t)(uint64_t);
 void init_dbg_out(string_output_handler_t string_handler = nullptr,
                   hex_output_handler_t hex_handler = nullptr);
 
-ThreadControlBlock *context_switch(void *interrupted_sp);
+const ThreadControlBlock *context_switch(void *interrupted_sp);
 
 bool spawn_thread(ThreadControlBlock *tcb);
 void join_thread(ThreadControlBlock *tcb);

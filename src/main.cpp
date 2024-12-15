@@ -79,21 +79,25 @@ void test_task_1(void *arg) {
   uint64_t shared = reinterpret_cast<uint64_t>(arg);
 
   while (true) {
-    produce_hex(shared);
-
-    for (int i = 0; i < 100000; i++)
-      asm volatile("nop");
+    produce_hex(0x69);
+    asm volatile("wfi");
   }
 }
 
 void test_task_2(void *arg) {
-  uint64_t shared = *(reinterpret_cast<uint64_t *>(arg));
+  // uint64_t shared = *(reinterpret_cast<uint64_t *>(arg));
 
   while (true) {
-    produce_hex(shared);
+    // Get sp
+    uint64_t sp;
+    asm volatile("mov %0, sp" : "=r"(sp));
 
-    for (int i = 0; i < 10000; i++)
+    produce_hex(sp);
+
+    for (int i = 0; i < 1000; i++)
       asm volatile("nop");
+
+    asm volatile("wfi");
   }
 }
 

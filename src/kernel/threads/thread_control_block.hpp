@@ -27,6 +27,7 @@ private:
   uint32_t burst_time;
   ThreadState state;
   uint64_t sp;
+  uint64_t preemption_count;
   thread_handler_t handler;
   void *arg;
   bool is_stack_initialized;
@@ -43,6 +44,9 @@ public:
   void *get_sp() const { return reinterpret_cast<void *>(sp); }
 
   void set_state(ThreadState state) { this->state = state; }
+
+  uint64_t get_preemption_count() const { return preemption_count; }
+  void increment_preemption_count() { this->preemption_count++; }
 
   void mark_complete() { this->is_complete = true; }
   bool get_is_complete() const { return is_complete; }

@@ -8,8 +8,8 @@ using namespace kernel::threads;
 ThreadControlBlock::ThreadControlBlock(thread_handler_t handler,
                                        uint32_t burst_time, void *arg)
     : thread_id(0), page_addr(0), burst_time(burst_time),
-      state(ThreadState::Ready), sp(0), handler(handler), arg(arg),
-      is_stack_initialized(false), is_complete(false) {
+      state(ThreadState::Ready), sp(0), preemption_count(0), handler(handler),
+      arg(arg), is_stack_initialized(false), is_complete(false) {
   static uint64_t thread_id_counter = 0;
   this->thread_id = thread_id_counter++;
 }

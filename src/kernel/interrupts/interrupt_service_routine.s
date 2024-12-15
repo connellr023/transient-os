@@ -56,7 +56,7 @@
     ldp x26, x27, [sp, #16*13]
     ldp x28, x29, [sp, #16*14]
 
-    add sp, sp, #CPU_CTX_STACK_SIZE
+    add sp, sp, #CPU_CTX_STACK_SIZE-48 // Weird thing
 .endm
 
 .globl _irq_handler

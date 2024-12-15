@@ -37,7 +37,7 @@ void kernel::start() {
   trigger_timer_interrupt();
 }
 
-ThreadControlBlock *kernel::context_switch(void *interrupted_sp) {
+const ThreadControlBlock *kernel::context_switch(void *interrupted_sp) {
   static bool is_first_context_switch = true;
 
   // Avoid corrupting the first thread's context when switching from main
@@ -48,11 +48,19 @@ ThreadControlBlock *kernel::context_switch(void *interrupted_sp) {
 
     // Goto next thread
     scheduler.next();
-    scheduler.peek()->set_state(ThreadState::Running);
   } else {
     // Set flag to false after first context switch
     is_first_context_switch = false;
   }
+
+  // Test fix
+  // if (scheduler.peek()->get_preemption_count() == 1) {
+  //   scheduler.peek()->set_sp(reinterpret_cast<void *>(
+  //       reinterpret_cast<uint64_t>(scheduler.peek()->get_sp()) - 0x30));
+  // }
+
+  scheduler.peek()->set_state(ThreadState::Running);
+  scheduler.peek()->increment_preemption_count();
 
   return scheduler.peek();
 }
