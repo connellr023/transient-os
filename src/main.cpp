@@ -2,42 +2,47 @@
 #include "drivers/uart0.hpp"
 #include "kernel/kernel.hpp"
 #include "kernel/threads/thread_control_block.hpp"
-#include "utils/mutex.hpp"
+#include "utils/atomic.hpp"
 #include <stdint.h>
 
 using namespace kernel::threads;
 
-Mutex uart_mutex = Mutex();
+struct PrintTaskArgs {
+public:
+  const char *msg;
+  uint64_t count;
 
-void test_task_1(void *arg) {
-  uint64_t shared = reinterpret_cast<uint64_t>(arg);
-  int k = 0x69;
+  PrintTaskArgs() : msg(nullptr), count(0) {}
+  PrintTaskArgs(const char *msg, uint64_t count) : msg(msg), count(count) {}
+};
 
-  while (true) {
-    asm volatile("wfi");
+void print_task(void *arg) {
+  PrintTaskArgs *args = reinterpret_cast<PrintTaskArgs *>(arg);
+
+  // Print thread ID
+  {
+    AtomicBlock guard;
+    uart0::hex(kernel::get_thread_id());
+    uart0::puts(": ");
+    uart0::puts("Starting thread\n");
   }
-}
 
-void test_task_3(void *arg) {
-  uint64_t shared = reinterpret_cast<uint64_t>(arg);
+  asm volatile("wfi");
 
-  while (true) {
-    for (int i = 0; i < 1000; i++)
-
+  for (uint64_t i = 0; i < args->count; i++) {
     {
-      uart_mutex.lock();
-
-      uint64_t sp;
-      asm volatile("mov %0, sp" : "=r"(sp));
-
-      uart0::puts("\nTask 3 stack pointer: ");
-      uart0::hex(sp);
-      uart0::puts("\n");
-
-      uart_mutex.unlock();
+      AtomicBlock guard;
+      uart0::hex(kernel::get_thread_id());
+      uart0::puts(": ");
+      uart0::puts(args->msg);
     }
+  }
 
-    asm volatile("wfi");
+  {
+    AtomicBlock guard;
+    uart0::hex(kernel::get_thread_id());
+    uart0::puts(": ");
+    uart0::puts("Thread complete\n");
   }
 }
 
@@ -47,28 +52,23 @@ int main() {
 
   uart0::puts("Hello, world!\n");
 
-  uint64_t test_shared = 0x69;
+  // Create and schedule n tasks
+  constexpr uint64_t n = 6;
+  ThreadControlBlock handles[n];
 
-  ThreadControlBlock tcb_1(&test_task_1, 1800, &test_shared);
-  ThreadControlBlock tcb_3(&test_task_3, 1200, &test_shared);
+  PrintTaskArgs handle_args("Thread!\n", 3);
 
-  kernel::schedule_thread(&tcb_1);
-  kernel::schedule_thread(&tcb_3);
+  for (uint64_t i = 0; i < n; i++) {
+    handles[i] = ThreadControlBlock(&print_task, 3000, &handle_args);
 
-  // Print stack pointer
-  uint64_t sp;
-  asm volatile("mov %0, sp" : "=r"(sp));
-  uart0::puts("Main stack pointer: ");
-  uart0::hex(sp);
-  uart0::puts("\n");
+    if (!kernel::schedule_thread(handles + i)) {
+      uart0::puts("Failed to schedule thread\n");
+      break;
+    }
+  }
 
   uart0::puts("Starting kernel\n");
   kernel::start();
-
-  while (true) {
-    uart0::puts("Waiting for kernel to start\n");
-    asm volatile("wfi");
-  }
 
   return 0;
 }

@@ -4,8 +4,8 @@
 // RAII class for atomic block
 class AtomicBlock {
 public:
-  inline AtomicBlock();
-  inline ~AtomicBlock();
+  AtomicBlock();
+  ~AtomicBlock();
 };
 
 #endif // ATOMIC_BLOCK_HPP

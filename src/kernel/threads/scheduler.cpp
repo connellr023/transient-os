@@ -3,25 +3,20 @@
 using namespace kernel::threads;
 
 bool SchedulerQueue::enqueue(ThreadControlBlock *tcb) {
-  if (this->size >= scheduler_queue_capacity) {
+  if (this->size >= MAX_CONCURRENT_THREADS) {
     return false;
   }
 
   this->queue[this->tail] = tcb;
-  this->tail = (this->tail + 1) % scheduler_queue_capacity;
+  this->tail = (this->tail + 1) % MAX_CONCURRENT_THREADS;
   this->size++;
 
   return true;
 }
 
-void SchedulerQueue::dequeue() {
-  if (this->size == 0) {
-    return;
-  }
-
-  this->queue[this->head] = nullptr;
-  this->head = (this->head + 1) % this->size;
-  this->size--;
+void SchedulerQueue::mark_current_as_complete() {
+  this->peek()->mark_as_complete();
+  this->completed++;
 }
 
 void SchedulerQueue::next() {
@@ -29,5 +24,7 @@ void SchedulerQueue::next() {
     return;
   }
 
-  this->head = (this->head + 1) % this->size;
+  do {
+    this->head = (this->head + 1) % this->size;
+  } while (this->peek()->is_complete());
 }

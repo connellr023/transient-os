@@ -1,6 +1,5 @@
 #include "kernel.hpp"
 #include "interrupts/interrupts.hpp"
-#include "memory/paging.hpp"
 #include "sys_registers.hpp"
 #include <stdint.h>
 
@@ -18,6 +17,8 @@ void kernel::init_dbg_out(string_output_handler_t string_handler,
   kernel_hex_output_handler = hex_handler;
 }
 
+bool is_kernel_started = false;
+
 void kernel::start() {
   // Ensure we are in EL1
   uint64_t current_el;
@@ -25,8 +26,7 @@ void kernel::start() {
   current_el >>= 2;
 
   if (current_el != 1) {
-    safe_put("Not running in EL1\n");
-    asm volatile("wfe");
+    kernel_panic("Not running in EL1");
   }
 
   // Initialize the interrupt controller and timer
@@ -34,18 +34,24 @@ void kernel::start() {
   enable_interrupt_controller();
   enable_interrupts();
 
-  // Trigger the first context switch
-  trigger_timer_interrupt();
+  is_kernel_started = true;
+
+  // Trigger the first timer interrupt
+  yield();
 }
 
 const ThreadControlBlock *kernel::context_switch(void *interrupted_sp) {
   static bool is_first_context_switch = true;
 
-  // Avoid corrupting the first thread's context when switching from main
+  if (scheduler.is_empty()) {
+    kernel_panic("No threads to schedule");
+  }
+
+  // Avoid corrupting a thread's context stack
   if (!is_first_context_switch) {
     // Save context of interrupted thread
     scheduler.peek()->set_sp(interrupted_sp);
-    scheduler.peek()->set_state(ThreadState::Ready);
+    scheduler.peek()->mark_as_ready();
 
     // Goto next thread
     scheduler.next();
@@ -54,12 +60,12 @@ const ThreadControlBlock *kernel::context_switch(void *interrupted_sp) {
     is_first_context_switch = false;
   }
 
-  scheduler.peek()->set_state(ThreadState::Running);
+  scheduler.peek()->mark_as_running();
   return scheduler.peek();
 }
 
 bool kernel::alloc_thread_stack(ThreadControlBlock *tcb) {
-  if (tcb->get_is_initialized()) {
+  if (tcb->is_initialized()) {
     return false;
   }
 
@@ -70,7 +76,7 @@ bool kernel::alloc_thread_stack(ThreadControlBlock *tcb) {
   }
 
   const uint64_t page_addr = reinterpret_cast<uint64_t>(page);
-  const uint64_t sp = page_addr - CPU_CTX_STACK_SIZE;
+  const uint64_t sp = page_addr + THREAD_STACK_SIZE - CPU_CTX_STACK_SIZE;
 
   uint64_t *register_stack = reinterpret_cast<uint64_t *>(sp);
 
@@ -93,19 +99,18 @@ bool kernel::alloc_thread_stack(ThreadControlBlock *tcb) {
 
   tcb->set_page(page);
   tcb->set_sp(reinterpret_cast<void *>(sp));
-  tcb->mark_initialized();
+  tcb->mark_as_ready();
 
   return true;
 }
 
 bool kernel::schedule_thread(ThreadControlBlock *tcb) {
-  return alloc_thread_stack(tcb) && scheduler.enqueue(tcb);
-}
-
-void kernel::join_thread(ThreadControlBlock *tcb) {
-  while (!tcb->get_is_complete()) {
-    asm volatile("wfi");
+  // Not allowed to schedule threads after kernel has started (at least for now)
+  if (is_kernel_started) {
+    return false;
   }
+
+  return alloc_thread_stack(tcb) && scheduler.enqueue(tcb);
 }
 
 void kernel::safe_put(const char *str) {
@@ -120,19 +125,27 @@ void kernel::safe_hex(uint64_t value) {
   }
 }
 
+uint64_t kernel::get_thread_id() { return scheduler.peek()->get_thread_id(); }
+
 void kernel::thread_return_handler() {
   interrupts::disable_interrupts();
 
-  ThreadControlBlock *current_tcb = scheduler.peek();
-  current_tcb->mark_complete();
-
-  // Free thread page
-  memory::pfree(current_tcb->get_page());
-
-  // Remove thread from scheduler
-  scheduler.dequeue();
+  scheduler.mark_current_as_complete();
+  memory::pfree(scheduler.peek()->get_page());
 
   // Trigger context switch
   interrupts::enable_interrupts();
-  interrupts::trigger_timer_interrupt();
+  interrupts::yield();
+}
+
+void kernel::kernel_panic(const char *msg) {
+  interrupts::disable_interrupts();
+
+  safe_put("Kernel panic: ");
+  safe_put(msg);
+  safe_put("\n");
+
+  while (true) {
+    asm volatile("wfe");
+  }
 }

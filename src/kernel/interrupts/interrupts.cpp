@@ -12,8 +12,8 @@ void kernel::interrupts::prepare_timer_interrupt(uint64_t interval) {
   *TIMER_CMP_1 = current_us + interval;
 }
 
-void kernel::interrupts::trigger_timer_interrupt() {
-  prepare_timer_interrupt(100);
+void kernel::interrupts::yield() {
+  prepare_timer_interrupt(10);
   asm volatile("wfi");
 }
 

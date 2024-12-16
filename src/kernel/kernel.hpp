@@ -9,6 +9,10 @@
 
 #ifndef __ASSEMBLER__
 
+#include "memory/paging.hpp"
+
+#define THREAD_STACK_SIZE PAGE_SIZE
+
 #include "threads/scheduler.hpp"
 #include "threads/thread_control_block.hpp"
 #include <stdint.h>
@@ -27,9 +31,10 @@ const ThreadControlBlock *context_switch(void *interrupted_sp);
 bool alloc_thread_stack(ThreadControlBlock *tcb);
 
 bool schedule_thread(ThreadControlBlock *tcb);
-void join_thread(ThreadControlBlock *tcb);
 
+uint64_t get_thread_id();
 void thread_return_handler();
+void kernel_panic(const char *msg);
 
 void start();
 

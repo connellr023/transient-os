@@ -16,7 +16,7 @@ void enable_interrupts() asm("_enable_interrupts");
 void disable_interrupts() asm("_disable_interrupts");
 
 void prepare_timer_interrupt(uint64_t interval);
-void trigger_timer_interrupt();
+void yield();
 void clear_timer_interrupt();
 
 void init_interrupt_vector() asm("_init_interrupt_vector");
