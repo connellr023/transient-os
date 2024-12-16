@@ -8,8 +8,14 @@ private:
 public:
   Mutex() : is_locked(false) {}
 
-  void acquire();
-  void release();
+  ~Mutex() {
+    if (this->is_locked) {
+      this->unlock();
+    }
+  }
+
+  void lock();
+  void unlock();
 };
 
 #endif // MUTEX_HPP

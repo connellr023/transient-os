@@ -1,6 +1,5 @@
 #include "drivers/framebuffer.hpp"
 #include "drivers/uart0.hpp"
-// #include "kernel/interrupts/interrupts.hpp"
 #include "kernel/kernel.hpp"
 #include "kernel/threads/thread_control_block.hpp"
 #include "utils/mutex.hpp"
@@ -15,7 +14,7 @@ void test_task_1(void *arg) {
   int k = 0x69;
 
   while (true) {
-    asm volatile("nop");
+    asm volatile("wfi");
   }
 }
 
@@ -24,10 +23,9 @@ void test_task_3(void *arg) {
 
   while (true) {
     for (int i = 0; i < 1000; i++)
-      asm volatile("nop");
 
     {
-      uart_mutex.acquire();
+      uart_mutex.lock();
 
       uint64_t sp;
       asm volatile("mov %0, sp" : "=r"(sp));
@@ -36,7 +34,7 @@ void test_task_3(void *arg) {
       uart0::hex(sp);
       uart0::puts("\n");
 
-      uart_mutex.release();
+      uart_mutex.unlock();
     }
 
     asm volatile("wfi");

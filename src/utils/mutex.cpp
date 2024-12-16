@@ -3,7 +3,7 @@
 
 using namespace kernel::interrupts;
 
-void Mutex::acquire() {
+void Mutex::lock() {
   disable_interrupts();
 
   while (this->is_locked) {
@@ -16,7 +16,7 @@ void Mutex::acquire() {
   enable_interrupts();
 }
 
-void Mutex::release() {
+void Mutex::unlock() {
   disable_interrupts();
   this->is_locked = false;
   enable_interrupts();
