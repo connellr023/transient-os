@@ -61,6 +61,11 @@
 
 .globl _irq_handler
 _irq_handler:
+    // Use x8 as a sacrificial register to load the value of SP_EL0
+    // Using x8 because this is an RTOS and there are no system calls
+    mrs x8, sp_el0
+    mov sp, x8
+
     push_registers
 
     // Pass the base address of the saved registers to the interrupt service routine

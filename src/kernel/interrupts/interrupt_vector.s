@@ -31,6 +31,3 @@ _vectors:
 
 .align 7
         b       _serror_handler
-
-.align 7
-        b       _synch_handler
