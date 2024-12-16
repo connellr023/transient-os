@@ -1,4 +1,4 @@
-#include "../threads/thread_control_block.hpp"
+#include "../kernel.hpp"
 
 .section .text
 

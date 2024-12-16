@@ -69,6 +69,30 @@ void test_task_2(void *arg) {
   }
 }
 
+void test_task_3(void *arg) {
+  uint64_t shared = reinterpret_cast<uint64_t>(arg);
+
+  while (true) {
+    for (int i = 0; i < 1000; i++)
+      asm volatile("nop");
+
+    {
+      kernel::interrupts::disable_interrupts();
+
+      uint64_t sp;
+      asm volatile("mov %0, sp" : "=r"(sp));
+
+      uart0::puts("\nTask 3 stack pointer: ");
+      uart0::hex(sp);
+      uart0::puts("\n");
+
+      kernel::interrupts::enable_interrupts();
+    }
+
+    asm volatile("wfi");
+  }
+}
+
 int main() {
   uart0::init();
   kernel::init_dbg_out(&uart0::puts, &uart0::hex);
@@ -77,11 +101,13 @@ int main() {
 
   uint64_t test_shared = 0x69;
 
-  ThreadControlBlock tcb_1(&test_task_1, 1800, &test_shared);
-  ThreadControlBlock tcb_2(&test_task_2, 1200, &test_shared);
+  // ThreadControlBlock tcb_1(&test_task_1, 1800, &test_shared);
+  // ThreadControlBlock tcb_2(&test_task_2, 1200, &test_shared);
+  ThreadControlBlock tcb_3(&test_task_3, 1200, &test_shared);
 
-  kernel::spawn_thread(&tcb_1);
-  kernel::spawn_thread(&tcb_2);
+  // kernel::spawn_thread(&tcb_1);
+  // kernel::spawn_thread(&tcb_2);
+  kernel::spawn_thread(&tcb_3);
 
   // Print stack pointer
   uint64_t sp;
