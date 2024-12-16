@@ -107,7 +107,7 @@ int main() {
 
   // kernel::spawn_thread(&tcb_1);
   // kernel::spawn_thread(&tcb_2);
-  kernel::spawn_thread(&tcb_3);
+  kernel::schedule_thread(&tcb_3);
 
   // Print stack pointer
   uint64_t sp;

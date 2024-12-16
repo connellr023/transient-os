@@ -26,7 +26,7 @@ const ThreadControlBlock *context_switch(void *interrupted_sp);
 
 bool alloc_thread_stack(ThreadControlBlock *tcb);
 
-bool spawn_thread(ThreadControlBlock *tcb);
+bool schedule_thread(ThreadControlBlock *tcb);
 void join_thread(ThreadControlBlock *tcb);
 
 void thread_return_handler();

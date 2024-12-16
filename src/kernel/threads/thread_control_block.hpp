@@ -21,6 +21,7 @@ private:
   uint64_t sp;
   thread_handler_t handler;
   void *arg;
+  bool is_initialized;
   bool is_complete;
 
 public:
@@ -34,6 +35,7 @@ public:
   void *get_sp() const { return reinterpret_cast<void *>(sp); }
   uint64_t get_thread_id() const { return thread_id; }
   uint32_t get_burst_time() const { return burst_time; }
+  bool get_is_initialized() const { return is_initialized; }
   bool get_is_complete() const { return is_complete; }
 
   void set_page(void *page) {
@@ -43,6 +45,7 @@ public:
   void set_sp(void *sp) { this->sp = reinterpret_cast<uint64_t>(sp); }
   void set_state(ThreadState state) { this->state = state; }
 
+  void mark_initialized() { this->is_initialized = true; }
   void mark_complete() { this->is_complete = true; }
 };
 } // namespace kernel::threads

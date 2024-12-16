@@ -59,6 +59,10 @@ const ThreadControlBlock *kernel::context_switch(void *interrupted_sp) {
 }
 
 bool kernel::alloc_thread_stack(ThreadControlBlock *tcb) {
+  if (tcb->get_is_initialized()) {
+    return false;
+  }
+
   void *page = memory::palloc();
 
   if (!page) {
@@ -96,21 +100,13 @@ bool kernel::alloc_thread_stack(ThreadControlBlock *tcb) {
 
   tcb->set_page(page);
   tcb->set_sp(reinterpret_cast<void *>(sp));
+  tcb->mark_initialized();
 
   return true;
 }
 
-bool kernel::spawn_thread(ThreadControlBlock *tcb) {
-  if (!alloc_thread_stack(tcb)) {
-    return false;
-  }
-
-  if (!scheduler.enqueue(tcb)) {
-    memory::pfree(tcb->get_page());
-    return false;
-  }
-
-  return true;
+bool kernel::schedule_thread(ThreadControlBlock *tcb) {
+  return alloc_thread_stack(tcb) && scheduler.enqueue(tcb);
 }
 
 void kernel::join_thread(ThreadControlBlock *tcb) {
