@@ -26,13 +26,13 @@
     mrs x22, elr_el1
     mrs x23, spsr_el1
 
-    // Push lr, elr_el1, and spsr_el1 onto the stack
+    // Push LR, ELR_EL1, and SPSR_EL1 onto the stack
     stp x30, x22, [sp, #16*15]
     str x23, [sp, #16*16]
 .endm
 
 .macro pop_registers
-    // Restore spsr_el1, elr_el1, and lr
+    // Restore SPSR_EL1, ELR_EL1, and LR
     ldr x23, [sp, #16*16]
     ldp x30, x22, [sp, #16*15]
 
@@ -56,7 +56,7 @@
     ldp x26, x27, [sp, #16*13]
     ldp x28, x29, [sp, #16*14]
 
-    add sp, sp, #CPU_CTX_STACK_SIZE-48 // Weird thing
+    add sp, sp, #CPU_CTX_STACK_SIZE
 .endm
 
 .globl _irq_handler

@@ -30,6 +30,13 @@ void ThreadControlBlock::init_stack(void *page) {
     register_stack[i] = 0;
   }
 
+  // Test
+  register_stack[1] = 0x1111111111111111;
+  register_stack[2] = 0x2222222222222222;
+  register_stack[3] = 0x3333333333333333;
+  register_stack[4] = 0x4444444444444444;
+  register_stack[5] = 0x5555555555555555;
+
   // Set argument to x0
   register_stack[0] = reinterpret_cast<uint64_t>(this->arg);
 
