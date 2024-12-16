@@ -1,6 +1,7 @@
 #include "kernel.hpp"
 #include "interrupts/interrupts.hpp"
 #include "memory/paging.hpp"
+#include "sys_registers.hpp"
 #include <stdint.h>
 
 using namespace kernel::threads;
@@ -53,33 +54,52 @@ const ThreadControlBlock *kernel::context_switch(void *interrupted_sp) {
     is_first_context_switch = false;
   }
 
-  // Test fix
-  // if (scheduler.peek()->get_preemption_count() == 1) {
-  //   scheduler.peek()->set_sp(reinterpret_cast<void *>(
-  //       reinterpret_cast<uint64_t>(scheduler.peek()->get_sp()) - 0x30));
-  // }
-
   scheduler.peek()->set_state(ThreadState::Running);
-  scheduler.peek()->increment_preemption_count();
-
   return scheduler.peek();
 }
 
-bool kernel::spawn_thread(ThreadControlBlock *tcb) {
+bool kernel::alloc_thread_stack(ThreadControlBlock *tcb) {
+  if (tcb->get_is_initialized()) {
+    return false;
+  }
+
   void *page = memory::palloc();
 
   if (!page) {
     return false;
   }
 
-  tcb->init_stack(page);
+  const uint64_t page_addr = reinterpret_cast<uint64_t>(page);
+  const uint64_t sp = page_addr - CPU_CTX_STACK_SIZE;
 
-  if (!scheduler.enqueue(tcb)) {
-    memory::pfree(page);
-    return false;
+  uint64_t *register_stack = reinterpret_cast<uint64_t *>(sp);
+
+  // Set x1 to x29 (FP) equal to 0
+  for (int i = 1; i < LR_IDX; i++) {
+    register_stack[i] = 0;
   }
 
+  // Set argument to x0
+  register_stack[0] = reinterpret_cast<uint64_t>(tcb->get_arg());
+
+  // Set x30 (LR) to the thread return handler
+  register_stack[LR_IDX] = reinterpret_cast<uint64_t>(&thread_return_handler);
+
+  // Set ELR_EL1 to the thread handler
+  register_stack[ELR_EL1_IDX] = reinterpret_cast<uint64_t>(tcb->get_handler());
+
+  // Set SPSR_EL1 to the initial value
+  register_stack[SPSR_EL1_IDX] = INITIAL_SPSR_EL1_VALUE;
+
+  tcb->set_page(page);
+  tcb->set_sp(reinterpret_cast<void *>(sp));
+  tcb->mark_initialized();
+
   return true;
+}
+
+bool kernel::schedule_thread(ThreadControlBlock *tcb) {
+  return alloc_thread_stack(tcb) && scheduler.enqueue(tcb);
 }
 
 void kernel::join_thread(ThreadControlBlock *tcb) {
