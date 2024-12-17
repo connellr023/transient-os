@@ -118,7 +118,7 @@ void kernel::safe_put(const char *str) {
 
 void kernel::safe_hex(uint64_t value) {
   if (kernel_string_output_handler != nullptr) {
-    constexpr char *digits = "0123456789ABCDEF";
+    constexpr const char *digits = "0123456789ABCDEF";
     constexpr uint8_t buffer_size = 17;
 
     char buffer[buffer_size];
