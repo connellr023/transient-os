@@ -1,4 +1,2 @@
 kernel_old=0
 disable_commandline_tags=1
-total_mem=1024
-gpu_mem=64
