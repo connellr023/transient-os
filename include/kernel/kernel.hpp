@@ -24,6 +24,7 @@ typedef void (*output_handler_t)(const char *);
 
 void set_output_handler(output_handler_t output_handler);
 void start();
+void yield();
 
 const ThreadControlBlock *context_switch(void *interrupted_sp);
 

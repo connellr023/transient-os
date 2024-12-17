@@ -110,6 +110,11 @@ bool kernel::schedule_thread(ThreadControlBlock *tcb) {
   return alloc_thread_stack(tcb) && scheduler.enqueue(tcb);
 }
 
+void kernel::yield() {
+  prepare_timer_interrupt(10);
+  asm volatile("wfi");
+}
+
 void kernel::safe_put(const char *str) {
   if (kernel_string_output_handler != nullptr) {
     kernel_string_output_handler(str);
@@ -136,18 +141,18 @@ void kernel::safe_hex(uint64_t value) {
 uint64_t kernel::get_thread_id() { return scheduler.peek()->get_thread_id(); }
 
 void kernel::thread_return_handler() {
-  interrupts::disable_interrupts();
+  disable_interrupts();
 
   scheduler.mark_current_as_complete();
   memory::pfree(scheduler.peek()->get_page());
 
   // Trigger context switch
-  interrupts::enable_interrupts();
-  interrupts::yield();
+  enable_interrupts();
+  yield();
 }
 
 void kernel::kernel_panic(const char *msg) {
-  interrupts::disable_interrupts();
+  disable_interrupts();
 
   safe_put("Kernel panic: ");
   safe_put(msg);

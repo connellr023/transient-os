@@ -11,11 +11,6 @@ void kernel::interrupts::prepare_timer_interrupt(uint64_t interval) {
   *TIMER_CMP_1 = current_us + interval;
 }
 
-void kernel::interrupts::yield() {
-  prepare_timer_interrupt(10);
-  asm volatile("wfi");
-}
-
 void kernel::interrupts::clear_timer_interrupt() {
   // Clear the M1 bit in the control/status register
   *TIMER_CS = TIMER_CS_M1;
