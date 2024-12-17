@@ -1,5 +1,5 @@
-#include "mutex.hpp"
-#include "../kernel/interrupts/interrupts.hpp"
+#include "../../../include/utils/concurrency/mutex.hpp"
+#include "../../../include/kernel/interrupts/interrupts.hpp"
 
 using namespace kernel::interrupts;
 

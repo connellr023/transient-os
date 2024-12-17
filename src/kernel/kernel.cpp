@@ -1,6 +1,6 @@
-#include "kernel.hpp"
-#include "interrupts/interrupts.hpp"
-#include "sys_registers.hpp"
+#include "../../include/kernel/kernel.hpp"
+#include "../../include/kernel/interrupts/interrupts.hpp"
+#include "../../include/kernel/sys_registers.hpp"
 #include <stdint.h>
 
 using namespace kernel::threads;

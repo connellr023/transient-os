@@ -1,6 +1,6 @@
-#include <stddef.h>
+#include "../../include/utils/memcpy.hpp"
 
-extern "C" void *memcpy(void *dest, const void *src, size_t n) {
+void *memcpy(void *dest, const void *src, size_t n) {
   char *csrc = reinterpret_cast<char *>(const_cast<void *>(src));
   char *cdest = reinterpret_cast<char *>(dest);
 

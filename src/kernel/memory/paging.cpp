@@ -1,4 +1,4 @@
-#include "paging.hpp"
+#include "../../../include/kernel/memory/paging.hpp"
 
 using namespace kernel::memory;
 

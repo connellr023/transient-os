@@ -1,5 +1,5 @@
-#include "memory/paging.hpp"
-#include "sys_registers.hpp"
+#include "../../include/kernel/memory/paging.hpp"
+#include "../../include/kernel/sys_registers.hpp"
 
 .section ".text.boot"
 

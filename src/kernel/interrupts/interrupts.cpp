@@ -1,8 +1,7 @@
-#include "interrupts.hpp"
-#include "../../drivers/framebuffer.hpp"
-#include "../../drivers/interrupt_requests.hpp"
-#include "../kernel.hpp"
-#include "../threads/thread_control_block.hpp"
+#include "../../../include/kernel/interrupts/interrupts.hpp"
+#include "../../../include/kernel/kernel.hpp"
+#include "../../../include/kernel/peripherals/interrupt_requests.hpp"
+#include "../../../include/kernel/threads/thread_control_block.hpp"
 #include <stdint.h>
 
 void kernel::interrupts::prepare_timer_interrupt(uint64_t interval) {

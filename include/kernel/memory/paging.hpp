@@ -1,7 +1,7 @@
 #ifndef MEMORY_HPP
 #define MEMORY_HPP
 
-#include "../../drivers/gpio.hpp"
+#include "../peripherals/mmio.hpp"
 
 #define PAGE_SHIFT 11
 #define TABLE_SHIFT 10

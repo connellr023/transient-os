@@ -1,5 +1,5 @@
-#include "thread_control_block.hpp"
-#include "../memory/paging.hpp"
+#include "../../../include/kernel/threads/thread_control_block.hpp"
+#include "../../../include/kernel/memory/paging.hpp"
 
 using namespace kernel::threads;
 

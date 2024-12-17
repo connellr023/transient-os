@@ -1,4 +1,4 @@
-#include "scheduler.hpp"
+#include "../../../include/kernel/threads/scheduler.hpp"
 
 using namespace kernel::threads;
 

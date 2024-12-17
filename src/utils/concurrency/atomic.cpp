@@ -1,5 +1,5 @@
-#include "atomic.hpp"
-#include "../kernel/interrupts/interrupts.hpp"
+#include "../../../include/utils/concurrency/atomic.hpp"
+#include "../../../include/kernel/interrupts/interrupts.hpp"
 
 using namespace kernel::interrupts;
 
