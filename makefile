@@ -18,7 +18,7 @@ CXXFLAGS = $(CFLAGS)
 LDFLAGS = -nostdlib -nostartfiles -ffreestanding -lgcc
 
 # Output library name
-LIB_NAME = lib-transientos.a
+LIB_NAME = libtransient-os.a
 
 # Default target
 all: $(BUILD_DIR)/$(LIB_NAME)

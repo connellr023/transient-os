@@ -8,13 +8,10 @@ using namespace kernel::interrupts;
 
 SchedulerQueue scheduler = SchedulerQueue();
 
-kernel::string_output_handler_t kernel_string_output_handler = nullptr;
-kernel::hex_output_handler_t kernel_hex_output_handler = nullptr;
+kernel::output_handler_t kernel_string_output_handler = nullptr;
 
-void kernel::init_dbg_out(string_output_handler_t string_handler,
-                          hex_output_handler_t hex_handler) {
+void kernel::set_output_handler(output_handler_t string_handler) {
   kernel_string_output_handler = string_handler;
-  kernel_hex_output_handler = hex_handler;
 }
 
 bool is_kernel_started = false;
@@ -120,8 +117,19 @@ void kernel::safe_put(const char *str) {
 }
 
 void kernel::safe_hex(uint64_t value) {
-  if (kernel_hex_output_handler != nullptr) {
-    kernel_hex_output_handler(value);
+  if (kernel_string_output_handler != nullptr) {
+    constexpr char *digits = "0123456789ABCDEF";
+    constexpr uint8_t buffer_size = 17;
+
+    char buffer[buffer_size];
+    buffer[buffer_size - 1] = '\0';
+
+    for (int i = buffer_size - 2; i >= 0; i--) {
+      buffer[i] = digits[value & 0xf];
+      value >>= 4;
+    }
+
+    kernel_string_output_handler(buffer);
   }
 }
 

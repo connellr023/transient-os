@@ -20,23 +20,19 @@
 namespace kernel {
 using namespace threads;
 
-typedef void (*string_output_handler_t)(const char *);
-typedef void (*hex_output_handler_t)(uint64_t);
+typedef void (*output_handler_t)(const char *);
 
-void init_dbg_out(string_output_handler_t string_handler = nullptr,
-                  hex_output_handler_t hex_handler = nullptr);
+void set_output_handler(output_handler_t output_handler);
+void start();
 
 const ThreadControlBlock *context_switch(void *interrupted_sp);
 
 bool alloc_thread_stack(ThreadControlBlock *tcb);
-
 bool schedule_thread(ThreadControlBlock *tcb);
 
 uint64_t get_thread_id();
 void thread_return_handler();
 void kernel_panic(const char *msg);
-
-void start();
 
 void safe_put(const char *str);
 void safe_hex(uint64_t value);
