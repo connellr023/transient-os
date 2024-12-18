@@ -41,13 +41,13 @@ enum class ThreadState {
 };
 
 /**
- * @brief A structure to hold information about a thread.
+ * @brief A class to encapsulate thread information.
  */
 class ThreadControlBlock {
 private:
   uint64_t thread_id;
   uint64_t page_addr;
-  uint32_t burst_time;
+  uint32_t quantum_us;
   ThreadState state;
   uint64_t sp;
   thread_handler_t handler;
@@ -57,11 +57,11 @@ public:
   /**
    * @brief Creates a new thread control block.
    * @param handler A pointer to the function that the thread will run.
-   * @param burst_time The amount of microseconds the thread will run for before
+   * @param quantum_us The amount of microseconds the thread will run for before
    * being interrupted.
    * @param arg An optional argument to pass to the thread function.
    */
-  ThreadControlBlock(thread_handler_t handler, uint32_t burst_time,
+  ThreadControlBlock(thread_handler_t handler, uint32_t quantum_us,
                      void *arg = nullptr);
 
   /**
@@ -74,7 +74,7 @@ public:
   void *get_page() const { return reinterpret_cast<void *>(this->page_addr); }
   void *get_sp() const { return reinterpret_cast<void *>(this->sp); }
   uint64_t get_thread_id() const { return this->thread_id; }
-  uint32_t get_burst_time() const { return this->burst_time; }
+  uint32_t get_burst_time() const { return this->quantum_us; }
 
   bool is_complete() const { return this->state == ThreadState::Complete; }
   bool is_ready() const { return this->state == ThreadState::Ready; }

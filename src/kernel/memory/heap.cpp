@@ -27,11 +27,17 @@
 using namespace kernel::memory;
 
 /**
- * @brief Singleton class to manage heap pages.
+ * @brief Array of pointers to the start of each heap page. Each heap page is
+ * not necessarily contiguous.
  */
-HeapPageManager heap_page_manager = HeapPageManager<10>();
+uint8_t (*heap_pages)[MAX_HEAP_PAGES] = {nullptr};
 
-void *kernel::memory::kmalloc(uint64_t size) {
+/**
+ * @brief The index of the next heap page to allocate.
+ */
+uint64_t heap_page_index;
+
+void *kernel::memory::km_heap_alloc(uint64_t size) {
   // Dont allocate more than a page (we cannot assume each heap page is
   // contiguous)
   if (size > PAGE_SIZE) {
@@ -39,34 +45,34 @@ void *kernel::memory::kmalloc(uint64_t size) {
   }
 
   // Ensure we have a page to allocate from
-  if (heap_page_manager.get_current_heap_page() == nullptr) {
-    void *heap_page = heap_page_manager.alloc_heap_page();
+  // if (heap_page_manager.get_current_heap_page() == nullptr) {
+  //   void *heap_page = heap_page_manager.alloc_heap_page();
 
-    if (!heap_page) {
-      return nullptr;
-    }
+  //   if (!heap_page) {
+  //     return nullptr;
+  //   }
 
-    // Initialize the heap page
-    // Create a free block at the start of the page
-    FreeListNode *free_list = reinterpret_cast<FreeListNode *>(heap_page);
-    free_list->set_size(size);
-    free_list->set_next(nullptr);
+  //   // Initialize the heap page
+  //   // Create a free block at the start of the page
+  //   FreeListNode *free_list = reinterpret_cast<FreeListNode *>(heap_page);
+  //   free_list->set_size(size);
+  //   free_list->set_next(nullptr);
 
-    void *payload = reinterpret_cast<void *>(
-        reinterpret_cast<uint64_t>(heap_page) + sizeof(FreeListNode));
+  //   void *payload = reinterpret_cast<void *>(
+  //       reinterpret_cast<uint64_t>(heap_page) + sizeof(FreeListNode));
 
-    return payload;
-  }
+  //   return payload;
+  // }
 
-  // Find a free block in the current heap page
-  FreeListNode *current = reinterpret_cast<FreeListNode *>(
-      heap_page_manager.get_current_heap_page());
-  FreeListNode *prev = nullptr;
+  // // Find a free block in the current heap page
+  // FreeListNode *current = reinterpret_cast<FreeListNode *>(
+  //     heap_page_manager.get_current_heap_page());
+  // FreeListNode *prev = nullptr;
 
-  while (current != nullptr) {
-  }
+  // while (current != nullptr) {
+  // }
 
   return nullptr; // Maybe...
 }
 
-void kernel::memory::kmfree(void *ptr) {}
+void kernel::memory::km_heap_free(void *ptr) {}

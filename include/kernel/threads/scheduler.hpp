@@ -26,17 +26,16 @@
 #define SCHEDULER_HPP
 
 #include "thread_control_block.hpp"
-#include <stdint.h>
+
+#define SCHEDULER_CAPACITY 250
 
 namespace kernel::threads {
 /**
  * @brief A simple queue for the scheduler.
- * @tparam queue_capacity The maximum number of threads that can be in the
- * queue.
  */
-template <int queue_capacity> class SchedulerQueue {
+class SchedulerQueue {
 private:
-  ThreadControlBlock *queue[queue_capacity]{nullptr};
+  ThreadControlBlock *queue[SCHEDULER_CAPACITY]{nullptr};
 
   uint32_t head;
   uint32_t tail;
@@ -51,39 +50,18 @@ public:
    * @param tcb The thread to enqueue.
    * @return True if the thread was enqueued, false if the queue is full.
    */
-  bool enqueue(ThreadControlBlock *tcb) {
-    if (this->size >= queue_capacity) {
-      return false;
-    }
-
-    this->queue[this->tail] = tcb;
-    this->tail = (this->tail + 1) % queue_capacity;
-    this->size++;
-
-    return true;
-  }
+  bool enqueue(ThreadControlBlock *tcb);
 
   /**
    * @brief Marks the current thread as complete and increments the completed
    * count.
    */
-  void mark_current_as_complete() {
-    this->peek()->mark_as_complete();
-    this->completed++;
-  }
+  void mark_current_as_complete();
 
   /**
    * @brief Switches this scheduler to the next thread.
    */
-  void next() {
-    if (this->size == 0) {
-      return;
-    }
-
-    do {
-      this->head = (this->head + 1) % this->size;
-    } while (this->peek()->is_complete());
-  }
+  void next();
 
   bool is_empty() const { return size == 0 || completed == size; }
 

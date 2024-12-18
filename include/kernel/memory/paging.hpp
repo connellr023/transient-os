@@ -48,17 +48,23 @@
 
 namespace kernel::memory {
 /**
- * @brief Allocates a page of memory.
+ * ### Page allocator
+ * @brief Allocates a page of memory. This operation is not thread safe and
+ * should only be invoked by a system call handler or if mutual exclusion is
+ * guaranteed.
  * @return A pointer to the allocated page. Returns nullptr if no memory is
  * available.
  */
-void *palloc();
+void *alloc_page();
 
 /**
- * @brief Frees a page of memory.
+ * ### Page deallocator
+ * @brief Frees a page of memory. This operation is not thread safe and should
+ * only be invoked by a system call handler or if mutual exclusion is
+ * guaranteed.
  * @param page The page to free.
  */
-void pfree(void *page);
+void free_page(void *page);
 } // namespace kernel::memory
 
 #endif // __ASSEMBLER__

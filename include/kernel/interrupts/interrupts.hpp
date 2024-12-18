@@ -70,16 +70,6 @@ void *irq_exception_handler(void *interrupted_sp) asm("_irq_exception_handler");
  * @brief Handles a synchronous exception.
  */
 void synch_exception_handler() asm("_synch_exception_handler");
-
-/**
- * @brief Handles a fast interrupt request exception.
- */
-void fiq_exception_handler() asm("_fiq_exception_handler");
-
-/**
- * @brief Handles a system error exception.
- */
-void serror_exception_handler() asm("_serror_exception_handler");
 } // namespace kernel::interrupts
 
 #endif // INTERRUPTS_HPP

@@ -28,6 +28,8 @@
 #include "paging.hpp"
 #include <stdint.h>
 
+#define MAX_HEAP_PAGES 10
+
 namespace kernel::memory {
 /**
  * @brief A node in the heap allocator's free list.
@@ -49,59 +51,24 @@ public:
 };
 
 /**
- * @brief A class to encapsulate the management of heap pages.
- */
-template <uint8_t max_heap_pages> class HeapPageManager {
-private:
-  /**
-   * @brief Array of pointers to the start of each heap page.
-   */
-  uint8_t (*heap_pages)[max_heap_pages] = {nullptr};
-
-  /**
-   * @brief The index of the next heap page to allocate.
-   */
-  uint64_t heap_page_index;
-
-public:
-  HeapPageManager() : heap_page_index(0) {}
-
-  void *get_current_heap_page() {
-    return this->heap_pages[this->heap_page_index];
-  }
-
-  void *alloc_heap_page() {
-    if (this->heap_page_index >= max_heap_pages) {
-      return nullptr;
-    }
-
-    if (this->heap_pages[this->heap_page_index] == nullptr) {
-      this->heap_pages[this->heap_page_index] = palloc();
-    }
-
-    return this->heap_pages[this->heap_page_index];
-  }
-
-  void next_heap_page() {
-    if (this->heap_page_index < max_heap_pages) {
-      this->heap_page_index++;
-    }
-  }
-};
-
-/**
- * @brief Allocates a block of memory on the heap.
+ * ### Kernel memory heap allocator
+ * @brief Allocates a block of memory on the heap. This is not thread safe and
+ * should only be invoked by a system call handler or if mutual exclusion is
+ * guaranteed.
  * @param size The size of the block to allocate.
  * @return A pointer to the allocated block. Returns nullptr if no memory is
  * available.
  */
-void *kmalloc(uint64_t size);
+void *km_heap_alloc(uint64_t size);
 
 /**
- * @brief Frees a block of memory on the heap.
+ * ### Kernel memory heap free
+ * @brief Frees a block of memory on the heap. This is not thread safe and
+ * should only be invoked by a system call handler or if mutual exclusion is
+ * guaranteed.
  * @param ptr The pointer to the block to free.
  */
-void kmfree(void *ptr);
+void km_heap_free(void *ptr);
 } // namespace kernel::memory
 
 #endif // HEAP_HPP

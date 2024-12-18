@@ -25,17 +25,20 @@
 #include "../../include/kernel/kernel.hpp"
 #include "../../include/kernel/interrupts/interrupts.hpp"
 #include "../../include/kernel/sys_registers.hpp"
-#include <stdint.h>
 
+using namespace kernel;
 using namespace kernel::threads;
 using namespace kernel::interrupts;
 
 /**
  * @brief Singleton scheduler queue for the kernel.
  */
-SchedulerQueue scheduler = SchedulerQueue<250>();
+SchedulerQueue scheduler = SchedulerQueue();
 
-kernel::output_handler_t kernel_string_output_handler = nullptr;
+/**
+ * @brief The output handler for kernel debugging.
+ */
+output_handler_t kernel_string_output_handler = nullptr;
 
 void kernel::set_output_handler(output_handler_t string_handler) {
   kernel_string_output_handler = string_handler;
@@ -93,7 +96,7 @@ bool kernel::alloc_thread_stack(ThreadControlBlock *tcb) {
     return false;
   }
 
-  void *page = memory::palloc();
+  void *page = memory::alloc_page();
 
   if (!page) {
     return false;
@@ -171,7 +174,7 @@ void kernel::thread_return_handler() {
   disable_interrupts();
 
   scheduler.mark_current_as_complete();
-  memory::pfree(scheduler.peek()->get_page());
+  memory::free_page(scheduler.peek()->get_page());
 
   // Trigger context switch
   enable_interrupts();

@@ -26,7 +26,6 @@
 #include "../../../include/kernel/kernel.hpp"
 #include "../../../include/kernel/peripherals/timer_interrupt.hpp"
 #include "../../../include/kernel/threads/thread_control_block.hpp"
-#include <stdint.h>
 
 void kernel::interrupts::prepare_timer_interrupt(uint64_t interval) {
   static uint32_t current_us = 0;
@@ -90,28 +89,5 @@ void kernel::interrupts::synch_exception_handler() {
   safe_hex(far);
   safe_put("\n");
 
-  // Halt execution for debugging
-  safe_put("System halted due to synchronous exception.\n");
-
-  while (true) {
-    asm volatile("wfe");
-  }
-}
-
-void kernel::interrupts::fiq_exception_handler() {
-  disable_interrupts();
-  safe_put("FIQ\n");
-
-  while (true) {
-    asm volatile("wfe");
-  }
-}
-
-void kernel::interrupts::serror_exception_handler() {
-  disable_interrupts();
-  safe_put("SError\n");
-
-  while (true) {
-    asm volatile("wfe");
-  }
+  kernel_panic("Synchronous exception occurred");
 }

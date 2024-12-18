@@ -115,14 +115,8 @@ _synch_handler:
 
 .globl _fiq_handler
 _fiq_handler:
-    push_registers
-    bl _fiq_exception_handler
-    pop_registers
     eret
 
 .globl _serror_handler
 _serror_handler:
-    push_registers
-    bl _serror_exception_handler
-    pop_registers
     eret
