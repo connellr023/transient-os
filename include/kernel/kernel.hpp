@@ -72,13 +72,15 @@ const ThreadControlBlock *context_switch(void *interrupted_sp);
 
 /**
  * @brief Allocates stack space for a thread. A thread can only have a stack
- * allocated to it once.
+ * allocated to it once. This function is not thread safe (should only be used
+ * during initialization).
  * @param tcb The thread control block of the thread.
  */
 bool alloc_thread_stack(ThreadControlBlock *tcb);
 
 /**
- * @brief Schedules a thread to run.
+ * @brief Schedules a thread to run. This function is not thread safe (should
+ * only be used during initialization).
  * @param tcb The thread control block of the thread.
  * @return True if the thread was scheduled, false otherwise.
  */
