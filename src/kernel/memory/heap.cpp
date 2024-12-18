@@ -22,45 +22,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef MEMORY_HPP
-#define MEMORY_HPP
+#include "../../../include/kernel/memory/heap.hpp"
 
-#include "../peripherals/mmio.hpp"
+void *kernel::memory::kmalloc(uint64_t size) { return nullptr; }
 
-#define PAGE_SHIFT 11
-#define TABLE_SHIFT 10
-#define SECTION_SHIFT (PAGE_SHIFT + TABLE_SHIFT)
-
-#define PAGE_SIZE (1 << PAGE_SHIFT)
-#define SECTION_SIZE (1 << SECTION_SHIFT)
-
-#define LOW_MEMORY (1 * SECTION_SIZE)
-#define HIGH_MEMORY MMIO_BASE
-
-#define PAGING_MEMORY (HIGH_MEMORY - LOW_MEMORY)
-#define PAGE_COUNT (PAGING_MEMORY / PAGE_SIZE)
-
-#ifndef __ASSEMBLER__
-
-#define MEMORY_FILL 0xB0BABABE
-
-#include <stdint.h>
-
-namespace kernel::memory {
-/**
- * @brief Allocates a page of memory.
- * @return A pointer to the allocated page. Returns nullptr if no memory is
- * available.
- */
-void *palloc();
-
-/**
- * @brief Frees a page of memory.
- * @param page The page to free.
- */
-void pfree(void *page);
-} // namespace kernel::memory
-
-#endif // __ASSEMBLER__
-
-#endif // MEMORY_HPP
+void kernel::memory::kmfree(void *ptr) {}

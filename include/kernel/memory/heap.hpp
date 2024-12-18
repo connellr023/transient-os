@@ -22,45 +22,44 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef MEMORY_HPP
-#define MEMORY_HPP
-
-#include "../peripherals/mmio.hpp"
-
-#define PAGE_SHIFT 11
-#define TABLE_SHIFT 10
-#define SECTION_SHIFT (PAGE_SHIFT + TABLE_SHIFT)
-
-#define PAGE_SIZE (1 << PAGE_SHIFT)
-#define SECTION_SIZE (1 << SECTION_SHIFT)
-
-#define LOW_MEMORY (1 * SECTION_SIZE)
-#define HIGH_MEMORY MMIO_BASE
-
-#define PAGING_MEMORY (HIGH_MEMORY - LOW_MEMORY)
-#define PAGE_COUNT (PAGING_MEMORY / PAGE_SIZE)
-
-#ifndef __ASSEMBLER__
-
-#define MEMORY_FILL 0xB0BABABE
+#ifndef HEAP_HPP
+#define HEAP_HPP
 
 #include <stdint.h>
 
 namespace kernel::memory {
 /**
- * @brief Allocates a page of memory.
- * @return A pointer to the allocated page. Returns nullptr if no memory is
- * available.
+ * @brief A node in the heap allocator's free list.
  */
-void *palloc();
+class FreeListNode {
+private:
+  uint64_t size;
+  FreeListNode *next;
+
+public:
+  FreeListNode(uint64_t size, FreeListNode *next = nullptr)
+      : size(size), next(next) {}
+
+  uint64_t get_size() const { return size; }
+  FreeListNode *get_next() const { return next; }
+
+  void set_size(uint64_t size) { this->size = size; }
+  void set_next(FreeListNode *next) { this->next = next; }
+};
 
 /**
- * @brief Frees a page of memory.
- * @param page The page to free.
+ * @brief Allocates a block of memory on the heap.
+ * @param size The size of the block to allocate.
+ * @return A pointer to the allocated block. Returns nullptr if no memory is
+ * available.
  */
-void pfree(void *page);
+void *kmalloc(uint64_t size);
+
+/**
+ * @brief Frees a block of memory on the heap.
+ * @param ptr The pointer to the block to free.
+ */
+void kmfree(void *ptr);
 } // namespace kernel::memory
 
-#endif // __ASSEMBLER__
-
-#endif // MEMORY_HPP
+#endif // HEAP_HPP

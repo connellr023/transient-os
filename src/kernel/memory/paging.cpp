@@ -32,8 +32,15 @@ void *kernel::memory::palloc() {
   for (uint64_t i = 0; i < PAGE_COUNT; i++) {
     if (!memory_map[i]) {
       memory_map[i] = true;
+      uint64_t *page_addr =
+          reinterpret_cast<uint64_t *>(LOW_MEMORY + (i * PAGE_SIZE));
 
-      return reinterpret_cast<void *>(LOW_MEMORY + (i * PAGE_SIZE));
+      // Fill page with a default fill value
+      for (uint64_t j = 0; j < PAGE_SIZE / sizeof(uint64_t); j++) {
+        page_addr[j] = MEMORY_FILL;
+      }
+
+      return reinterpret_cast<void *>(page_addr);
     }
   }
 
