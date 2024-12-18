@@ -30,6 +30,9 @@
 using namespace kernel::threads;
 using namespace kernel::interrupts;
 
+/**
+ * @brief Singleton scheduler queue for the kernel.
+ */
 SchedulerQueue scheduler = SchedulerQueue<250>();
 
 kernel::output_handler_t kernel_string_output_handler = nullptr;

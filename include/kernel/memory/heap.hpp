@@ -25,6 +25,7 @@
 #ifndef HEAP_HPP
 #define HEAP_HPP
 
+#include "paging.hpp"
 #include <stdint.h>
 
 namespace kernel::memory {
@@ -45,6 +46,47 @@ public:
 
   void set_size(uint64_t size) { this->size = size; }
   void set_next(FreeListNode *next) { this->next = next; }
+};
+
+/**
+ * @brief A class to encapsulate the management of heap pages.
+ */
+template <uint8_t max_heap_pages> class HeapPageManager {
+private:
+  /**
+   * @brief Array of pointers to the start of each heap page.
+   */
+  uint8_t (*heap_pages)[max_heap_pages] = {nullptr};
+
+  /**
+   * @brief The index of the next heap page to allocate.
+   */
+  uint64_t heap_page_index;
+
+public:
+  HeapPageManager() : heap_page_index(0) {}
+
+  void *get_current_heap_page() {
+    return this->heap_pages[this->heap_page_index];
+  }
+
+  void *alloc_heap_page() {
+    if (this->heap_page_index >= max_heap_pages) {
+      return nullptr;
+    }
+
+    if (this->heap_pages[this->heap_page_index] == nullptr) {
+      this->heap_pages[this->heap_page_index] = palloc();
+    }
+
+    return this->heap_pages[this->heap_page_index];
+  }
+
+  void next_heap_page() {
+    if (this->heap_page_index < max_heap_pages) {
+      this->heap_page_index++;
+    }
+  }
 };
 
 /**
