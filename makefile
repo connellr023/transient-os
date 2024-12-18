@@ -23,6 +23,11 @@ LIB_NAME = libtransient-os.a
 # Default target
 all: $(BUILD_DIR)/$(LIB_NAME)
 
+# Rule for building optimized code
+optimized: CFLAGS += -O3
+optimized: CXXFLAGS += -O3
+optimized: $(BUILD_DIR)/$(LIB_NAME)
+
 # Build the static library
 $(BUILD_DIR)/$(LIB_NAME): $(OBJS)
 	@mkdir -p $(BUILD_DIR)

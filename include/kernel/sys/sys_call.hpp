@@ -37,11 +37,6 @@ enum class SystemCall : uint8_t {
 };
 
 /**
- * @brief Triggers a system call that writes a message to the output handler.
- */
-void hello_world();
-
-/**
  * @brief Utility function to trigger a system call.
  * @param call_code The system call code.
  * @param arg The argument to the system call.

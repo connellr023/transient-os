@@ -28,8 +28,8 @@
 #include "../../include/kernel/sys/sys_registers.hpp"
 
 using namespace kernel;
-using namespace kernel::threads;
-using namespace kernel::interrupts;
+using namespace threads;
+using namespace interrupts;
 
 /**
  * @brief Singleton scheduler queue for the kernel.
@@ -192,4 +192,8 @@ void kernel::kernel_panic(const char *msg) {
   while (true) {
     asm volatile("wfe");
   }
+}
+
+void kernel::hello_world() {
+  trigger_system_call(SystemCall::HelloWorld, nullptr);
 }

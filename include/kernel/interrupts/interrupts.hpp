@@ -25,12 +25,13 @@
 #ifndef INTERRUPTS_HPP
 #define INTERRUPTS_HPP
 
-#include "../../../include/kernel/sys/sys_call_table.hpp"
-#include <stdint.h>
+#include "../../../include/kernel/sys/sys_call_handler.hpp"
 
 #define SVC_EC 0x15
 
 namespace kernel::interrupts {
+using namespace sys;
+
 /**
  * @brief Enables the system timer interrupt controller.
  */
@@ -68,8 +69,6 @@ void clear_timer_interrupt();
  * @return The new stack pointer.
  */
 void *irq_exception_handler(void *interrupted_sp) asm("_irq_exception_handler");
-
-using namespace kernel::sys;
 
 /**
  * @brief Handles a synchronous exception.

@@ -22,11 +22,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/sys/sys_call_table.hpp"
+#include "../../../include/kernel/sys/sys_call_handler.hpp"
 #include "../../../include/kernel/kernel.hpp"
-
-#define SYSTEM_CALL_TABLE_SIZE                                                 \
-  (sizeof(system_call_table) / sizeof(system_call_table[0]))
 
 using namespace kernel::sys;
 
@@ -66,8 +63,10 @@ const system_call_handler system_call_table[] = {
 
 void *kernel::sys::handle_system_call(SystemCall call_code, void *arg) {
   const uint8_t numerical_call_code = static_cast<uint8_t>(call_code);
+  constexpr uint64_t system_call_table_size =
+      sizeof(system_call_table) / sizeof(system_call_table[0]);
 
-  if (numerical_call_code >= SYSTEM_CALL_TABLE_SIZE) {
+  if (numerical_call_code >= system_call_table_size) {
     return nullptr;
   }
 

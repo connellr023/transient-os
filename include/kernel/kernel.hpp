@@ -115,6 +115,11 @@ void safe_put(const char *str);
  * @param value The value to print.
  */
 void safe_hex(uint64_t value);
+
+/**
+ * @brief Triggers a system call that writes a message to the output handler.
+ */
+void hello_world();
 } // namespace kernel
 
 #endif // __ASSEMBLER__
