@@ -57,11 +57,13 @@ void *kernel::interrupts::irq_exception_handler(void *interrupted_sp) {
   return next_tcb->get_sp();
 }
 
-void *kernel::interrupts::synch_exception_handler(uint32_t ec,
-                                                  SystemCall call_code,
+void *kernel::interrupts::synch_exception_handler(SystemCall call_code,
                                                   void *arg,
                                                   void *interrupted_sp) {
-  disable_interrupts();
+  // Check if the exception was a system call
+  uint64_t ec;
+  asm("mrs %0, esr_el1" : "=r"(ec));
+  ec >>= 26;
 
   if (ec != SVC_EC) {
     kernel_panic("Non-SVC synchronous exception occurred");
@@ -74,8 +76,5 @@ void *kernel::interrupts::synch_exception_handler(uint32_t ec,
   sp[0] = reinterpret_cast<uint64_t>(value);
 
   // Switch to a different thread
-  void *next_sp = irq_exception_handler(interrupted_sp);
-
-  enable_interrupts();
-  return next_sp;
+  return irq_exception_handler(interrupted_sp);
 }

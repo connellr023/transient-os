@@ -73,13 +73,12 @@ using namespace kernel::sys;
 
 /**
  * @brief Handles a synchronous exception.
- * @param ec The exception class.
  * @param call_code The system call code. (SVC only)
  * @param arg The argument to the system call. (SVC only)
  * @return Stack pointer of the next thread.
  */
 void *
-synch_exception_handler(uint32_t ec, SystemCall call_code, void *arg,
+synch_exception_handler(SystemCall call_code, void *arg,
                         void *interrupted_sp) asm("_synch_exception_handler");
 } // namespace kernel::interrupts
 

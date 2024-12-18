@@ -60,6 +60,10 @@
 .endm
 
 .macro pop_registers
+    // Prepare SP_EL0 for the next thread
+    add x0, x0, #CPU_CTX_STACK_SIZE
+    msr sp_el0, x0
+
     // Restore SPSR_EL1, ELR_EL1, and LR
     ldr x23, [sp, #16*16]
     ldp x30, x22, [sp, #16*15]
@@ -98,37 +102,26 @@ _irq_handler:
     // Update the stack pointer to the next thread
     mov sp, x0
 
-    // Prepare SP_EL0 for the next thread
-    add x0, x0, #CPU_CTX_STACK_SIZE
-    msr sp_el0, x0
-
     pop_registers
     eret
 
 .globl _synch_handler
 _synch_handler:
+    bl _disable_interrupts
     push_registers
 
-    // Move syscall argument into x2
+    // Move syscall argument into x1
     mov x2, x0
 
-    // Move exception class into w0
-    mrs x0, esr_el1
-    lsr w0, w0, #26
+    // Move call code into w0
+    mov w0, w8
 
-    // Move call code into w1
-    mov w1, w8
-
-    // Move interrupted stack pointer into x3
-    mov x3, sp
+    // Move interrupted stack pointer into x2
+    mov x2, sp
 
     bl _synch_exception_handler
-
-    // Prepare SP_EL0 for the next thread
-    add x0, x0, #CPU_CTX_STACK_SIZE
-    msr sp_el0, x0
-
     pop_registers
+    bl _enable_interrupts
     eret
 
 .globl _fiq_handler
