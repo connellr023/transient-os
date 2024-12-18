@@ -22,25 +22,20 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/memory/paging.hpp"
+#ifndef TIMER_INTERRUPT_HPP
+#define TIMER_INTERRUPT_HPP
 
-using namespace kernel::memory;
+#include "mmio.hpp"
+#include <stdint.h>
 
-bool memory_map[PAGE_COUNT] = {false};
+#define TIMER_CS ((volatile uint32_t *)(MMIO_BASE + 0x00003000))
+#define TIMER_COUNTER_LOW ((volatile uint32_t *)(MMIO_BASE + 0x00003004))
+#define TIMER_COUNTER_HIGH ((volatile uint32_t *)(MMIO_BASE + 0x00003008))
 
-void *kernel::memory::palloc() {
-  for (uint64_t i = 0; i < PAGE_COUNT; i++) {
-    if (!memory_map[i]) {
-      memory_map[i] = true;
+#define TIMER_CMP_1 ((volatile uint32_t *)(MMIO_BASE + 0x00003010))
+#define TIMER_CS_M1 (1 << 1)
 
-      return reinterpret_cast<void *>(LOW_MEMORY + (i * PAGE_SIZE));
-    }
-  }
+#define ENABLE_IRQS_1 ((volatile uint32_t *)(MMIO_BASE + 0x0000B210))
+#define SYSTEM_TIMER_IRQ_1 (1 << 1)
 
-  return nullptr;
-}
-
-void kernel::memory::pfree(void *page) {
-  const uint64_t page_addr = reinterpret_cast<uint64_t>(page);
-  memory_map[(page_addr - LOW_MEMORY) / PAGE_SIZE] = false;
-}
+#endif // TIMER_INTERRUPT_HPP
