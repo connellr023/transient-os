@@ -27,6 +27,8 @@
 #include "../../../include/kernel/peripherals/timer_interrupt.hpp"
 #include "../../../include/kernel/threads/thread_control_block.hpp"
 
+using namespace kernel::sys;
+
 void kernel::interrupts::prepare_timer_interrupt(uint64_t interval) {
   static uint32_t current_us = 0;
 
@@ -55,39 +57,25 @@ void *kernel::interrupts::irq_exception_handler(void *interrupted_sp) {
   return next_tcb->get_sp();
 }
 
-void kernel::interrupts::synch_exception_handler() {
+void *kernel::interrupts::synch_exception_handler(uint32_t ec,
+                                                  SystemCall call_code,
+                                                  void *arg,
+                                                  void *interrupted_sp) {
   disable_interrupts();
-  uint64_t esr, elr, far;
 
-  // Read the ESR_EL1 (Exception Syndrome Register)
-  asm volatile("mrs %0, esr_el1" : "=r"(esr));
-  const uint64_t ec = esr >> 26;       // Exception Class (EC)
-  const uint64_t iss = esr & 0xFFFFFF; // Instruction Specific Syndrome (ISS)
+  if (ec != SVC_EC) {
+    kernel_panic("Non-SVC synchronous exception occurred");
+  }
 
-  // Read the ELR_EL1 (Exception Link Register)
-  asm volatile("mrs %0, elr_el1" : "=r"(elr));
+  void *value = handle_system_call(call_code, arg);
 
-  // Read the FAR_EL1 (Fault Address Register)
-  asm volatile("mrs %0, far_el1" : "=r"(far));
+  // Write return value to x0 register on the interrupted stack
+  uint64_t *sp = reinterpret_cast<uint64_t *>(interrupted_sp);
+  sp[0] = reinterpret_cast<uint64_t>(value);
 
-  // Log ESR_EL1 (Exception Class and ISS)
-  safe_put("Synchronous exception cause (EC): 0x");
-  safe_hex(ec);
-  safe_put("\n");
+  // Switch to a different thread
+  void *next_sp = irq_exception_handler(interrupted_sp);
 
-  safe_put("Instruction Specific Syndrome (ISS): 0x");
-  safe_hex(iss);
-  safe_put("\n");
-
-  // Log ELR_EL1 (Faulting instruction address)
-  safe_put("Exception Link Register (ELR_EL1): 0x");
-  safe_hex(elr);
-  safe_put("\n");
-
-  // Log FAR_EL1 (Fault Address Register, if applicable)
-  safe_put("Fault Address Register (FAR_EL1): 0x");
-  safe_hex(far);
-  safe_put("\n");
-
-  kernel_panic("Synchronous exception occurred");
+  enable_interrupts();
+  return next_sp;
 }

@@ -108,7 +108,26 @@ _irq_handler:
 .globl _synch_handler
 _synch_handler:
     push_registers
+
+    // Move syscall argument into x2
+    mov x2, x0
+
+    // Move exception class into w0
+    mrs x0, esr_el1
+    lsr w0, w0, #26
+
+    // Move call code into w1
+    mov w1, w8
+
+    // Move interrupted stack pointer into x3
+    mov x3, sp
+
     bl _synch_exception_handler
+
+    // Prepare SP_EL0 for the next thread
+    add x0, x0, #CPU_CTX_STACK_SIZE
+    msr sp_el0, x0
+
     pop_registers
     eret
 

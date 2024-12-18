@@ -59,7 +59,7 @@ void *sys_call_heap_alloc(void *size) {
 /**
  * @brief Table of system call handlers.
  */
-const system_call_handler system_call_table[SYSTEM_CALL_TABLE_SIZE] = {
+const system_call_handler system_call_table[] = {
     sys_call_hello_world,
     sys_call_heap_alloc,
 };

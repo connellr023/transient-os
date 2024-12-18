@@ -24,8 +24,8 @@
 
 .globl _trigger_system_call
 _trigger_system_call:
-    // Load syscall code into x8
-    mov x8, x0
+    // Load syscall code into w8
+    mov w8, w0
 
     // Load syscall argument into x0
     mov x0, x1

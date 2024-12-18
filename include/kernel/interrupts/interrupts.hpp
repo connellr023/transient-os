@@ -25,7 +25,10 @@
 #ifndef INTERRUPTS_HPP
 #define INTERRUPTS_HPP
 
+#include "../../../include/kernel/sys/sys_call_table.hpp"
 #include <stdint.h>
+
+#define SVC_EC 0x15
 
 namespace kernel::interrupts {
 /**
@@ -66,10 +69,18 @@ void clear_timer_interrupt();
  */
 void *irq_exception_handler(void *interrupted_sp) asm("_irq_exception_handler");
 
+using namespace kernel::sys;
+
 /**
  * @brief Handles a synchronous exception.
+ * @param ec The exception class.
+ * @param call_code The system call code. (SVC only)
+ * @param arg The argument to the system call. (SVC only)
+ * @return Stack pointer of the next thread.
  */
-void synch_exception_handler() asm("_synch_exception_handler");
+void *
+synch_exception_handler(uint32_t ec, SystemCall call_code, void *arg,
+                        void *interrupted_sp) asm("_synch_exception_handler");
 } // namespace kernel::interrupts
 
 #endif // INTERRUPTS_HPP
