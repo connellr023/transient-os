@@ -37,7 +37,6 @@
 
 #define THREAD_STACK_SIZE PAGE_SIZE
 
-#include "threads/scheduler.hpp"
 #include "threads/thread_control_block.hpp"
 #include <stdint.h>
 

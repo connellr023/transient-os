@@ -55,19 +55,13 @@ private:
 
 public:
   /**
-   * @brief Creates a new thread control block.
+   * @brief Initializes a thread control block.
    * @param handler A pointer to the function that the thread will run.
    * @param quantum_us The amount of microseconds the thread will run for before
    * being interrupted.
    * @param arg An optional argument to pass to the thread function.
    */
-  ThreadControlBlock(thread_handler_t handler, uint32_t quantum_us,
-                     void *arg = nullptr);
-
-  /**
-   * @brief Initializes a blank thread control block.
-   */
-  ThreadControlBlock() : ThreadControlBlock(nullptr, 0) {}
+  void init(thread_handler_t handler, uint32_t quantum_us, void *arg = nullptr);
 
   thread_handler_t get_handler() const { return this->handler; }
   void *get_arg() const { return this->arg; }

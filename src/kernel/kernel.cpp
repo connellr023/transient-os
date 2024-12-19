@@ -26,6 +26,7 @@
 #include "../../include/kernel/interrupts/interrupts.hpp"
 #include "../../include/kernel/sys/sys_call.hpp"
 #include "../../include/kernel/sys/sys_registers.hpp"
+#include "../../include/kernel/threads/scheduler.hpp"
 
 using namespace kernel;
 using namespace threads;
@@ -34,7 +35,7 @@ using namespace interrupts;
 /**
  * @brief Singleton scheduler queue for the kernel.
  */
-SchedulerQueue scheduler = SchedulerQueue();
+SchedulerQueue scheduler;
 
 /**
  * @brief The output handler for kernel debugging.

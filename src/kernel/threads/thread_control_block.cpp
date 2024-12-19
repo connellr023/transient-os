@@ -27,9 +27,15 @@
 
 using namespace kernel::threads;
 
-uint64_t thread_id_counter = 0;
+volatile uint64_t thread_id_counter = 0;
 
-ThreadControlBlock::ThreadControlBlock(thread_handler_t handler,
-                                       uint32_t burst_time, void *arg)
-    : thread_id(thread_id_counter++), page_addr(0), quantum_us(burst_time),
-      state(ThreadState::Uninitialized), sp(0), handler(handler), arg(arg) {}
+void ThreadControlBlock::init(thread_handler_t handler, uint32_t quantum_us,
+                              void *arg) {
+  this->thread_id = thread_id_counter++;
+  this->page_addr = 0;
+  this->quantum_us = quantum_us;
+  this->state = ThreadState::Uninitialized;
+  this->sp = 0;
+  this->handler = handler;
+  this->arg = arg;
+}

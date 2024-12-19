@@ -37,13 +37,13 @@ class SchedulerQueue {
 private:
   ThreadControlBlock *queue[SCHEDULER_CAPACITY]{nullptr};
 
-  uint32_t head;
-  uint32_t tail;
-  uint32_t size;
-  uint32_t completed;
+  uint32_t head = 0;
+  uint32_t tail = 0;
+  uint32_t size = 0;
+  uint32_t completed = 0;
 
 public:
-  SchedulerQueue() : head(0), tail(0), size(0), completed(0){};
+  SchedulerQueue() = default;
 
   /**
    * @brief Enqueues a thread in the scheduler queue.

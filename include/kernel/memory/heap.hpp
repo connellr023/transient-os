@@ -40,8 +40,10 @@ private:
   FreeListNode *next;
 
 public:
-  FreeListNode(uint64_t size, FreeListNode *next = nullptr)
-      : size(size), next(next) {}
+  void init(uint64_t size, FreeListNode *next = nullptr) {
+    this->size = size;
+    this->next = next;
+  }
 
   uint64_t get_size() const { return size; }
   FreeListNode *get_next() const { return next; }
