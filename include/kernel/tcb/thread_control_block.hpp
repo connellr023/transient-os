@@ -33,9 +33,10 @@ typedef void (*thread_handler_t)(void *);
  * @brief Enumeration of the possible states of a thread.
  */
 enum class ThreadState : uint8_t {
-  Uninitialized,
+  Unallocated,
   Ready,
   Running,
+  Sleeping,
   Complete,
 };
 
@@ -47,6 +48,7 @@ private:
   uint64_t thread_id;
   uint64_t page_addr;
   uint32_t quantum_us;
+  uint64_t sleep_until_us;
   ThreadState state;
   uint64_t sp;
   thread_handler_t handler;
@@ -62,23 +64,44 @@ public:
    */
   void init(thread_handler_t handler, uint32_t quantum_us, void *arg = nullptr);
 
+  /**
+   * @brief Allocates a stack for the thread.
+   * @return True if the stack was allocated, false otherwise.
+   */
+  bool allocate();
+
   thread_handler_t get_handler() const { return this->handler; }
+
   void *get_arg() const { return this->arg; }
+
   void *get_page() const { return reinterpret_cast<void *>(this->page_addr); }
+
   void *get_sp() const { return reinterpret_cast<void *>(this->sp); }
+
   uint64_t get_thread_id() const { return this->thread_id; }
+
   uint32_t get_burst_time() const { return this->quantum_us; }
 
   bool is_complete() const { return this->state == ThreadState::Complete; }
+
   bool is_ready() const { return this->state == ThreadState::Ready; }
+
   bool is_running() const { return this->state == ThreadState::Running; }
-  bool is_initialized() const {
-    return this->state != ThreadState::Uninitialized;
-  }
+
+  bool is_sleeping() const { return this->state == ThreadState::Sleeping; }
+
+  bool is_allocated() const { return this->state != ThreadState::Unallocated; }
 
   void mark_as_ready() { this->state = ThreadState::Ready; }
+
   void mark_as_running() { this->state = ThreadState::Running; }
+
   void mark_as_complete() { this->state = ThreadState::Complete; }
+
+  void mark_as_sleeping(uint64_t sleep_until_us) {
+    this->state = ThreadState::Sleeping;
+    this->sleep_until_us = sleep_until_us;
+  }
 
   void set_page(void *page) {
     this->page_addr = reinterpret_cast<uint64_t>(page);

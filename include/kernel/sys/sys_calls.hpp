@@ -38,6 +38,7 @@ enum class SystemCall : uint8_t {
   HeapFree,
   Yield,
   Exit,
+  Sleep,
 };
 
 namespace kernel::sys {

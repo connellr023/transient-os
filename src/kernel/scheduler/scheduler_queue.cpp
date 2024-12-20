@@ -1,12 +1,12 @@
-#include "../../../include/kernel/threads/scheduler.hpp"
+#include "../../../include/kernel/scheduler/scheduler_queue.hpp"
 
 bool SchedulerQueue::enqueue(ThreadControlBlock *tcb) {
-  if (this->size >= SCHEDULER_CAPACITY) {
+  if (this->size >= QUEUE_CAPACITY) {
     return false;
   }
 
   this->queue[this->tail] = tcb;
-  this->tail = (this->tail + 1) % SCHEDULER_CAPACITY;
+  this->tail = (this->tail + 1) % QUEUE_CAPACITY;
   this->size++;
 
   return true;

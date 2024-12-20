@@ -37,7 +37,7 @@
 #define ELR_EL1_IDX 31
 #define SPSR_EL1_IDX 32
 
-#include "threads/thread_control_block.hpp"
+#include "tcb/thread_control_block.hpp"
 #include <stdint.h>
 
 typedef void (*output_handler_t)(const char *);
@@ -81,12 +81,6 @@ void safe_puts(const char *str);
  * @param value The value to print.
  */
 void safe_hex(uint64_t value);
-
-/**
- * @brief Gets the thread ID of the currently running thread.
- * @return The thread ID.
- */
-uint64_t get_thread_id();
 
 /**
  * ### (INTERNAL)

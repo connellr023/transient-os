@@ -22,19 +22,19 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SCHEDULER_HPP
-#define SCHEDULER_HPP
+#ifndef SCHEDULER_QUEUE_HPP
+#define SCHEDULER_QUEUE_HPP
 
-#include "thread_control_block.hpp"
+#include "../tcb/thread_control_block.hpp"
 
-#define SCHEDULER_CAPACITY 250
+#define QUEUE_CAPACITY 250
 
 /**
  * @brief A simple queue for the scheduler.
  */
 class SchedulerQueue {
 private:
-  ThreadControlBlock *queue[SCHEDULER_CAPACITY]{nullptr};
+  ThreadControlBlock *queue[QUEUE_CAPACITY]{nullptr};
 
   uint32_t head = 0;
   uint32_t tail = 0;
@@ -71,4 +71,4 @@ public:
   ThreadControlBlock *peek() { return queue[head]; }
 };
 
-#endif // SCHEDULER_HPP
+#endif // SCHEDULER_QUEUE_HPP
