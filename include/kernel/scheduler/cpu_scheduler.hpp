@@ -12,19 +12,10 @@ namespace kernel::scheduler {
 bool enqueue(ThreadControlBlock *tcb);
 
 /**
- * @brief Moves the first thread in the sleeping queue to the primary queue
- if
- * it is time.
- * @return True if a thread was moved, false otherwise.
+ * @brief Gets the current thread's ID.
+ * @return The thread ID.
  */
-bool wake();
-
-/**
- * @brief Moves the first thread in the primary queue to the sleeping
- queue.
- * @return True if a thread was moved, false otherwise.
- */
-bool sleep();
+uint64_t get_thread_id();
 } // namespace kernel::scheduler
 
 #endif // CPU_SCHEDULER_HPP

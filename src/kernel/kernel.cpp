@@ -25,8 +25,6 @@
 #include "../../include/kernel/kernel.hpp"
 #include "../../include/kernel/interrupts/interrupts.hpp"
 #include "../../include/kernel/scheduler/cpu_scheduler.hpp"
-#include "../../include/kernel/sys/sys_calls.hpp"
-#include "../../include/kernel/sys/sys_registers.hpp"
 
 namespace kernel {
 /**
@@ -42,6 +40,8 @@ bool is_kernel_started = false;
 void set_output_handler(output_handler_t string_handler) {
   kernel_string_output_handler = string_handler;
 }
+
+bool is_started() { return is_kernel_started; }
 
 void start() {
   // Ensure we are in EL1
@@ -68,42 +68,8 @@ void start() {
   }
 }
 
-// const ThreadControlBlock *internal_context_switch(void *interrupted_sp) {
-//   static bool is_first_context_switch = true;
-
-//   if (scheduler.is_empty()) {
-//     panic("No threads to schedule");
-//   }
-
-//   // Avoid corrupting a thread's context stack
-//   if (!is_first_context_switch) {
-//     // Save context of interrupted thread
-//     scheduler.peek()->set_sp(interrupted_sp);
-//     scheduler.peek()->mark_as_ready();
-
-//     // Goto next thread
-//     scheduler.next();
-//   } else {
-//     // Set flag to false after first context switch
-//     is_first_context_switch = false;
-//   }
-
-//   scheduler.peek()->mark_as_running();
-//   return scheduler.peek();
-// }
-
-// void internal_thread_free() {
-//   memory::internal_page_free(scheduler.peek()->get_page());
-//   scheduler.mark_current_as_complete();
-// }
-
-bool schedule_thread(ThreadControlBlock *tcb) {
-  // Not allowed to schedule threads after kernel has started (at least for now)
-  if (is_kernel_started) {
-    return false;
-  }
-
-  return alloc_thread_stack(tcb) && scheduler.enqueue(tcb);
+bool prepare_thread(ThreadControlBlock *tcb) {
+  return tcb->stack_alloc() && scheduler::enqueue(tcb);
 }
 
 void safe_puts(const char *str) {

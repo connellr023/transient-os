@@ -22,27 +22,32 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SYS_CALL_TABLE_HPP
-#define SYS_CALL_TABLE_HPP
+#ifndef HEAP_HPP
+#define HEAP_HPP
 
-#include "sys_calls.hpp"
+#include "internal_paging.hpp"
+#include <stdint.h>
+
+namespace kernel::memory {
+/**
+ * ### Kernel memory heap allocator (INTERNAL)
+ * @brief Allocates a block of memory on the heap. This is not thread safe and
+ * should only be invoked by a system call handler.
+ * guaranteed.
+ * @param size The size of the block to allocate.
+ * @return A pointer to the allocated block. Returns nullptr if no memory is
+ * available.
+ */
+void *internal_heap_alloc(uint64_t size);
 
 /**
- * @brief A function pointer type for system call handlers.
- * @param arg The argument to the system call.
- * @return The return value of the system call.
+ * ### Kernel memory heap free (INTERNAL)
+ * @brief Frees a block of memory on the heap. This is not thread safe and
+ * should only be invoked by a system call handler.
+ * guaranteed.
+ * @param ptr The pointer to the block to free.
  */
-typedef void *(*system_call_handler)(const void *);
+void internal_heap_free(void *ptr);
+} // namespace kernel::memory
 
-namespace kernel::sys {
-/**
- * @brief Handles a system call by invoking the appropriate system call handler.
- * This should only be invoked by the synchronous exception handler.
- * @param call_code The system call code.
- * @param arg The argument to the system call.
- * @return The return value of the system call.
- */
-void *handle_system_call(SystemCall call_code, const void *arg);
-} // namespace kernel::sys
-
-#endif // SYS_CALL_TABLE_HPP
+#endif // HEAP_HPP

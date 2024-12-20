@@ -23,9 +23,12 @@
  */
 
 #include "../../../include/kernel/interrupts/interrupts.hpp"
+#include "../../../include/kernel/interrupts/internal_interrupts.hpp"
 #include "../../../include/kernel/kernel.hpp"
 #include "../../../include/kernel/peripherals/timer_interrupt.hpp"
-#include "../../../include/kernel/threads/thread_control_block.hpp"
+#include "../../../include/kernel/scheduler/internal_cpu_scheduler.hpp"
+#include "../../../include/kernel/sys/internal_sys_call_handler.hpp"
+#include "../../../include/kernel/tcb/thread_control_block.hpp"
 
 namespace kernel::interrupts {
 /**
@@ -46,7 +49,8 @@ void enable_interrupt_controller() {
 }
 
 void *internal_irq_exception_handler(void *interrupted_sp) {
-  const ThreadControlBlock *next_tcb = internal_context_switch(interrupted_sp);
+  const ThreadControlBlock *next_tcb =
+      scheduler::internal_context_switch(interrupted_sp);
 
   // Prepare timer for next context switch
   prepare_timer_interrupt(next_tcb->get_burst_time());
@@ -67,7 +71,7 @@ void *internal_synch_exception_handler(SystemCall call_code, void *arg,
     panic("Non-SVC synchronous exception occurred");
   }
 
-  void *value = handle_system_call(call_code, arg);
+  void *value = sys::internal_handle_sys_call(call_code, arg);
 
   // Write return value to x0 register on the interrupted stack
   uint64_t *sp = reinterpret_cast<uint64_t *>(interrupted_sp);

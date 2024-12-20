@@ -25,18 +25,6 @@
 #ifndef KERNEL_HPP
 #define KERNEL_HPP
 
-#define CPU_CTX_STACK_SIZE (17 * 16) // 17 pairs of 8 byte registers
-
-#ifndef __ASSEMBLER__
-
-#include "memory/paging.hpp"
-
-#define THREAD_STACK_SIZE PAGE_SIZE
-
-#define LR_IDX 30
-#define ELR_EL1_IDX 31
-#define SPSR_EL1_IDX 32
-
 #include "tcb/thread_control_block.hpp"
 #include <stdint.h>
 
@@ -63,12 +51,12 @@ void set_output_handler(output_handler_t output_handler);
 [[noreturn]] void panic(const char *msg);
 
 /**
- * @brief Schedules a thread to run. This function is not thread safe (should
- * only be used during initialization).
+ * @brief Prepares a thread by setting up the stack and enqueueing it in the
+ * scheduler.
  * @param tcb The thread control block of the thread.
  * @return True if the thread was scheduled, false otherwise.
  */
-bool schedule_thread(ThreadControlBlock *tcb);
+bool prepare_thread(ThreadControlBlock *tcb);
 
 /**
  * @brief Prints a message to the output handler.
@@ -83,22 +71,10 @@ void safe_puts(const char *str);
 void safe_hex(uint64_t value);
 
 /**
- * ### (INTERNAL)
- * @brief Handles a context switch by updating the current thread's TCB and
- * scheduling the next thread. This function should never be called directly.
- * @param interrupted_sp The stack pointer of the interrupted thread.
- * @return The thread control block of the next thread to run.
+ * @brief Checks if the kernel has started.
+ * @return True if the kernel has started, false otherwise.
  */
-const ThreadControlBlock *internal_context_switch(void *interrupted_sp);
-
-/**
- * ### (INTERNAL)
- * @brief Frees resources of currently scheduled thread. Should only be called
- * by a system call handler.
- */
-void internal_thread_free();
+bool is_started();
 } // namespace kernel
-
-#endif // __ASSEMBLER__
 
 #endif // KERNEL_HPP

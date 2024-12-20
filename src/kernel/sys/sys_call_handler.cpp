@@ -22,13 +22,14 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/sys/sys_call_handler.hpp"
 #include "../../../include/kernel/kernel.hpp"
-#include "../../../include/kernel/memory/heap.hpp"
-#include "../../../include/kernel/memory/paging.hpp"
+#include "../../../include/kernel/memory/internal_heap.hpp"
+#include "../../../include/kernel/memory/internal_paging.hpp"
+#include "../../../include/kernel/scheduler/internal_cpu_scheduler.hpp"
+#include "../../../include/kernel/sys/internal_sys_call_handler.hpp"
 
 namespace kernel::sys {
-void *handle_system_call(SystemCall call_code, const void *arg) {
+void *internal_handle_sys_call(SystemCall call_code, const void *arg) {
   switch (call_code) {
   case SystemCall::PutString: {
     const char *str = reinterpret_cast<const char *>(arg);
@@ -50,7 +51,7 @@ void *handle_system_call(SystemCall call_code, const void *arg) {
     break;
   }
   case SystemCall::Exit: {
-    internal_thread_free();
+    scheduler::internal_thread_free();
     break;
   }
   default:

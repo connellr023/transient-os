@@ -39,7 +39,6 @@ private:
   uint32_t head = 0;
   uint32_t tail = 0;
   uint32_t size = 0;
-  uint32_t completed = 0;
 
 public:
   SchedulerQueue() = default;
@@ -52,17 +51,18 @@ public:
   bool enqueue(ThreadControlBlock *tcb);
 
   /**
-   * @brief Marks the current thread as complete and increments the completed
-   * count.
+   * @brief Removes the thread at the head of the queue.
+   * @return A pointer to the thread control block that was dequeued. Will be
+   * nullptr if the queue is empty.
    */
-  void mark_current_as_complete();
+  ThreadControlBlock *dequeue();
 
   /**
    * @brief Switches this scheduler to the next thread.
    */
   void next();
 
-  bool is_empty() const { return size == 0 || completed == size; }
+  bool is_empty() const { return size == 0; }
 
   /**
    * @brief Peeks the thread currently at the head of the queue.

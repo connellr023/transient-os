@@ -12,10 +12,7 @@ bool SchedulerQueue::enqueue(ThreadControlBlock *tcb) {
   return true;
 }
 
-void SchedulerQueue::mark_current_as_complete() {
-  this->peek()->mark_as_complete();
-  this->completed++;
-}
+ThreadControlBlock *dequeue() { return nullptr; }
 
 void SchedulerQueue::next() {
   if (this->size == 0) {

@@ -22,35 +22,28 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef INTERRUPTS_HPP
-#define INTERRUPTS_HPP
+#ifndef INTERNAL_SYS_CALL_HANDLER_HPP
+#define INTERNAL_SYS_CALL_HANDLER_HPP
 
-namespace kernel::interrupts {
-/**
- * @brief Enables the system timer interrupt controller.
- */
-void enable_interrupt_controller();
+#include "sys_calls.hpp"
 
 /**
- * @brief Initializes the interrupt vector.
+ * @brief A function pointer type for system call handlers.
+ * @param arg The argument to the system call.
+ * @return The return value of the system call.
  */
-void init_interrupt_vector() asm("_init_interrupt_vector");
+typedef void *(*system_call_handler)(const void *);
 
+namespace kernel::sys {
 /**
- * @brief Enables preemptive interrupt requests.
+ * ### (INTERNAL)
+ * @brief Handles a system call by invoking the appropriate system call handler.
+ * This should only be invoked by the synchronous exception handler.
+ * @param call_code The system call code.
+ * @param arg The argument to the system call.
+ * @return The return value of the system call.
  */
-void enable_preemption() asm("_enable_preemption");
+void *internal_handle_sys_call(SystemCall call_code, const void *arg);
+} // namespace kernel::sys
 
-/**
- * @brief Disables preemptive interrupt requests.
- */
-void disable_preemption() asm("_disable_preemption");
-
-/**
- * @brief Prepares a timer interrupt to fire after a given interval.
- * @param interval The number of cycles to wait before firing the interrupt.
- */
-void prepare_timer_interrupt(uint64_t interval);
-} // namespace kernel::interrupts
-
-#endif // INTERRUPTS_HPP
+#endif // INTERNAL_SYS_CALL_HANDLER_HPP

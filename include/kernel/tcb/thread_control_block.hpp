@@ -25,6 +25,15 @@
 #ifndef THREAD_CONTROL_BLOCK_HPP
 #define THREAD_CONTROL_BLOCK_HPP
 
+#define CPU_CTX_STACK_SIZE (17 * 16) // 17 pairs of 8 byte registers
+#define THREAD_STACK_SIZE PAGE_SIZE
+
+#define LR_IDX 30
+#define ELR_EL1_IDX 31
+#define SPSR_EL1_IDX 32
+
+#ifndef __ASSEMBLER__
+
 #include <stdint.h>
 
 typedef void (*thread_handler_t)(void *);
@@ -68,11 +77,7 @@ public:
    * @brief Allocates a stack for the thread.
    * @return True if the stack was allocated, false otherwise.
    */
-  bool allocate();
-
-  thread_handler_t get_handler() const { return this->handler; }
-
-  void *get_arg() const { return this->arg; }
+  bool stack_alloc();
 
   void *get_page() const { return reinterpret_cast<void *>(this->page_addr); }
 
@@ -103,11 +108,9 @@ public:
     this->sleep_until_us = sleep_until_us;
   }
 
-  void set_page(void *page) {
-    this->page_addr = reinterpret_cast<uint64_t>(page);
-  }
-
   void set_sp(void *sp) { this->sp = reinterpret_cast<uint64_t>(sp); }
 };
+
+#endif // __ASSEMBLER__
 
 #endif // THREAD_CONTROL_BLOCK_HPP
