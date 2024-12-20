@@ -25,7 +25,7 @@
 #ifndef SYS_CALL_TABLE_HPP
 #define SYS_CALL_TABLE_HPP
 
-#include "sys_call.hpp"
+#include "sys_calls.hpp"
 
 /**
  * @brief A function pointer type for system call handlers.

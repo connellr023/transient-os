@@ -54,19 +54,19 @@ void *trigger_sys_call(SystemCall call_code,
  * @brief Triggers a system call that writes a message to the output handler.
  * The output handler must have been initialized or nothing will happen.
  */
-void put_str(const char *str) { trigger_sys_call(SystemCall::PutString, str); }
+void puts(const char *str);
 
 /**
  * @brief Triggers a system call that allocates a page of memory.
  * @return A pointer to the allocated page or nullptr if no memory is available.
  */
-void *page_alloc() { return nullptr; }
+void *page_alloc();
 
 /**
  * @brief Triggers a system call that frees a page of memory.
  * @param page The page to free.
  */
-void page_free(void *page) { return; }
+void page_free(void *page);
 
 /**
  * @brief Triggers a system call that allocates a block of memory on the heap.
@@ -74,18 +74,18 @@ void page_free(void *page) { return; }
  * @return A pointer to the allocated block or nullptr if no memory is
  * available.
  */
-void *heap_alloc(uint64_t size) { return nullptr; }
+void *heap_alloc(uint64_t size);
 
 /**
  * @brief Triggers a system call that frees a block of memory on the heap.
  * @param ptr The pointer to the block to free.
  */
-void heap_free(void *ptr) { return; }
+void heap_free(void *ptr);
 
 /**
  * @brief Triggers a system call that yields the current thread.
  */
-void yield() { trigger_sys_call(SystemCall::Yield); }
+void yield();
 } // namespace kernel::sys
 
 #endif // SYS_CALL_HPP

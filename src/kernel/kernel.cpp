@@ -24,7 +24,6 @@
 
 #include "../../include/kernel/kernel.hpp"
 #include "../../include/kernel/interrupts/interrupts.hpp"
-#include "../../include/kernel/sys/sys_call.hpp"
 #include "../../include/kernel/sys/sys_registers.hpp"
 #include "../../include/kernel/threads/scheduler.hpp"
 
