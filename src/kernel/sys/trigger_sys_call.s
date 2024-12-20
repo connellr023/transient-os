@@ -23,12 +23,9 @@
  */
 
 .globl _trigger_sys_call
-_trigger_system_call:
-    // Load syscall code into w8
-    mov w8, w0
-
-    // Load syscall argument into x0
-    mov x0, x1
+_trigger_sys_call:
+    mov w8, w0 // Load syscall code into w8
+    mov x0, x1 // Load syscall argument into x0
 
     // Trigger a synchronous exception
     svc #0

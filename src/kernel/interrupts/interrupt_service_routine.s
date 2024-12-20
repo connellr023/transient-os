@@ -83,11 +83,12 @@
     add sp, sp, #CPU_CTX_STACK_SIZE
 .endm
 
+    tls .req x18
+
 .globl _irq_handler
 _irq_handler:
-    // Use x9 as a sacrificial register to load the value of SP_EL0
-    mrs x9, sp_el0
-    mov sp, x9
+    mrs tls, sp_el0
+    mov sp, tls
 
     push_registers
 
@@ -108,8 +109,8 @@ _irq_handler:
 .globl _synch_handler
 _synch_handler:
     // Use x9 as a sacrificial register to load the value of SP_EL0
-    mrs x9, sp_el0
-    mov sp, x9
+    mrs tls, sp_el0
+    mov sp, tls
 
     push_registers
 
