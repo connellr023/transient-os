@@ -49,9 +49,3 @@ _vectors:
 
 .align 7
         b       _irq_handler
-
-.align 7
-        b       _fiq_handler
-
-.align 7
-        b       _serror_handler

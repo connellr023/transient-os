@@ -65,7 +65,7 @@ void prepare_timer_interrupt(uint64_t interval);
  * @return The new stack pointer.
  */
 void *internal_irq_exception_handler(void *interrupted_sp) asm(
-    "_irq_exception_handler");
+    "_internal_irq_exception_handler");
 
 /**
  * ### (INTERNAL) Synchronous Exception Handler
@@ -76,7 +76,7 @@ void *internal_irq_exception_handler(void *interrupted_sp) asm(
  */
 void *internal_synch_exception_handler(
     SystemCall call_code, void *arg,
-    void *interrupted_sp) asm("_synch_exception_handler");
+    void *interrupted_sp) asm("_internal_synch_exception_handler");
 } // namespace kernel::interrupts
 
 #endif // INTERRUPTS_HPP

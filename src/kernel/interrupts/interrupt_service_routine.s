@@ -26,6 +26,8 @@
 
 .section .text
 
+    platform_register .req x18
+
 .macro push_registers
     sub sp, sp, #CPU_CTX_STACK_SIZE
 
@@ -83,18 +85,16 @@
     add sp, sp, #CPU_CTX_STACK_SIZE
 .endm
 
-    tls .req x18
-
 .globl _irq_handler
 _irq_handler:
-    mrs tls, sp_el0
-    mov sp, tls
+    mrs platform_register, sp_el0
+    mov sp, platform_register
 
     push_registers
 
     // Pass the base address of the saved registers to the interrupt service routine
     mov x0, sp
-    bl _irq_exception_handler
+    bl _internal_irq_exception_handler
 
     // Update the stack pointer to the next thread
     mov sp, x0
@@ -108,16 +108,15 @@ _irq_handler:
 
 .globl _synch_handler
 _synch_handler:
-    // Use x9 as a sacrificial register to load the value of SP_EL0
-    mrs tls, sp_el0
-    mov sp, tls
+    mrs platform_register, sp_el0
+    mov sp, platform_register
 
     push_registers
 
     mov x1, x0 // Move syscall argument into x1
     mov w0, w8 // Move call code into w0
     mov x2, sp // Move interrupted stack pointer into x2
-    bl _synch_exception_handler
+    bl _internal_synch_exception_handler
 
     // Update the stack pointer to the next thread
     mov sp, x0
@@ -127,12 +126,4 @@ _synch_handler:
     msr sp_el0, x0
 
     pop_registers
-    eret
-
-.globl _fiq_handler
-_fiq_handler:
-    eret
-
-.globl _serror_handler
-_serror_handler:
     eret

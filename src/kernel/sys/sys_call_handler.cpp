@@ -24,15 +24,33 @@
 
 #include "../../../include/kernel/sys/sys_call_handler.hpp"
 #include "../../../include/kernel/kernel.hpp"
+#include "../../../include/kernel/memory/heap.hpp"
+#include "../../../include/kernel/memory/paging.hpp"
 
 namespace kernel::sys {
 void *handle_system_call(SystemCall call_code, const void *arg) {
   switch (call_code) {
   case SystemCall::PutString: {
     const char *str = reinterpret_cast<const char *>(arg);
-    kernel::safe_puts(str);
+    safe_puts(str);
     break;
   }
+  case SystemCall::PageAlloc: {
+    return memory::internal_page_alloc();
+  }
+  case SystemCall::PageFree: {
+    memory::internal_page_free(const_cast<void *>(arg));
+    break;
+  }
+  case SystemCall::HeapAlloc: {
+    return memory::internal_heap_alloc(reinterpret_cast<uintptr_t>(arg));
+  }
+  case SystemCall::HeapFree: {
+    memory::internal_heap_free(const_cast<void *>(arg));
+    break;
+  }
+  case SystemCall::Yield:
+    // Do nothing
   default:
     break;
   }
