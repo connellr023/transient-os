@@ -60,7 +60,7 @@ void *internal_synch_exception_handler(SystemCall call_code, void *arg,
                                        void *interrupted_sp) {
   // Check if the exception was a system call
   uint64_t ec;
-  asm("mrs %0, esr_el1" : "=r"(ec));
+  asm volatile("mrs %0, esr_el1" : "=r"(ec));
   ec >>= 26;
 
   if (ec != SVC_EC) {
