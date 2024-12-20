@@ -37,6 +37,7 @@ enum class SystemCall : uint8_t {
   HeapAlloc,
   HeapFree,
   Yield,
+  Exit,
 };
 
 namespace kernel::sys {
@@ -86,6 +87,12 @@ void heap_free(void *ptr);
  * @brief Triggers a system call that yields the current thread.
  */
 void yield();
+
+/**
+ * @brief Triggers a system call that exits the current thread and cleans up any
+ * resources it was using.
+ */
+[[noreturn]] void exit();
 } // namespace kernel::sys
 
 #endif // SYS_CALL_HPP

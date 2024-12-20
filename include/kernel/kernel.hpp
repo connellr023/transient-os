@@ -27,15 +27,15 @@
 
 #define CPU_CTX_STACK_SIZE (17 * 16) // 17 pairs of 8 byte registers
 
-#define LR_IDX 30
-#define ELR_EL1_IDX 31
-#define SPSR_EL1_IDX 32
-
 #ifndef __ASSEMBLER__
 
 #include "memory/paging.hpp"
 
 #define THREAD_STACK_SIZE PAGE_SIZE
+
+#define LR_IDX 30
+#define ELR_EL1_IDX 31
+#define SPSR_EL1_IDX 32
 
 #include "threads/thread_control_block.hpp"
 #include <stdint.h>
@@ -96,6 +96,13 @@ uint64_t get_thread_id();
  * @return The thread control block of the next thread to run.
  */
 const ThreadControlBlock *internal_context_switch(void *interrupted_sp);
+
+/**
+ * ### (INTERNAL)
+ * @brief Frees resources of currently scheduled thread. Should only be called
+ * by a system call handler.
+ */
+void internal_thread_free();
 } // namespace kernel
 
 #endif // __ASSEMBLER__

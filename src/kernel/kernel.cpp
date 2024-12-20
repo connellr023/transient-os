@@ -24,6 +24,7 @@
 
 #include "../../include/kernel/kernel.hpp"
 #include "../../include/kernel/interrupts/interrupts.hpp"
+#include "../../include/kernel/sys/sys_calls.hpp"
 #include "../../include/kernel/sys/sys_registers.hpp"
 #include "../../include/kernel/threads/scheduler.hpp"
 
@@ -42,23 +43,6 @@ output_handler_t kernel_string_output_handler = nullptr;
  * @brief Flag to indicate if the kernel has started.
  */
 bool is_kernel_started = false;
-
-/**
- * @brief The function that runs when a thread returns.
- */
-[[noreturn]] void thread_return_handler() {
-  interrupts::disable_preemption();
-
-  scheduler.mark_current_as_complete();
-  memory::internal_page_free(scheduler.peek()->get_page());
-
-  // Trigger context switch
-  interrupts::enable_preemption();
-
-  while (true) {
-    asm volatile("wfe");
-  }
-}
 
 /**
  * @brief Allocates stack space for a thread. A thread can only have a stack
@@ -90,8 +74,8 @@ bool alloc_thread_stack(ThreadControlBlock *tcb) {
   // Set argument to x0
   register_stack[0] = reinterpret_cast<uint64_t>(tcb->get_arg());
 
-  // Set x30 (LR) to the thread return handler
-  register_stack[LR_IDX] = reinterpret_cast<uint64_t>(&thread_return_handler);
+  // Set x30 (LR) to the exit system call
+  register_stack[LR_IDX] = reinterpret_cast<uint64_t>(&sys::exit);
 
   // Set ELR_EL1 to the thread handler
   register_stack[ELR_EL1_IDX] = reinterpret_cast<uint64_t>(tcb->get_handler());
@@ -157,6 +141,11 @@ const ThreadControlBlock *internal_context_switch(void *interrupted_sp) {
 
   scheduler.peek()->mark_as_running();
   return scheduler.peek();
+}
+
+void internal_thread_free() {
+  memory::internal_page_free(scheduler.peek()->get_page());
+  scheduler.mark_current_as_complete();
 }
 
 bool schedule_thread(ThreadControlBlock *tcb) {

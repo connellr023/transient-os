@@ -49,8 +49,10 @@ void *handle_system_call(SystemCall call_code, const void *arg) {
     memory::internal_heap_free(const_cast<void *>(arg));
     break;
   }
-  case SystemCall::Yield:
-    // Do nothing
+  case SystemCall::Exit: {
+    internal_thread_free();
+    break;
+  }
   default:
     break;
   }
