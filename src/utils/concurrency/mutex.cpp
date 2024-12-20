@@ -28,20 +28,20 @@
 using namespace kernel::interrupts;
 
 void Mutex::lock() {
-  disable_interrupts();
+  disable_preemption();
 
   while (this->is_locked) {
-    enable_interrupts();
+    enable_preemption();
     asm volatile("wfi");
-    disable_interrupts();
+    disable_preemption();
   }
 
   this->is_locked = true;
-  enable_interrupts();
+  enable_preemption();
 }
 
 void Mutex::unlock() {
-  disable_interrupts();
+  disable_preemption();
   this->is_locked = false;
-  enable_interrupts();
+  enable_preemption();
 }

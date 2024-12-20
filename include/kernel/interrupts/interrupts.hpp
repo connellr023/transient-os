@@ -43,14 +43,14 @@ void enable_interrupt_controller();
 void init_interrupt_vector() asm("_init_interrupt_vector");
 
 /**
- * @brief Enables interrupt requests.
+ * @brief Enables preemptive interrupt requests.
  */
-void enable_interrupts() asm("_enable_interrupts");
+void enable_preemption() asm("_enable_preemption");
 
 /**
- * @brief Disables interrupt requests.
+ * @brief Disables preemptive interrupt requests.
  */
-void disable_interrupts() asm("_disable_interrupts");
+void disable_preemption() asm("_disable_preemption");
 
 /**
  * @brief Prepares a timer interrupt to fire after a given interval.
@@ -59,26 +59,24 @@ void disable_interrupts() asm("_disable_interrupts");
 void prepare_timer_interrupt(uint64_t interval);
 
 /**
- * @brief Clears the timer interrupt.
- */
-void clear_timer_interrupt();
-
-/**
+ * ### (INTERNAL) IRQ Exception Handler
  * @brief Handles an interrupt request exception.
  * @param interrupted_sp The stack pointer at the time of the interrupt.
  * @return The new stack pointer.
  */
-void *irq_exception_handler(void *interrupted_sp) asm("_irq_exception_handler");
+void *internal_irq_exception_handler(void *interrupted_sp) asm(
+    "_irq_exception_handler");
 
 /**
+ * ### (INTERNAL) Synchronous Exception Handler
  * @brief Handles a synchronous exception.
  * @param call_code The system call code. (SVC only)
  * @param arg The argument to the system call. (SVC only)
  * @return Stack pointer of the next thread.
  */
-void *
-synch_exception_handler(SystemCall call_code, void *arg,
-                        void *interrupted_sp) asm("_synch_exception_handler");
+void *internal_synch_exception_handler(
+    SystemCall call_code, void *arg,
+    void *interrupted_sp) asm("_synch_exception_handler");
 } // namespace kernel::interrupts
 
 #endif // INTERRUPTS_HPP

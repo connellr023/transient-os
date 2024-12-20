@@ -27,5 +27,5 @@
 
 using namespace kernel::interrupts;
 
-AtomicBlock::AtomicBlock() { disable_interrupts(); }
-AtomicBlock::~AtomicBlock() { enable_interrupts(); }
+AtomicBlock::AtomicBlock() { disable_preemption(); }
+AtomicBlock::~AtomicBlock() { enable_preemption(); }

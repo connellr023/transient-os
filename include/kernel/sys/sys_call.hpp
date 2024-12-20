@@ -27,23 +27,65 @@
 
 #include <stdint.h>
 
-namespace kernel::sys {
 /**
  * @brief An enumeration of possible system call codes.
  */
 enum class SystemCall : uint8_t {
-  HelloWorld = 0,
-  HeapAlloc = 1,
+  PutString,
+  PageAlloc,
+  PageFree,
+  HeapAlloc,
+  HeapFree,
+  Yield,
 };
 
+namespace kernel::sys {
 /**
- * @brief Utility function to trigger a system call.
+ * @brief Utility function to trigger a system call. Can be called directly, or
+ * use wrapper functions.
  * @param call_code The system call code.
  * @param arg The argument to the system call.
  * @return The return value of the system call.
  */
-void *trigger_system_call(SystemCall call_code,
-                          void *arg) asm("_trigger_system_call");
+void *trigger_sys_call(SystemCall call_code,
+                       const void *arg = nullptr) asm("_trigger_sys_call");
+
+/**
+ * @brief Triggers a system call that writes a message to the output handler.
+ * The output handler must have been initialized or nothing will happen.
+ */
+void put_str(const char *str) { trigger_sys_call(SystemCall::PutString, str); }
+
+/**
+ * @brief Triggers a system call that allocates a page of memory.
+ * @return A pointer to the allocated page or nullptr if no memory is available.
+ */
+void *page_alloc() { return nullptr; }
+
+/**
+ * @brief Triggers a system call that frees a page of memory.
+ * @param page The page to free.
+ */
+void page_free(void *page) { return; }
+
+/**
+ * @brief Triggers a system call that allocates a block of memory on the heap.
+ * @param size The size of the block to allocate.
+ * @return A pointer to the allocated block or nullptr if no memory is
+ * available.
+ */
+void *heap_alloc(uint64_t size) { return nullptr; }
+
+/**
+ * @brief Triggers a system call that frees a block of memory on the heap.
+ * @param ptr The pointer to the block to free.
+ */
+void heap_free(void *ptr) { return; }
+
+/**
+ * @brief Triggers a system call that yields the current thread.
+ */
+void yield() { trigger_sys_call(SystemCall::Yield); }
 } // namespace kernel::sys
 
 #endif // SYS_CALL_HPP

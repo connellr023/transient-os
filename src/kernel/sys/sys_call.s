@@ -22,7 +22,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-.globl _trigger_system_call
+.globl _trigger_sys_call
 _trigger_system_call:
     // Load syscall code into w8
     mov w8, w0

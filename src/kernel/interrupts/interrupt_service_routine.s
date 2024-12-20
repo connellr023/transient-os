@@ -27,10 +27,6 @@
 .section .text
 
 .macro push_registers
-    // Use x9 as a sacrificial register to load the value of SP_EL0
-    mrs x9, sp_el0
-    mov sp, x9
-
     sub sp, sp, #CPU_CTX_STACK_SIZE
 
     // Save that state of all general purpose registers
@@ -60,10 +56,6 @@
 .endm
 
 .macro pop_registers
-    // Prepare SP_EL0 for the next thread
-    add x0, x0, #CPU_CTX_STACK_SIZE
-    msr sp_el0, x0
-
     // Restore SPSR_EL1, ELR_EL1, and LR
     ldr x23, [sp, #16*16]
     ldp x30, x22, [sp, #16*15]
@@ -93,6 +85,10 @@
 
 .globl _irq_handler
 _irq_handler:
+    // Use x9 as a sacrificial register to load the value of SP_EL0
+    mrs x9, sp_el0
+    mov sp, x9
+
     push_registers
 
     // Pass the base address of the saved registers to the interrupt service routine
@@ -102,26 +98,34 @@ _irq_handler:
     // Update the stack pointer to the next thread
     mov sp, x0
 
+    // Prepare SP_EL0 for the next thread
+    add x0, x0, #CPU_CTX_STACK_SIZE
+    msr sp_el0, x0
+
     pop_registers
     eret
 
 .globl _synch_handler
 _synch_handler:
-    bl _disable_interrupts
+    // Use x9 as a sacrificial register to load the value of SP_EL0
+    mrs x9, sp_el0
+    mov sp, x9
+
     push_registers
 
-    // Move syscall argument into x1
-    mov x2, x0
-
-    // Move call code into w0
-    mov w0, w8
-
-    // Move interrupted stack pointer into x2
-    mov x2, sp
-
+    mov x1, x0 // Move syscall argument into x1
+    mov w0, w8 // Move call code into w0
+    mov x2, sp // Move interrupted stack pointer into x2
     bl _synch_exception_handler
+
+    // Update the stack pointer to the next thread
+    mov sp, x0
+
+    // Prepare SP_EL0 for the next thread
+    add x0, x0, #CPU_CTX_STACK_SIZE
+    msr sp_el0, x0
+
     pop_registers
-    bl _enable_interrupts
     eret
 
 .globl _fiq_handler

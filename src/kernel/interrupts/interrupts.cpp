@@ -27,27 +27,26 @@
 #include "../../../include/kernel/peripherals/timer_interrupt.hpp"
 #include "../../../include/kernel/threads/thread_control_block.hpp"
 
-using namespace kernel::sys;
+namespace kernel::interrupts {
+/**
+ * @brief Clears the timer interrupt.
+ */
+void clear_timer_interrupt() { *TIMER_CS = TIMER_CS_M1; }
 
-void kernel::interrupts::prepare_timer_interrupt(uint64_t interval) {
+void prepare_timer_interrupt(uint64_t interval) {
   static uint32_t current_us = 0;
 
   current_us = *TIMER_COUNTER_LOW;
   *TIMER_CMP_1 = current_us + interval;
 }
 
-void kernel::interrupts::clear_timer_interrupt() {
-  // Clear the M1 bit in the control/status register
-  *TIMER_CS = TIMER_CS_M1;
-}
-
-void kernel::interrupts::enable_interrupt_controller() {
+void enable_interrupt_controller() {
   // Enable the system timer IRQ
   *ENABLE_IRQS_1 = SYSTEM_TIMER_IRQ_1;
 }
 
-void *kernel::interrupts::irq_exception_handler(void *interrupted_sp) {
-  const ThreadControlBlock *next_tcb = context_switch(interrupted_sp);
+void *internal_irq_exception_handler(void *interrupted_sp) {
+  const ThreadControlBlock *next_tcb = internal_context_switch(interrupted_sp);
 
   // Prepare timer for next context switch
   prepare_timer_interrupt(next_tcb->get_burst_time());
@@ -57,16 +56,15 @@ void *kernel::interrupts::irq_exception_handler(void *interrupted_sp) {
   return next_tcb->get_sp();
 }
 
-void *kernel::interrupts::synch_exception_handler(SystemCall call_code,
-                                                  void *arg,
-                                                  void *interrupted_sp) {
+void *internal_synch_exception_handler(SystemCall call_code, void *arg,
+                                       void *interrupted_sp) {
   // Check if the exception was a system call
   uint64_t ec;
   asm("mrs %0, esr_el1" : "=r"(ec));
   ec >>= 26;
 
   if (ec != SVC_EC) {
-    kernel_panic("Non-SVC synchronous exception occurred");
+    panic("Non-SVC synchronous exception occurred");
   }
 
   void *value = handle_system_call(call_code, arg);
@@ -76,5 +74,6 @@ void *kernel::interrupts::synch_exception_handler(SystemCall call_code,
   sp[0] = reinterpret_cast<uint64_t>(value);
 
   // Switch to a different thread
-  return irq_exception_handler(interrupted_sp);
+  return internal_irq_exception_handler(interrupted_sp);
 }
+} // namespace kernel::interrupts

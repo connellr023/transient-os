@@ -27,13 +27,12 @@
 
 #include <stdint.h>
 
-namespace kernel::threads {
 typedef void (*thread_handler_t)(void *);
 
 /**
  * @brief Enumeration of the possible states of a thread.
  */
-enum class ThreadState {
+enum class ThreadState : uint8_t {
   Uninitialized,
   Ready,
   Running,
@@ -87,6 +86,5 @@ public:
 
   void set_sp(void *sp) { this->sp = reinterpret_cast<uint64_t>(sp); }
 };
-} // namespace kernel::threads
 
 #endif // THREAD_CONTROL_BLOCK_HPP

@@ -25,8 +25,6 @@
 #include "../../../include/kernel/threads/thread_control_block.hpp"
 #include "../../../include/kernel/memory/paging.hpp"
 
-using namespace kernel::threads;
-
 volatile uint64_t thread_id_counter = 0;
 
 void ThreadControlBlock::init(thread_handler_t handler, uint32_t quantum_us,

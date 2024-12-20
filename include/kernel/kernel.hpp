@@ -40,11 +40,9 @@
 #include "threads/thread_control_block.hpp"
 #include <stdint.h>
 
-namespace kernel {
-using namespace threads;
-
 typedef void (*output_handler_t)(const char *);
 
+namespace kernel {
 /**
  * @brief Initializes an output handler for kernel debugging.
  */
@@ -55,27 +53,14 @@ void set_output_handler(output_handler_t output_handler);
  * This function should be called after all initialization is done.
  * This function will not return.
  */
-void start();
+[[noreturn]] void start();
 
 /**
- * @brief Yields the current thread by triggering a context switch.
+ * @brief If something goes wrong, call this function to panic the kernel.
+ * Will print a message if an output handler is set and then put the CPU in a
+ * low power state.
  */
-void yield();
-
-/**
- * @brief Handles a context switch.
- * @param interrupted_sp The stack pointer of the interrupted thread.
- * @return The thread control block of the next thread to run.
- */
-const ThreadControlBlock *context_switch(void *interrupted_sp);
-
-/**
- * @brief Allocates stack space for a thread. A thread can only have a stack
- * allocated to it once. This function is not thread safe (should only be used
- * during initialization).
- * @param tcb The thread control block of the thread.
- */
-bool alloc_thread_stack(ThreadControlBlock *tcb);
+[[noreturn]] void panic(const char *msg);
 
 /**
  * @brief Schedules a thread to run. This function is not thread safe (should
@@ -86,28 +71,10 @@ bool alloc_thread_stack(ThreadControlBlock *tcb);
 bool schedule_thread(ThreadControlBlock *tcb);
 
 /**
- * @brief Gets the thread ID of the currently running thread.
- * @return The thread ID.
- */
-uint64_t get_thread_id();
-
-/**
- * @brief The function that runs when a thread returns.
- */
-void thread_return_handler();
-
-/**
- * @brief If something goes wrong, call this function to panic the kernel.
- * Will print a message if an output handler is set and then put the CPU in a
- * low power state.
- */
-void kernel_panic(const char *msg);
-
-/**
  * @brief Prints a message to the output handler.
  * @param str The message to print.
  */
-void safe_put(const char *str);
+void safe_puts(const char *str);
 
 /**
  * @brief Prints a hex value to the output handler.
@@ -116,9 +83,19 @@ void safe_put(const char *str);
 void safe_hex(uint64_t value);
 
 /**
- * @brief Triggers a system call that writes a message to the output handler.
+ * @brief Gets the thread ID of the currently running thread.
+ * @return The thread ID.
  */
-void hello_world();
+uint64_t get_thread_id();
+
+/**
+ * ### (INTERNAL)
+ * @brief Handles a context switch by updating the current thread's TCB and
+ * scheduling the next thread. This function should never be called directly.
+ * @param interrupted_sp The stack pointer of the interrupted thread.
+ * @return The thread control block of the next thread to run.
+ */
+const ThreadControlBlock *internal_context_switch(void *interrupted_sp);
 } // namespace kernel
 
 #endif // __ASSEMBLER__

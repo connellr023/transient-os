@@ -31,13 +31,13 @@ _init_interrupt_vector:
         msr     vbar_el1, x0
         ret
 
-.globl _enable_interrupts
-_enable_interrupts:
+.globl _enable_preeption
+_enable_preeption:
         msr     daifclr, #2
         ret
 
-.globl _disable_interrupts
-_disable_interrupts:
+.globl _disable_preemption
+_disable_preemption:
         msr     daifset, #2
         ret
 

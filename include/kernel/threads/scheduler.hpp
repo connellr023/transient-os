@@ -29,7 +29,6 @@
 
 #define SCHEDULER_CAPACITY 250
 
-namespace kernel::threads {
 /**
  * @brief A simple queue for the scheduler.
  */
@@ -71,6 +70,5 @@ public:
    */
   ThreadControlBlock *peek() { return queue[head]; }
 };
-} // namespace kernel::threads
 
 #endif // SCHEDULER_HPP

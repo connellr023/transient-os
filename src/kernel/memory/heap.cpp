@@ -24,8 +24,7 @@
 
 #include "../../../include/kernel/memory/heap.hpp"
 
-using namespace kernel::memory;
-
+namespace kernel::memory {
 /**
  * @brief Array of pointers to the start of each heap page. Each heap page is
  * not necessarily contiguous.
@@ -37,7 +36,7 @@ uint8_t (*heap_pages)[MAX_HEAP_PAGES] = {nullptr};
  */
 uint64_t heap_page_index;
 
-void *kernel::memory::km_heap_alloc(uint64_t size) {
+void *internal_heap_alloc(uint64_t size) {
   // Dont allocate more than a page (we cannot assume each heap page is
   // contiguous)
   if (size > PAGE_SIZE) {
@@ -75,4 +74,5 @@ void *kernel::memory::km_heap_alloc(uint64_t size) {
   return nullptr; // Maybe...
 }
 
-void kernel::memory::km_heap_free(void *ptr) {}
+void internal_heap_free(void *ptr) {}
+} // namespace kernel::memory

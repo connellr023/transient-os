@@ -25,50 +25,18 @@
 #include "../../../include/kernel/sys/sys_call_handler.hpp"
 #include "../../../include/kernel/kernel.hpp"
 
-using namespace kernel::sys;
-
-/**
- * @brief Test system call that writes a message to the kernel debug output
- * handler. Should only be invoked by system call handler.
- * @param _arg Unused.
- * @return Always nullptr.
- */
-void *sys_call_hello_world(void *_arg) {
-  // Test system call
-  kernel::safe_put("Hello, world!\n");
-
-  return nullptr;
-}
-
-/**
- * @brief System call that allocates a block of memory on the heap. Should only
- * be invoked by system call handler.
- * @param size The size of the block to allocate.
- * @return A pointer to the allocated block.
- */
-void *sys_call_heap_alloc(void *size) {
-  const uint64_t alloc_size = reinterpret_cast<uint64_t>(size);
-
-  // For now
-  return nullptr;
-}
-
-/**
- * @brief Table of system call handlers.
- */
-const system_call_handler system_call_table[] = {
-    sys_call_hello_world,
-    sys_call_heap_alloc,
-};
-
-void *kernel::sys::handle_system_call(SystemCall call_code, void *arg) {
-  const uint8_t numerical_call_code = static_cast<uint8_t>(call_code);
-  constexpr uint64_t system_call_table_size =
-      sizeof(system_call_table) / sizeof(system_call_table[0]);
-
-  if (numerical_call_code >= system_call_table_size) {
-    return nullptr;
+namespace kernel::sys {
+void *handle_system_call(SystemCall call_code, const void *arg) {
+  switch (call_code) {
+  case SystemCall::PutString: {
+    const char *str = reinterpret_cast<const char *>(arg);
+    kernel::safe_puts(str);
+    break;
+  }
+  default:
+    break;
   }
 
-  return system_call_table[numerical_call_code](arg);
+  return nullptr;
 }
+} // namespace kernel::sys

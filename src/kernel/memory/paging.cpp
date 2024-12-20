@@ -24,11 +24,13 @@
 
 #include "../../../include/kernel/memory/paging.hpp"
 
-using namespace kernel::memory;
-
+namespace kernel::memory {
+/**
+ * @brief Array of booleans representing the state of each page in memory.
+ */
 bool memory_map[PAGE_COUNT] = {false};
 
-void *kernel::memory::alloc_page() {
+void *internal_page_alloc() {
   for (uint64_t i = 0; i < PAGE_COUNT; i++) {
     if (!memory_map[i]) {
       memory_map[i] = true;
@@ -47,7 +49,8 @@ void *kernel::memory::alloc_page() {
   return nullptr;
 }
 
-void kernel::memory::free_page(void *page) {
+void internal_page_free(void *page) {
   const uint64_t page_addr = reinterpret_cast<uint64_t>(page);
   memory_map[(page_addr - LOW_MEMORY) / PAGE_SIZE] = false;
 }
+} // namespace kernel::memory

@@ -30,16 +30,10 @@
  */
 class Mutex {
 private:
-  volatile bool is_locked;
+  volatile bool is_locked = false;
 
 public:
-  Mutex() : is_locked(false) {}
-
-  ~Mutex() {
-    if (this->is_locked) {
-      this->unlock();
-    }
-  }
+  Mutex() = default;
 
   /**
    * @brief Lock the mutex.

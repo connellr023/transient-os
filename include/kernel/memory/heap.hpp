@@ -30,7 +30,6 @@
 
 #define MAX_HEAP_PAGES 10
 
-namespace kernel::memory {
 /**
  * @brief A node in the heap allocator's free list.
  */
@@ -52,25 +51,26 @@ public:
   void set_next(FreeListNode *next) { this->next = next; }
 };
 
+namespace kernel::memory {
 /**
- * ### Kernel memory heap allocator
+ * ### Kernel memory heap allocator (INTERNAL)
  * @brief Allocates a block of memory on the heap. This is not thread safe and
- * should only be invoked by a system call handler or if mutual exclusion is
+ * should only be invoked by a system call handler.
  * guaranteed.
  * @param size The size of the block to allocate.
  * @return A pointer to the allocated block. Returns nullptr if no memory is
  * available.
  */
-void *km_heap_alloc(uint64_t size);
+void *internal_heap_alloc(uint64_t size);
 
 /**
- * ### Kernel memory heap free
+ * ### Kernel memory heap free (INTERNAL)
  * @brief Frees a block of memory on the heap. This is not thread safe and
- * should only be invoked by a system call handler or if mutual exclusion is
+ * should only be invoked by a system call handler.
  * guaranteed.
  * @param ptr The pointer to the block to free.
  */
-void km_heap_free(void *ptr);
+void internal_heap_free(void *ptr);
 } // namespace kernel::memory
 
 #endif // HEAP_HPP

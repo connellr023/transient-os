@@ -1,7 +1,5 @@
 #include "../../../include/kernel/threads/scheduler.hpp"
 
-using namespace kernel::threads;
-
 bool SchedulerQueue::enqueue(ThreadControlBlock *tcb) {
   if (this->size >= SCHEDULER_CAPACITY) {
     return false;

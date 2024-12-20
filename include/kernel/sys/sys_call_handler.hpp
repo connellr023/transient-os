@@ -27,14 +27,14 @@
 
 #include "sys_call.hpp"
 
-namespace kernel::sys {
 /**
  * @brief A function pointer type for system call handlers.
  * @param arg The argument to the system call.
  * @return The return value of the system call.
  */
-typedef void *(*system_call_handler)(void *);
+typedef void *(*system_call_handler)(const void *);
 
+namespace kernel::sys {
 /**
  * @brief Handles a system call by invoking the appropriate system call handler.
  * This should only be invoked by the synchronous exception handler.
@@ -42,7 +42,7 @@ typedef void *(*system_call_handler)(void *);
  * @param arg The argument to the system call.
  * @return The return value of the system call.
  */
-void *handle_system_call(SystemCall call_code, void *arg);
+void *handle_system_call(SystemCall call_code, const void *arg);
 } // namespace kernel::sys
 
 #endif // SYS_CALL_TABLE_HPP
