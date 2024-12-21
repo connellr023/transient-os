@@ -37,6 +37,7 @@ private:
   ThreadControlBlock *queue[QUEUE_CAPACITY]{nullptr};
 
   uint32_t head = 0;
+  uint32_t current = 0;
   uint32_t tail = 0;
   uint32_t size = 0;
 
@@ -62,13 +63,23 @@ public:
    */
   void next();
 
+  /**
+   * @brief Predicate to check if the queue is empty.
+   * @return True if the queue is empty, false otherwise.
+   */
   bool is_empty() const { return size == 0; }
+
+  /**
+   * @brief Predicate to check if the queue is full.
+   * @return True if the queue is full, false otherwise.
+   */
+  bool is_full() const { return size >= QUEUE_CAPACITY - 1; }
 
   /**
    * @brief Peeks the thread currently at the head of the queue.
    * @return A pointer to the thread control block.
    */
-  ThreadControlBlock *peek() { return queue[head]; }
+  ThreadControlBlock *peek();
 };
 
 #endif // SCHEDULER_QUEUE_HPP
