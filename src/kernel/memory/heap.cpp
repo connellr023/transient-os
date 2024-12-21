@@ -22,7 +22,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/memory/heap.hpp"
+#include "../../../include/kernel/memory/internal_heap.hpp"
 
 namespace kernel::memory {
 void *internal_heap_alloc(uint64_t size) {

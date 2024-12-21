@@ -23,7 +23,7 @@
  */
 
 #include "../../../include/kernel/tcb/thread_control_block.hpp"
-#include "../../../include/kernel/memory/paging.hpp"
+#include "../../../include/kernel/memory/internal_paging.hpp"
 #include "../../../include/kernel/sys/sys_calls.hpp"
 #include "../../../include/kernel/sys/sys_registers.hpp"
 

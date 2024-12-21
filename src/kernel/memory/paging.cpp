@@ -22,7 +22,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/memory/paging.hpp"
+#include "../../../include/kernel/memory/internal_paging.hpp"
 
 namespace kernel::memory {
 /**

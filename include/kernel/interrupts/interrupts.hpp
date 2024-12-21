@@ -25,6 +25,8 @@
 #ifndef INTERRUPTS_HPP
 #define INTERRUPTS_HPP
 
+#include <stdint.h>
+
 namespace kernel::interrupts {
 /**
  * @brief Enables the system timer interrupt controller.

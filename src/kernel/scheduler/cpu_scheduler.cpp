@@ -1,6 +1,6 @@
 #include "../../../include/kernel/scheduler/cpu_scheduler.hpp"
 #include "../../../include/kernel/kernel.hpp"
-#include "../../../include/kernel/memory/paging.hpp"
+#include "../../../include/kernel/memory/internal_paging.hpp"
 #include "../../../include/kernel/scheduler/internal_cpu_scheduler.hpp"
 #include "../../../include/kernel/scheduler/scheduler_queue.hpp"
 

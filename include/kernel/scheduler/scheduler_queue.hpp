@@ -58,7 +58,7 @@ public:
   ThreadControlBlock *dequeue();
 
   /**
-   * @brief Switches this scheduler to the next thread.
+   * @brief This will move the head of the queue to the next ready thread.
    */
   void next();
 
