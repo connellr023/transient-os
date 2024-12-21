@@ -78,5 +78,5 @@ void SchedulerQueue::next() {
     if (this->current == this->tail) {
       this->current = this->head;
     }
-  } while (!this->peek()->is_ready());
+  } while (!this->queue[this->current]->is_ready());
 }
