@@ -27,8 +27,8 @@
 
 #include "../peripherals/mmio.hpp"
 
-#define PAGE_SHIFT 11
-#define TABLE_SHIFT 10
+#define PAGE_SHIFT 12 // 4KB page size
+#define TABLE_SHIFT 9
 #define SECTION_SHIFT (PAGE_SHIFT + TABLE_SHIFT)
 
 #define PAGE_SIZE (1 << PAGE_SHIFT)
@@ -42,7 +42,12 @@
 
 #ifndef __ASSEMBLER__
 
-#define MEMORY_FILL 0xB0BABABE
+// Pages allocated to threads will have the top half for the stack and the bottom half for the heap
+// Stack and heap overflows are not checked
+#define THREAD_STACK_SIZE (PAGE_SIZE / 2) // Half of page for stack
+#define THREAD_HEAP_SIZE (PAGE_SIZE - THREAD_STACK_SIZE) // Rest of page for heap
+
+#define MEMORY_FILL 0xB0BABABE // ;)
 
 #include <stdint.h>
 

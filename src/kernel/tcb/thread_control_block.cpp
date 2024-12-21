@@ -24,6 +24,7 @@
 
 #include "../../../include/kernel/tcb/thread_control_block.hpp"
 #include "../../../include/kernel/memory/internal_paging.hpp"
+#include "../../../include/kernel/memory/free_list.hpp"
 #include "../../../include/kernel/sys/sys_calls.hpp"
 #include "../../../include/kernel/sys/sys_registers.hpp"
 
@@ -44,7 +45,7 @@ void ThreadControlBlock::init(thread_handler_t handler, uint32_t quantum_us,
   this->arg = arg;
 }
 
-bool ThreadControlBlock::stack_alloc() {
+bool ThreadControlBlock::alloc() {
   if (this->is_allocated()) {
     return false;
   }
@@ -56,12 +57,14 @@ bool ThreadControlBlock::stack_alloc() {
   }
 
   const uint64_t page_addr = reinterpret_cast<uint64_t>(page);
-  const uint64_t sp = page_addr + THREAD_STACK_SIZE - CPU_CTX_STACK_SIZE;
 
+  // Initialize stack
+  // Set stack pointer to top of the page (stack grows down)
+  const uint64_t sp = page_addr + PAGE_SIZE - CPU_CTX_STACK_SIZE;
   uint64_t *register_stack = reinterpret_cast<uint64_t *>(sp);
 
   // Set x1 to x29 (FP) equal to 0
-  for (int i = 1; i < LR_IDX; i++) {
+  for (int i = 1; i <= FP_IDX; i++) {
     register_stack[i] = 0;
   }
 
@@ -79,7 +82,11 @@ bool ThreadControlBlock::stack_alloc() {
 
   this->page_addr = reinterpret_cast<uint64_t>(page);
   this->sp = sp;
-  this->mark_as_ready();
 
+  // Initialize heap at bottom of page (heap will grow up)
+  FreeListNode *node = reinterpret_cast<FreeListNode *>(page);
+  node->init(THREAD_HEAP_SIZE - sizeof(FreeListNode));
+
+  this->mark_as_ready();
   return true;
 }

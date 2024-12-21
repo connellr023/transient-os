@@ -55,6 +55,7 @@ void *internal_handle_sys_call(SystemCall call_code, const void *arg) {
     break;
   }
   default:
+    // Yield system call does nothing so this case will be hit for it
     break;
   }
 

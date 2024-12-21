@@ -69,7 +69,7 @@ void start() {
 }
 
 bool prepare_thread(ThreadControlBlock *tcb) {
-  return tcb->stack_alloc() && scheduler::enqueue(tcb);
+  return tcb->alloc() && scheduler::enqueue(tcb);
 }
 
 void safe_puts(const char *str) {

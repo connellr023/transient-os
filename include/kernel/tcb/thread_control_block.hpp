@@ -26,13 +26,13 @@
 #define THREAD_CONTROL_BLOCK_HPP
 
 #define CPU_CTX_STACK_SIZE (17 * 16) // 17 pairs of 8 byte registers
-#define THREAD_STACK_SIZE PAGE_SIZE
 
+#ifndef __ASSEMBLER__
+
+#define FP_IDX 29
 #define LR_IDX 30
 #define ELR_EL1_IDX 31
 #define SPSR_EL1_IDX 32
-
-#ifndef __ASSEMBLER__
 
 #include <stdint.h>
 
@@ -74,10 +74,10 @@ public:
   void init(thread_handler_t handler, uint32_t quantum_us, void *arg = nullptr);
 
   /**
-   * @brief Allocates a stack for the thread.
-   * @return True if the stack was allocated, false otherwise.
+   * @brief Allocates a page for the thread stack and heap.
+   * @return True if the page was successfully allocated, false otherwise.
    */
-  bool stack_alloc();
+  bool alloc();
 
   void *get_page() const { return reinterpret_cast<void *>(this->page_addr); }
 
