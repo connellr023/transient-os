@@ -57,7 +57,7 @@ private:
   uint64_t thread_id;
   uint64_t page_addr;
   uint32_t quantum_us;
-  uint64_t sleep_until_us;
+  uint32_t sleep_until_us;
   ThreadState state;
   uint64_t sp;
   thread_handler_t handler;
@@ -87,6 +87,8 @@ public:
 
   uint32_t get_burst_time() const { return this->quantum_us; }
 
+  uint32_t get_wake_time() const { return this->sleep_until_us; }
+
   bool is_complete() const { return this->state == ThreadState::Complete; }
 
   bool is_ready() const { return this->state == ThreadState::Ready; }
@@ -103,7 +105,7 @@ public:
 
   void mark_as_complete() { this->state = ThreadState::Complete; }
 
-  void mark_as_sleeping(uint64_t sleep_until_us) {
+  void mark_as_sleeping(uint32_t sleep_until_us) {
     this->state = ThreadState::Sleeping;
     this->sleep_until_us = sleep_until_us;
   }

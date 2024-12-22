@@ -60,8 +60,17 @@ public:
 
   /**
    * @brief This will move the head of the queue to the next ready thread.
+   * @return A pointer to the new currently scheduled thread control block. Will
+   * be nullptr if the queue is empty.
    */
-  void next();
+  ThreadControlBlock *next();
+
+  /**
+   * @brief Peeks the thread currently at the head of the queue.
+   * @return A pointer to the thread control block. Will be nullptr if the queue
+   * is empty.
+   */
+  ThreadControlBlock *peek();
 
   /**
    * @brief Predicate to check if the queue is empty.
@@ -74,12 +83,6 @@ public:
    * @return True if the queue is full, false otherwise.
    */
   bool is_full() const { return size >= QUEUE_CAPACITY - 1; }
-
-  /**
-   * @brief Peeks the thread currently at the head of the queue.
-   * @return A pointer to the thread control block.
-   */
-  ThreadControlBlock *peek();
 };
 
 #endif // SCHEDULER_QUEUE_HPP

@@ -25,7 +25,7 @@
 #include "../../../include/kernel/interrupts/interrupts.hpp"
 #include "../../../include/kernel/interrupts/internal_interrupts.hpp"
 #include "../../../include/kernel/kernel.hpp"
-#include "../../../include/kernel/peripherals/timer_interrupt.hpp"
+#include "../../../include/kernel/peripherals/timer.hpp"
 #include "../../../include/kernel/scheduler/internal_cpu_scheduler.hpp"
 #include "../../../include/kernel/sys/internal_sys_call_handler.hpp"
 #include "../../../include/kernel/tcb/thread_control_block.hpp"

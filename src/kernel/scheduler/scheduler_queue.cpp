@@ -45,7 +45,7 @@ ThreadControlBlock *SchedulerQueue::dequeue() {
     return nullptr;
   }
 
-  ThreadControlBlock *tcb = this->peek();
+  ThreadControlBlock *tcb = this->queue[this->head];
   const uint32_t new_head = (this->head + 1) % QUEUE_CAPACITY;
 
   // Keep current within bounds.
@@ -67,16 +67,16 @@ ThreadControlBlock *SchedulerQueue::peek() {
   return this->queue[this->current];
 }
 
-void SchedulerQueue::next() {
+ThreadControlBlock *SchedulerQueue::next() {
   if (this->is_empty()) {
-    return;
+    return nullptr;
   }
 
-  do {
-    this->current = (this->current + 1) % QUEUE_CAPACITY;
+  this->current = (this->current + 1) % QUEUE_CAPACITY;
 
-    if (this->current == this->tail) {
-      this->current = this->head;
-    }
-  } while (!this->queue[this->current]->is_ready());
+  if (this->current == this->tail) {
+    this->current = this->head;
+  }
+
+  return this->queue[this->current];
 }

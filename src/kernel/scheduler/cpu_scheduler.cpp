@@ -25,12 +25,13 @@
 #include "../../../include/kernel/scheduler/cpu_scheduler.hpp"
 #include "../../../include/kernel/kernel.hpp"
 #include "../../../include/kernel/memory/internal_paging.hpp"
+#include "../../../include/kernel/peripherals/timer.hpp"
 #include "../../../include/kernel/scheduler/internal_cpu_scheduler.hpp"
 #include "../../../include/kernel/scheduler/scheduler_queue.hpp"
 
 namespace kernel::scheduler {
 /**
- * @brief Primary queue of threads.
+ * @brief Primary queue of thread control blocks.
  */
 SchedulerQueue primary_queue;
 
@@ -54,20 +55,46 @@ const ThreadControlBlock *internal_context_switch(void *interrupted_sp) {
     panic("No threads to schedule");
   }
 
-  if (!is_first_context_switch) {
-    // Save context of interrupted thread
-    primary_queue.peek()->set_sp(interrupted_sp);
-    primary_queue.peek()->mark_as_ready();
-
-    // Goto next thread
-    primary_queue.next();
-  } else {
+  if (is_first_context_switch) {
     // Set flag to false after first context switch
+    // All threads at this point are in the ready state
     is_first_context_switch = false;
+
+    // Next thread for first context switch
+    ThreadControlBlock *next = primary_queue.peek();
+    next->mark_as_running();
+
+    return next;
   }
 
-  primary_queue.peek()->mark_as_running();
-  return primary_queue.peek();
+  ThreadControlBlock *current = primary_queue.peek();
+
+  // Save context of interrupted thread
+  current->set_sp(interrupted_sp);
+  current->mark_as_ready();
+
+  // Goto next thread
+  ThreadControlBlock *next = nullptr;
+
+  do {
+    next = primary_queue.next();
+
+    if (next->is_ready()) {
+      break;
+    } else if (next->is_sleeping()) {
+      // Check if thread should be woken up
+      if (next->get_wake_time() < *TIMER_COUNTER_LOW) {
+        next->mark_as_ready();
+        break;
+      }
+    } else {
+      panic("Thread in invalid state");
+    }
+  } while (true); // Loop until a ready thread is found
+
+  next->mark_as_running();
+
+  return next;
 }
 
 void internal_thread_free() {
