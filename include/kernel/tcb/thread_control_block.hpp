@@ -63,6 +63,9 @@ private:
   thread_handler_t handler;
   void *arg;
 
+  void init_stack();
+  void init_heap();
+
 public:
   /**
    * @brief Initializes a thread control block.

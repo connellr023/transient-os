@@ -93,7 +93,6 @@ const ThreadControlBlock *internal_context_switch(void *interrupted_sp) {
   } while (true); // Loop until a ready thread is found
 
   next->mark_as_running();
-
   return next;
 }
 

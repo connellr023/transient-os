@@ -23,18 +23,15 @@
  */
 
 #include "../../../include/kernel/tcb/thread_control_block.hpp"
-#include "../../../include/kernel/memory/internal_paging.hpp"
 #include "../../../include/kernel/memory/free_list.hpp"
+#include "../../../include/kernel/memory/internal_paging.hpp"
 #include "../../../include/kernel/sys/sys_calls.hpp"
 #include "../../../include/kernel/sys/sys_registers.hpp"
 
-/**
- * @brief Counter for thread IDs.
- */
-volatile uint64_t thread_id_counter = 0;
-
 void ThreadControlBlock::init(thread_handler_t handler, uint32_t quantum_us,
                               void *arg) {
+  static volatile uint64_t thread_id_counter = 0;
+
   this->thread_id = thread_id_counter++;
   this->page_addr = 0;
   this->quantum_us = quantum_us;
@@ -45,23 +42,14 @@ void ThreadControlBlock::init(thread_handler_t handler, uint32_t quantum_us,
   this->arg = arg;
 }
 
-bool ThreadControlBlock::alloc() {
-  if (this->is_allocated()) {
-    return false;
+void ThreadControlBlock::init_stack() {
+  if (!this->page_addr || this->is_allocated()) {
+    return;
   }
 
-  void *page = kernel::memory::internal_page_alloc();
-
-  if (!page) {
-    return false;
-  }
-
-  const uint64_t page_addr = reinterpret_cast<uint64_t>(page);
-
-  // Initialize stack
   // Set stack pointer to top of the page (stack grows down)
-  const uint64_t sp = page_addr + PAGE_SIZE - CPU_CTX_STACK_SIZE;
-  uint64_t *register_stack = reinterpret_cast<uint64_t *>(sp);
+  this->sp = this->page_addr + PAGE_SIZE - CPU_CTX_STACK_SIZE;
+  uint64_t *register_stack = reinterpret_cast<uint64_t *>(this->sp);
 
   // Set x1 to x29 (FP) equal to 0
   for (int i = 1; i <= FP_IDX; i++) {
@@ -79,14 +67,34 @@ bool ThreadControlBlock::alloc() {
 
   // Set SPSR_EL1 to the initial value
   register_stack[SPSR_EL1_IDX] = INITIAL_SPSR_EL1_VALUE;
+}
 
-  this->page_addr = reinterpret_cast<uint64_t>(page);
-  this->sp = sp;
+void ThreadControlBlock::init_heap() {
+  if (!this->page_addr || this->is_allocated()) {
+    return;
+  }
 
   // Initialize heap at bottom of page (heap will grow up)
-  FreeListNode *node = reinterpret_cast<FreeListNode *>(page);
-  node->init(THREAD_HEAP_SIZE - sizeof(FreeListNode));
+  FreeListNode *start_node = reinterpret_cast<FreeListNode *>(this->page_addr);
+  start_node->init(THREAD_HEAP_SIZE - sizeof(FreeListNode));
+}
 
+bool ThreadControlBlock::alloc() {
+  if (this->is_allocated()) {
+    return false;
+  }
+
+  void *page = kernel::memory::internal_page_alloc();
+
+  if (!page) {
+    return false;
+  }
+
+  this->page_addr = reinterpret_cast<uint64_t>(page);
+
+  this->init_stack();
+  this->init_heap();
   this->mark_as_ready();
+
   return true;
 }
