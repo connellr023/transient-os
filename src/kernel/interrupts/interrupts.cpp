@@ -36,11 +36,11 @@ namespace kernel::interrupts {
  */
 void clear_timer_interrupt() { *TIMER_CS = TIMER_CS_M1; }
 
-void prepare_timer_interrupt(uint64_t interval) {
+void prepare_timer_interrupt(uint32_t interval_us) {
   static uint32_t current_us = 0;
 
   current_us = *TIMER_COUNTER_LOW;
-  *TIMER_CMP_1 = current_us + interval;
+  *TIMER_CMP_1 = current_us + interval_us;
 }
 
 void enable_interrupt_controller() {

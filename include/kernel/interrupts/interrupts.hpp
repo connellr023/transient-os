@@ -50,9 +50,10 @@ void disable_preemption() asm("_disable_preemption");
 
 /**
  * @brief Prepares a timer interrupt to fire after a given interval.
- * @param interval The number of cycles to wait before firing the interrupt.
+ * @param interval_us The number of microseconds to wait before firing the
+ * interrupt.
  */
-void prepare_timer_interrupt(uint64_t interval);
+void prepare_timer_interrupt(uint32_t interval_us);
 } // namespace kernel::interrupts
 
 #endif // INTERRUPTS_HPP
