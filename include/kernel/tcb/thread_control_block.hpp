@@ -34,6 +34,7 @@
 #define ELR_EL1_IDX 31
 #define SPSR_EL1_IDX 32
 
+#include "../../../include/kernel/memory/free_list.hpp"
 #include <stdint.h>
 
 typedef void (*thread_handler_t)(void *);
@@ -91,6 +92,10 @@ public:
   uint32_t get_burst_time() const { return this->quantum_us; }
 
   uint32_t get_wake_time() const { return this->sleep_until_us; }
+
+  FreeListNode *get_heap_start() const {
+    return reinterpret_cast<FreeListNode *>(this->page_addr);
+  }
 
   bool is_complete() const { return this->state == ThreadState::Complete; }
 

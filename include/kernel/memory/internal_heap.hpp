@@ -25,8 +25,9 @@
 #ifndef HEAP_HPP
 #define HEAP_HPP
 
-#include "internal_paging.hpp"
-#include <stdint.h>
+#include "../../../include/kernel/memory/free_list.hpp"
+
+#define FREED_MEMORY_FILL 0xDEADBEEF
 
 namespace kernel::memory {
 /**
@@ -38,7 +39,7 @@ namespace kernel::memory {
  * @return A pointer to the allocated block. Returns nullptr if no memory is
  * available.
  */
-void *internal_heap_alloc(uint64_t size);
+void *internal_heap_alloc(FreeListNode *start_node, uint64_t size);
 
 /**
  * ### Kernel memory heap free (INTERNAL)

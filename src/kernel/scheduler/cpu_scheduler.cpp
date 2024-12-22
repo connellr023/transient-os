@@ -96,7 +96,7 @@ const ThreadControlBlock *internal_context_switch(void *interrupted_sp) {
   return next;
 }
 
-void internal_thread_free() {
+void internal_current_thread_free() {
   memory::internal_page_free(primary_queue.peek()->get_page());
   primary_queue.dequeue();
 }

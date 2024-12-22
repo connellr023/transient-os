@@ -25,15 +25,50 @@
 #include "../../../include/kernel/memory/internal_heap.hpp"
 
 namespace kernel::memory {
-void *internal_heap_alloc(uint64_t size) {
-  // Dont allocate more than a page (we cannot assume each heap page is
-  // contiguous)
-  if (size > PAGE_SIZE) {
-    return nullptr;
+void *internal_heap_alloc(FreeListNode *start_node, uint64_t size) {
+  FreeListNode *current = start_node;
+
+  while (current) {
+    // Allocate in this node's payload
+    if (current->is_free() && current->get_payload_size() >= size) {
+      const uint64_t payload_start_addr =
+          reinterpret_cast<uintptr_t>(current + 1);
+
+      // Check if the node can be split
+      if (current->get_payload_size() > size + sizeof(FreeListNode)) {
+        // New node should be placed right after the payload
+        FreeListNode *new_node =
+            reinterpret_cast<FreeListNode *>(payload_start_addr + size);
+
+        const uint64_t new_size =
+            current->get_payload_size() - size - sizeof(FreeListNode);
+
+        new_node->init(new_size, current->get_next());
+
+        current->set_size(size);
+        current->set_next(new_node);
+      }
+
+      current->mark_as_used();
+      return reinterpret_cast<void *>(payload_start_addr);
+    }
+
+    // Visit next node
+    current = current->get_next();
   }
 
-  return nullptr; // Maybe...
+  return nullptr;
 }
 
-void internal_heap_free(void *ptr) {}
+void internal_heap_free(void *ptr) {
+  FreeListNode *node = reinterpret_cast<FreeListNode *>(ptr) - 1;
+  node->mark_as_free();
+
+  // Fill freed memory
+  uint64_t *payload = reinterpret_cast<uint64_t *>(ptr);
+
+  for (uint64_t i = 0; i < node->get_payload_size() / sizeof(uint64_t); i++) {
+    payload[i] = FREED_MEMORY_FILL;
+  }
+}
 } // namespace kernel::memory

@@ -23,7 +23,6 @@
  */
 
 #include "../../../include/kernel/tcb/thread_control_block.hpp"
-#include "../../../include/kernel/memory/free_list.hpp"
 #include "../../../include/kernel/memory/internal_paging.hpp"
 #include "../../../include/kernel/sys/sys_calls.hpp"
 #include "../../../include/kernel/sys/sys_registers.hpp"
@@ -57,13 +56,13 @@ void ThreadControlBlock::init_stack() {
   }
 
   // Set argument to x0
-  register_stack[0] = reinterpret_cast<uint64_t>(this->arg);
+  register_stack[0] = reinterpret_cast<uintptr_t>(this->arg);
 
   // Set x30 (LR) to the exit system call
-  register_stack[LR_IDX] = reinterpret_cast<uint64_t>(&kernel::sys::exit);
+  register_stack[LR_IDX] = reinterpret_cast<uintptr_t>(&kernel::sys::exit);
 
   // Set ELR_EL1 to the thread handler
-  register_stack[ELR_EL1_IDX] = reinterpret_cast<uint64_t>(this->handler);
+  register_stack[ELR_EL1_IDX] = reinterpret_cast<uintptr_t>(this->handler);
 
   // Set SPSR_EL1 to the initial value
   register_stack[SPSR_EL1_IDX] = INITIAL_SPSR_EL1_VALUE;
@@ -90,7 +89,7 @@ bool ThreadControlBlock::alloc() {
     return false;
   }
 
-  this->page_addr = reinterpret_cast<uint64_t>(page);
+  this->page_addr = reinterpret_cast<uintptr_t>(page);
 
   this->init_stack();
   this->init_heap();

@@ -18,7 +18,7 @@ const ThreadControlBlock *internal_context_switch(void *interrupted_sp);
  * @brief Frees the resources of the current thread and dequeues it from the
  * primary queue.
  */
-void internal_thread_free();
+void internal_current_thread_free();
 
 /**
  * ### (INTERNAL)

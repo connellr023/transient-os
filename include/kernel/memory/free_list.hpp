@@ -32,32 +32,27 @@
  */
 class FreeListNode {
 private:
-  bool is_free;
-  uint64_t size;
-
-  FreeListNode *prev;
+  bool is_free_node;
+  uint64_t payload_size;
   FreeListNode *next;
 
 public:
-  void init(uint64_t size, FreeListNode *prev = nullptr, FreeListNode *next = nullptr) {
-    this->is_free = true;
-    this->size = size;
-    this->prev = prev;
+  void init(uint64_t size, FreeListNode *next = nullptr) {
+    this->is_free_node = true;
+    this->payload_size = size;
     this->next = next;
   }
 
-  bool is_free_node() const { return is_free; }
+  bool is_free() const { return is_free; }
 
-  uint64_t get_size() const { return size; }
-  FreeListNode *get_prev() const { return prev; }
+  uint64_t get_payload_size() const { return payload_size; }
   FreeListNode *get_next() const { return next; }
 
-  void set_size(uint64_t size) { this->size = size; }
-  void set_prev(FreeListNode *prev) { this->prev = prev; }
+  void set_size(uint64_t size) { this->payload_size = size; }
   void set_next(FreeListNode *next) { this->next = next; }
 
-  void mark_as_used() { this->is_free = false; }
-  void mark_as_free() { this->is_free = true; }
+  void mark_as_used() { this->is_free_node = false; }
+  void mark_as_free() { this->is_free_node = true; }
 };
 
 #endif // FREE_LIST_HPP

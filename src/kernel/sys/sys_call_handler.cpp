@@ -25,6 +25,7 @@
 #include "../../../include/kernel/kernel.hpp"
 #include "../../../include/kernel/memory/internal_heap.hpp"
 #include "../../../include/kernel/memory/internal_paging.hpp"
+#include "../../../include/kernel/scheduler/cpu_scheduler.hpp"
 #include "../../../include/kernel/scheduler/internal_cpu_scheduler.hpp"
 #include "../../../include/kernel/sys/internal_sys_call_handler.hpp"
 
@@ -44,14 +45,16 @@ void *internal_handle_sys_call(SystemCall call_code, const void *arg) {
     break;
   }
   case SystemCall::HeapAlloc: {
-    return memory::internal_heap_alloc(reinterpret_cast<uintptr_t>(arg));
+    return memory::internal_heap_alloc(
+        scheduler::get_current_thread()->get_heap_start(),
+        reinterpret_cast<uintptr_t>(arg));
   }
   case SystemCall::HeapFree: {
     memory::internal_heap_free(const_cast<void *>(arg));
     break;
   }
   case SystemCall::Exit: {
-    scheduler::internal_thread_free();
+    scheduler::internal_current_thread_free();
     break;
   }
   default:
