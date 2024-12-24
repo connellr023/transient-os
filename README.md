@@ -1,6 +1,6 @@
 # $\text{Transient OS}$
 
-> A simple _time-sharing_ operating system for concurrency on the **Raspberry Pi 3**.
+> A work in progress _time-sharing_ operating system for concurrency on the **Raspberry Pi 3**.
 
 ![Raspberry Pi](https://img.shields.io/badge/-Raspberry_Pi-C51A4A?style=for-the-badge&logo=Raspberry-Pi)
 ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=cplusplus&logoColor=white)
@@ -54,6 +54,12 @@ This call exits the current thread and cleans up any resources it was using.
 ### Sleep (`sleep`)
 
 This call sleeps for at least the specified number of microseconds before resuming execution.
+
+### Diagrams (as of now)
+
+![Memory Layout](https://github.com/connellr023/connellr023.github.io/blob/main/static/images/transient-os/memory-layout.png?raw=true)
+
+![Thread Heap Memory Layout](https://github.com/connellr023/connellr023.github.io/blob/main/static/images/transient-os/thread-heap-memory-layout.png?raw=true)
 
 ## Development
 

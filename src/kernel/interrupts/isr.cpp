@@ -34,7 +34,7 @@ void *internal_irq_exception_handler(void *interrupted_sp) {
   const ThreadControlBlock *next_tcb =
       scheduler::internal_context_switch(interrupted_sp);
 
-  prepare_timer_interrupt(next_tcb->get_burst_time());
+  prepare_timer_interrupt(next_tcb->get_quantum());
   clear_timer_interrupt();
 
   // Return the stack pointer of the next thread
@@ -57,7 +57,7 @@ void *internal_synch_exception_handler(SystemCall call_code, void *arg,
     const ThreadControlBlock *next_tcb =
         scheduler::internal_exit_context_switch();
 
-    prepare_timer_interrupt(next_tcb->get_burst_time());
+    prepare_timer_interrupt(next_tcb->get_quantum());
     clear_timer_interrupt();
 
     return next_tcb->get_sp();

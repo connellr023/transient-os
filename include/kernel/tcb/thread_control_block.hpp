@@ -83,16 +83,35 @@ public:
    */
   bool alloc();
 
+  /**
+   * @brief Frees the page allocated for the thread stack and heap.
+   */
   void *get_page() const { return reinterpret_cast<void *>(this->page_addr); }
 
+  /**
+   * @brief Returns the stack pointer of the thread.
+   */
   void *get_sp() const { return reinterpret_cast<void *>(this->sp); }
 
+  /**
+   * @brief Returns the thread ID.
+   */
   uint64_t get_thread_id() const { return this->thread_id; }
 
-  uint32_t get_burst_time() const { return this->quantum_us; }
+  /**
+   * @brief Returns the time quantum of the thread in microseconds.
+   */
+  uint32_t get_quantum() const { return this->quantum_us; }
 
+  /**
+   * @brief Returns the wake time of the thread in microseconds. Only applicable
+   * if the thread is sleeping.
+   */
   uint32_t get_wake_time() const { return this->wake_time; }
 
+  /**
+   * @brief Returns the free list node for the start of this thread's heap.
+   */
   FreeListNode *get_heap_start() const {
     return reinterpret_cast<FreeListNode *>(this->page_addr);
   }
@@ -113,11 +132,19 @@ public:
 
   void mark_as_complete() { this->state = ThreadState::Complete; }
 
+  /**
+   * @brief Marks the thread as sleeping and sets the wake time.
+   * @param wake_time The time in microseconds when the scheduler should wake
+   * this thread.
+   */
   void mark_as_sleeping(uint32_t wake_time) {
     this->state = ThreadState::Sleeping;
     this->wake_time = wake_time;
   }
 
+  /**
+   * @brief Sets the stack pointer of the thread.
+   */
   void set_sp(void *sp) { this->sp = reinterpret_cast<uintptr_t>(sp); }
 };
 
