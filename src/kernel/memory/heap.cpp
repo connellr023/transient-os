@@ -23,10 +23,16 @@
  */
 
 #include "../../../include/kernel/memory/internal_heap.hpp"
+#include <stddef.h>
 
 namespace kernel::memory {
+constexpr uint64_t align_up(uint64_t value) {
+  return (value + alignof(max_align_t) - 1) & ~(alignof(max_align_t) - 1);
+}
+
 void *internal_heap_alloc(FreeListNode *start_node, uint64_t size) {
   FreeListNode *current = start_node;
+  size = align_up(size);
 
   while (current) {
     // Allocate in this node's payload
