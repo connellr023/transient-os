@@ -23,17 +23,9 @@
  */
 
 #include "../../../include/kernel/interrupts/interrupts.hpp"
-#include "../../../include/kernel/interrupts/internal_interrupts.hpp"
-#include "../../../include/kernel/kernel.hpp"
 #include "../../../include/kernel/peripherals/timer.hpp"
-#include "../../../include/kernel/scheduler/internal_cpu_scheduler.hpp"
-#include "../../../include/kernel/sys/internal_sys_call_handler.hpp"
-#include "../../../include/kernel/tcb/thread_control_block.hpp"
 
 namespace kernel::interrupts {
-/**
- * @brief Clears the timer interrupt.
- */
 void clear_timer_interrupt() { *TIMER_CS = TIMER_CS_M1; }
 
 void prepare_timer_interrupt(uint32_t interval_us) {
@@ -46,38 +38,5 @@ void prepare_timer_interrupt(uint32_t interval_us) {
 void enable_interrupt_controller() {
   // Enable the system timer IRQ
   *ENABLE_IRQS_1 = SYSTEM_TIMER_IRQ_1;
-}
-
-void *internal_irq_exception_handler(void *interrupted_sp) {
-  const ThreadControlBlock *next_tcb =
-      scheduler::internal_context_switch(interrupted_sp);
-
-  // Prepare timer for next context switch
-  prepare_timer_interrupt(next_tcb->get_burst_time());
-  clear_timer_interrupt();
-
-  // Return the stack pointer of the next thread
-  return next_tcb->get_sp();
-}
-
-void *internal_synch_exception_handler(SystemCall call_code, void *arg,
-                                       void *interrupted_sp) {
-  // Check if the exception was a system call
-  uint64_t ec;
-  asm volatile("mrs %0, esr_el1" : "=r"(ec));
-  ec >>= 26;
-
-  if (ec != SVC_EC) {
-    panic("Non-SVC synchronous exception occurred");
-  }
-
-  void *value = sys::internal_handle_sys_call(call_code, arg);
-
-  // Write return value to x0 register on the interrupted stack
-  uint64_t *sp = reinterpret_cast<uint64_t *>(interrupted_sp);
-  sp[0] = reinterpret_cast<uint64_t>(value);
-
-  // Switch to a different thread
-  return internal_irq_exception_handler(interrupted_sp);
 }
 } // namespace kernel::interrupts

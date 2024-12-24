@@ -96,9 +96,23 @@ const ThreadControlBlock *internal_context_switch(void *interrupted_sp) {
   return next;
 }
 
+const ThreadControlBlock *internal_context_switch_after_exit() {
+  if (primary_queue.is_empty()) {
+    panic("No threads to schedule after exit");
+  }
+
+  // Next thread is the first thread in the queue after a thread is dequeued
+  ThreadControlBlock *next = primary_queue.peek();
+  next->mark_as_running();
+
+  return next;
+}
+
 void internal_current_thread_free() {
-  memory::internal_page_free(primary_queue.peek()->get_page());
-  primary_queue.dequeue();
+  ThreadControlBlock *tcb = primary_queue.dequeue();
+
+  memory::internal_page_free(tcb->get_page());
+  tcb->mark_as_complete();
 }
 
 bool internal_wake() { return false; }

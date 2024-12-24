@@ -54,6 +54,11 @@ void disable_preemption() asm("_disable_preemption");
  * interrupt.
  */
 void prepare_timer_interrupt(uint32_t interval_us);
+
+/**
+ * @brief Clears the timer interrupt.
+ */
+void clear_timer_interrupt();
 } // namespace kernel::interrupts
 
 #endif // INTERRUPTS_HPP

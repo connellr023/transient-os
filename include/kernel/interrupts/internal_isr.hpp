@@ -22,52 +22,33 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/scheduler/scheduler_queue.hpp"
+#ifndef INTERNAL_ISR_HPP
+#define INTERNAL_ISR_HPP
 
-bool SchedulerQueue::enqueue(ThreadControlBlock *tcb) {
-  if (this->is_full()) {
-    return false;
-  }
+#include "../sys/sys_calls.hpp"
 
-  this->queue[this->tail] = tcb;
-  this->tail = (this->tail + 1) % QUEUE_CAPACITY;
-  this->size++;
+#define SVC_EC 0x15
 
-  return true;
-}
+namespace kernel::interrupts {
+/**
+ * ### (INTERNAL) IRQ Exception Handler
+ * @brief Handles an interrupt request exception.
+ * @param interrupted_sp The stack pointer at the time of the interrupt.
+ * @return The new stack pointer.
+ */
+void *internal_irq_exception_handler(void *interrupted_sp) asm(
+    "_internal_irq_exception_handler");
 
-ThreadControlBlock *SchedulerQueue::dequeue() {
-  if (this->is_empty()) {
-    return nullptr;
-  }
+/**
+ * ### (INTERNAL) Synchronous Exception Handler
+ * @brief Handles a synchronous exception.
+ * @param call_code The system call code. (SVC only)
+ * @param arg The argument to the system call. (SVC only)
+ * @return Stack pointer of the next thread.
+ */
+void *internal_synch_exception_handler(
+    SystemCall call_code, void *arg,
+    void *interrupted_sp) asm("_internal_synch_exception_handler");
+} // namespace kernel::interrupts
 
-  ThreadControlBlock *tcb = this->queue[this->head];
-  this->head = (this->head + 1) % QUEUE_CAPACITY;
-  this->size--;
-
-  return tcb;
-}
-
-ThreadControlBlock *SchedulerQueue::peek() {
-  if (this->is_empty()) {
-    return nullptr;
-  }
-
-  return this->queue[this->head];
-}
-
-ThreadControlBlock *SchedulerQueue::next() {
-  if (this->is_empty()) {
-    return nullptr;
-  }
-
-  // Remove the head
-  ThreadControlBlock *tcb = this->queue[this->head];
-  this->head = (this->head + 1) % QUEUE_CAPACITY;
-
-  // Add the head to the tail
-  this->queue[this->tail] = tcb;
-  this->tail = (this->tail + 1) % QUEUE_CAPACITY;
-
-  return this->queue[this->head];
-}
+#endif // INTERNAL_ISR_HPP

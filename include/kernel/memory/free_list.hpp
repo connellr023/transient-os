@@ -43,7 +43,7 @@ public:
     this->next = next;
   }
 
-  bool is_free() const { return is_free; }
+  bool is_free() const { return is_free_node; }
 
   uint64_t get_payload_size() const { return payload_size; }
   FreeListNode *get_next() const { return next; }

@@ -53,10 +53,6 @@ void *internal_handle_sys_call(SystemCall call_code, const void *arg) {
     memory::internal_heap_free(const_cast<void *>(arg));
     break;
   }
-  case SystemCall::Exit: {
-    scheduler::internal_current_thread_free();
-    break;
-  }
   default:
     // Yield system call does nothing so this case will be hit for it
     break;
