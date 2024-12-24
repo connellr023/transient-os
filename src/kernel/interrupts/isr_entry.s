@@ -26,7 +26,8 @@
 
 .section .text
 
-    platform_register .req x18
+    // Platform register
+    pr .req x18
 
 .macro push_registers
     sub sp, sp, #CPU_CTX_STACK_SIZE
@@ -87,8 +88,8 @@
 
 .globl _irq_handler
 _irq_handler:
-    mrs platform_register, sp_el0
-    mov sp, platform_register
+    mrs pr, sp_el0
+    mov sp, pr
 
     push_registers
 
@@ -108,8 +109,8 @@ _irq_handler:
 
 .globl _synch_handler
 _synch_handler:
-    mrs platform_register, sp_el0
-    mov sp, platform_register
+    mrs pr, sp_el0
+    mov sp, pr
 
     push_registers
 

@@ -22,8 +22,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef MEMORY_HPP
-#define MEMORY_HPP
+#ifndef INTERNAL_PAGING_HPP
+#define INTERNAL_PAGING_HPP
 
 #include "../peripherals/mmio.hpp"
 
@@ -42,10 +42,11 @@
 
 #ifndef __ASSEMBLER__
 
-// Pages allocated to threads will have the top half for the stack and the bottom half for the heap
-// Stack and heap overflows are not checked
+// Pages allocated to threads will have the top half for the stack and the
+// bottom half for the heap Stack and heap overflows are not checked
 #define THREAD_STACK_SIZE (PAGE_SIZE / 2) // Half of page for stack
-#define THREAD_HEAP_SIZE (PAGE_SIZE - THREAD_STACK_SIZE) // Rest of page for heap
+#define THREAD_HEAP_SIZE                                                       \
+  (PAGE_SIZE - THREAD_STACK_SIZE) // Rest of page for heap
 
 #define MEMORY_FILL 0xB0BABABE // ;)
 
@@ -72,4 +73,4 @@ void internal_page_free(void *page);
 
 #endif // __ASSEMBLER__
 
-#endif // MEMORY_HPP
+#endif // INTERNAL_PAGING_HPP

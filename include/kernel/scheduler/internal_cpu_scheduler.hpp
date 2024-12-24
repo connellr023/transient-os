@@ -15,17 +15,11 @@ const ThreadControlBlock *internal_context_switch(void *interrupted_sp);
 
 /**
  * ### (INTERNAL)
- * @brief Special handling for context switches after a thread exits.
+ * @brief Special handling for context switches when the current thread is
+ * exiting.
  * @return The thread control block of the next thread to run.
  */
-const ThreadControlBlock *internal_context_switch_after_exit();
-
-/**
- * ### (INTERNAL)
- * @brief Frees the resources of the current thread and dequeues it from the
- * primary queue.
- */
-void internal_current_thread_free();
+const ThreadControlBlock *internal_exit_context_switch();
 
 /**
  * ### (INTERNAL)

@@ -54,10 +54,8 @@ void *internal_synch_exception_handler(SystemCall call_code, void *arg,
 
   // Special handling for exit system call
   if (call_code == SystemCall::Exit) {
-    scheduler::internal_current_thread_free();
-
     const ThreadControlBlock *next_tcb =
-        scheduler::internal_context_switch_after_exit();
+        scheduler::internal_exit_context_switch();
 
     prepare_timer_interrupt(next_tcb->get_burst_time());
     clear_timer_interrupt();

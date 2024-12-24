@@ -22,8 +22,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef HEAP_HPP
-#define HEAP_HPP
+#ifndef INTERNAL_HEAP_HPP
+#define INTERNAL_HEAP_HPP
 
 #include "../../../include/kernel/memory/free_list.hpp"
 
@@ -50,4 +50,4 @@ void *internal_heap_alloc(FreeListNode *start_node, uint64_t size);
 void internal_heap_free(void *ptr);
 } // namespace kernel::memory
 
-#endif // HEAP_HPP
+#endif // INTERNAL_HEAP_HPP
