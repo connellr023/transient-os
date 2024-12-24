@@ -50,7 +50,7 @@ void *internal_page_alloc() {
 }
 
 void internal_page_free(void *page) {
-  const uint64_t page_addr = reinterpret_cast<uint64_t>(page);
+  const uint64_t page_addr = reinterpret_cast<uintptr_t>(page);
   page_table[(page_addr - LOW_MEMORY) / PAGE_SIZE] = false;
 }
 } // namespace kernel::memory

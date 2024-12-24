@@ -41,16 +41,23 @@ void *internal_handle_sys_call(SystemCall call_code, const void *arg) {
     return memory::internal_page_alloc();
   }
   case SystemCall::PageFree: {
-    memory::internal_page_free(const_cast<void *>(arg));
+    void *page = const_cast<void *>(arg);
+    memory::internal_page_free(page);
     break;
   }
   case SystemCall::HeapAlloc: {
+    const uint64_t size = reinterpret_cast<uintptr_t>(arg);
     return memory::internal_heap_alloc(
-        scheduler::get_current_thread()->get_heap_start(),
-        reinterpret_cast<uintptr_t>(arg));
+        scheduler::get_current_thread()->get_heap_start(), size);
   }
   case SystemCall::HeapFree: {
-    memory::internal_heap_free(const_cast<void *>(arg));
+    void *ptr = const_cast<void *>(arg);
+    memory::internal_heap_free(ptr);
+    break;
+  }
+  case SystemCall::Sleep: {
+    const uint32_t sleep_us = reinterpret_cast<uintptr_t>(arg);
+    scheduler::internal_sleep(sleep_us);
     break;
   }
   default:

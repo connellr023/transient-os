@@ -58,7 +58,7 @@ private:
   uint64_t thread_id;
   uint64_t page_addr;
   uint32_t quantum_us;
-  uint32_t sleep_until_us;
+  uint32_t wake_time;
   ThreadState state;
   uint64_t sp;
   thread_handler_t handler;
@@ -91,7 +91,7 @@ public:
 
   uint32_t get_burst_time() const { return this->quantum_us; }
 
-  uint32_t get_wake_time() const { return this->sleep_until_us; }
+  uint32_t get_wake_time() const { return this->wake_time; }
 
   FreeListNode *get_heap_start() const {
     return reinterpret_cast<FreeListNode *>(this->page_addr);
@@ -113,9 +113,9 @@ public:
 
   void mark_as_complete() { this->state = ThreadState::Complete; }
 
-  void mark_as_sleeping(uint32_t sleep_until_us) {
+  void mark_as_sleeping(uint32_t wake_time) {
     this->state = ThreadState::Sleeping;
-    this->sleep_until_us = sleep_until_us;
+    this->wake_time = wake_time;
   }
 
   void set_sp(void *sp) { this->sp = reinterpret_cast<uint64_t>(sp); }

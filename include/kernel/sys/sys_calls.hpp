@@ -94,6 +94,13 @@ void yield();
  * resources it was using.
  */
 [[noreturn]] void exit();
+
+/**
+ * @brief Triggers a system call that puts the current thread to sleep for a
+ * specified number of microseconds.
+ * @param sleep_us The number of microseconds to sleep.
+ */
+void sleep(uint32_t sleep_us);
 } // namespace kernel::sys
 
 #endif // SYS_CALL_HPP

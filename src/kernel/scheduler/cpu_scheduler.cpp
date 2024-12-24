@@ -47,6 +47,31 @@ bool enqueue(ThreadControlBlock *tcb) {
   return primary_queue.enqueue(tcb);
 }
 
+/**
+ * @brief Linearly scans the primary queue to find the next ready thread.
+ */
+ThreadControlBlock *find_next_thread() {
+  ThreadControlBlock *next = nullptr;
+
+  do {
+    next = primary_queue.next();
+
+    if (next->is_ready()) {
+      break;
+    } else if (next->is_sleeping()) {
+      // Check if thread should be woken up
+      if (next->get_wake_time() < *TIMER_COUNTER_LOW) {
+        next->mark_as_ready();
+        break;
+      }
+    } else {
+      panic("Thread in invalid state");
+    }
+  } while (true); // Loop until a ready thread is found
+
+  return next;
+}
+
 const ThreadControlBlock *internal_context_switch(void *interrupted_sp) {
   // Flag to indicate if the first context switch has occurred.
   static bool is_first_context_switch = true;
@@ -71,28 +96,16 @@ const ThreadControlBlock *internal_context_switch(void *interrupted_sp) {
 
   // Save context of interrupted thread
   current->set_sp(interrupted_sp);
-  current->mark_as_ready();
+
+  // Prevent states such as sleeping from being removed
+  if (current->is_running()) {
+    current->mark_as_ready();
+  }
 
   // Goto next thread
-  ThreadControlBlock *next = nullptr;
-
-  do {
-    next = primary_queue.next();
-
-    if (next->is_ready()) {
-      break;
-    } else if (next->is_sleeping()) {
-      // Check if thread should be woken up
-      if (next->get_wake_time() < *TIMER_COUNTER_LOW) {
-        next->mark_as_ready();
-        break;
-      }
-    } else {
-      panic("Thread in invalid state");
-    }
-  } while (true); // Loop until a ready thread is found
-
+  ThreadControlBlock *next = find_next_thread();
   next->mark_as_running();
+
   return next;
 }
 
@@ -109,12 +122,17 @@ const ThreadControlBlock *internal_exit_context_switch() {
 
   // Next thread is the first thread in the queue after a thread is dequeued
   ThreadControlBlock *next_tcb = primary_queue.peek();
-  next_tcb->mark_as_running();
 
+  // Find the next ready thread if the first thread is not ready
+  if (!next_tcb->is_ready()) {
+    next_tcb = find_next_thread();
+  }
+
+  next_tcb->mark_as_running();
   return next_tcb;
 }
 
-bool internal_wake() { return false; }
-
-bool internal_sleep() { return false; }
+void internal_sleep(uint32_t sleep_us) {
+  primary_queue.peek()->mark_as_sleeping(*TIMER_COUNTER_LOW + sleep_us);
+}
 } // namespace kernel::scheduler

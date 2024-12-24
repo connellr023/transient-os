@@ -26,4 +26,8 @@ void exit() {
     asm volatile("wfi");
   }
 }
+
+void sleep(uint32_t sleep_us) {
+  trigger_sys_call(SystemCall::Sleep, reinterpret_cast<void *>(sleep_us));
+}
 } // namespace kernel::sys

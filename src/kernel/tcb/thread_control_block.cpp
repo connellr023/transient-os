@@ -34,7 +34,7 @@ void ThreadControlBlock::init(thread_handler_t handler, uint32_t quantum_us,
   this->thread_id = thread_id_counter++;
   this->page_addr = 0;
   this->quantum_us = quantum_us;
-  this->sleep_until_us = 0;
+  this->wake_time = 0;
   this->state = ThreadState::Unallocated;
   this->sp = 0;
   this->handler = handler;

@@ -23,18 +23,10 @@ const ThreadControlBlock *internal_exit_context_switch();
 
 /**
  * ### (INTERNAL)
- * @brief Moves the first thread in the sleeping queue to the primary queue
- if it is time.
- * @return True if a thread was moved, false otherwise.
+ * @brief Marks the current thread as sleeping.
+ * @param sleep_us The number of microseconds to sleep.
  */
-bool internal_wake();
-
-/**
- * ### (INTERNAL)
- * @brief Moves the first thread in the primary queue to the sleeping queue.
- * @return True if a thread was moved, false otherwise.
- */
-bool internal_sleep();
+void internal_sleep(uint32_t sleep_us);
 } // namespace kernel::scheduler
 
 #endif // INTERNAL_CPU_SCHEDULER_HPP
