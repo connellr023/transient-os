@@ -22,8 +22,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SYS_CALL_HPP
-#define SYS_CALL_HPP
+#ifndef SYS_CALLS_HPP
+#define SYS_CALLS_HPP
 
 #include <stdint.h>
 
@@ -32,8 +32,6 @@
  */
 enum class SystemCall : uint8_t {
   PutString,
-  PageAlloc,
-  PageFree,
   HeapAlloc,
   HeapFree,
   Yield,
@@ -57,18 +55,6 @@ void *trigger_sys_call(SystemCall call_code,
  * The output handler must have been initialized or nothing will happen.
  */
 void puts(const char *str);
-
-/**
- * @brief Triggers a system call that allocates a page of memory.
- * @return A pointer to the allocated page or nullptr if no memory is available.
- */
-void *page_alloc();
-
-/**
- * @brief Triggers a system call that frees a page of memory.
- * @param page The page to free.
- */
-void page_free(void *page);
 
 /**
  * @brief Triggers a system call that allocates a block of memory on the heap.
@@ -96,11 +82,11 @@ void yield();
 [[noreturn]] void exit();
 
 /**
- * @brief Triggers a system call that puts the current thread to sleep for a
- * specified number of microseconds.
- * @param sleep_us The number of microseconds to sleep.
+ * @brief Triggers a system call that puts the current thread to sleep for at
+ * least the specified number of microseconds.
+ * @param sleep_us The number of microseconds to sleep for.
  */
 void sleep(uint32_t sleep_us);
 } // namespace kernel::sys
 
-#endif // SYS_CALL_HPP
+#endif // SYS_CALLS_HPP

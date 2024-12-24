@@ -26,6 +26,9 @@
 #include <stddef.h>
 
 namespace kernel::memory {
+/**
+ * @brief Aligns a value to the next multiple of the alignment.
+ */
 constexpr uint64_t align_up(uint64_t value) {
   return (value + alignof(max_align_t) - 1) & ~(alignof(max_align_t) - 1);
 }

@@ -37,14 +37,6 @@ void *internal_handle_sys_call(SystemCall call_code, const void *arg) {
     safe_puts(str);
     break;
   }
-  case SystemCall::PageAlloc: {
-    return memory::internal_page_alloc();
-  }
-  case SystemCall::PageFree: {
-    void *page = const_cast<void *>(arg);
-    memory::internal_page_free(page);
-    break;
-  }
   case SystemCall::HeapAlloc: {
     const uint64_t size = reinterpret_cast<uintptr_t>(arg);
     return memory::internal_heap_alloc(

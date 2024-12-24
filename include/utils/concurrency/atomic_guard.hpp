@@ -29,11 +29,14 @@
  * @brief RAII class to create an atomic block.
  * Simply disables interrupts at the beginning of the block and re-enables them
  * at the end of the block.
+ * @note This class will likely be removed when user-proccesses and virtual
+ * memory is implemented as it won't be possible to disable interrupts in user
+ * space.
  */
-class AtomicBlock {
+class AtomicGuard {
 public:
-  AtomicBlock();
-  ~AtomicBlock();
+  AtomicGuard();
+  ~AtomicGuard();
 };
 
 #endif // ATOMIC_BLOCK_HPP

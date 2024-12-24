@@ -25,22 +25,15 @@ This operating system is intended to still be used for very low-level programmin
 - **Memory Management**: No virtual memory with paging and heap allocation.
 - **Thread Management**: All threads, including the kernel, run at EL1. All threads run on a single core.
 - **Utilities**:
-  - `AtomicBlock`: Class that provides a way to create atomic blocks of code.
   - `Mutex`: Class that provides a way to create mutual exclusion locks.
+  - `MutexLockGuard`: Class that provides a way to create mutual exclusion blocks of code.
+  - `AtomicGuard`: Class that provides a way to create atomic blocks of code. (Likely will be removed in future versions)
 
 ## System Calls
 
 ### `puts` - Put String
 
 This call writes a message to the output handler. The output handler must have been initialized, or nothing will happen. This is intended as more of a test system call than anything else but can be used to safely transmit over **UART** if output handler is configured to do so.
-
-### Page Allocation (`page_alloc`)
-
-This call allocates a page of memory and returns a pointer to the allocated page. If no memory is available, it returns `nullptr`.
-
-### Page Free (`page_free`)
-
-This call frees a previously allocated page of memory.
 
 ### Heap Allocation (`heap_alloc`)
 

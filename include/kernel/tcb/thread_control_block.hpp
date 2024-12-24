@@ -25,7 +25,7 @@
 #ifndef THREAD_CONTROL_BLOCK_HPP
 #define THREAD_CONTROL_BLOCK_HPP
 
-#define CPU_CTX_STACK_SIZE (17 * 16) // 17 pairs of 8 byte registers
+#define CPU_CTX_STACK_SIZE (34 * 8) // 34 registers * 8 bytes per register
 
 #ifndef __ASSEMBLER__
 
@@ -118,7 +118,7 @@ public:
     this->wake_time = wake_time;
   }
 
-  void set_sp(void *sp) { this->sp = reinterpret_cast<uint64_t>(sp); }
+  void set_sp(void *sp) { this->sp = reinterpret_cast<uintptr_t>(sp); }
 };
 
 #endif // __ASSEMBLER__

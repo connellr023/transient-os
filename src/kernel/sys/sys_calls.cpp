@@ -4,10 +4,6 @@
 namespace kernel::sys {
 void puts(const char *str) { trigger_sys_call(SystemCall::PutString, str); }
 
-void *page_alloc() { return trigger_sys_call(SystemCall::PageAlloc); }
-
-void page_free(void *page) { trigger_sys_call(SystemCall::PageFree, page); }
-
 void *heap_alloc(uint64_t size) {
   return trigger_sys_call(SystemCall::HeapAlloc,
                           reinterpret_cast<void *>(size));

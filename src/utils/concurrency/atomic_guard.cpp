@@ -22,10 +22,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/utils/concurrency/atomic.hpp"
+#include "../../../include/utils/concurrency/atomic_guard.hpp"
 #include "../../../include/kernel/interrupts/interrupts.hpp"
 
 using namespace kernel::interrupts;
 
-AtomicBlock::AtomicBlock() { disable_preemption(); }
-AtomicBlock::~AtomicBlock() { enable_preemption(); }
+AtomicGuard::AtomicGuard() { disable_preemption(); }
+AtomicGuard::~AtomicGuard() { enable_preemption(); }

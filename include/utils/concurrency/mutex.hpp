@@ -27,6 +27,8 @@
 
 /**
  * @brief A simple mutex class for mutual exclusion.
+ * @note This is currently implemented by disabling interrupts. In the future,
+ * we will need to use atomic instructions once virtual memory is implemented.
  */
 class Mutex {
 private:
