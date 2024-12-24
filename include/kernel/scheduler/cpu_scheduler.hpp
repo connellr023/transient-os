@@ -22,18 +22,24 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/threads/thread_control_block.hpp"
-#include "../../../include/kernel/memory/paging.hpp"
+#ifndef CPU_SCHEDULER_HPP
+#define CPU_SCHEDULER_HPP
 
-volatile uint64_t thread_id_counter = 0;
+#include "../tcb/thread_control_block.hpp"
 
-void ThreadControlBlock::init(thread_handler_t handler, uint32_t quantum_us,
-                              void *arg) {
-  this->thread_id = thread_id_counter++;
-  this->page_addr = 0;
-  this->quantum_us = quantum_us;
-  this->state = ThreadState::Uninitialized;
-  this->sp = 0;
-  this->handler = handler;
-  this->arg = arg;
-}
+namespace kernel::scheduler {
+/**
+ * @brief Enqueues a thread in the primary scheduler queue.
+ * @param tcb The thread control block to enqueue.
+ * @return True if the thread was enqueued, false if the queue is full.
+ */
+bool enqueue(ThreadControlBlock *tcb);
+
+/**
+ * @brief Gets the current thread's thread control block.
+ * @return The thread control block of the current thread.
+ */
+const ThreadControlBlock *get_current_thread();
+} // namespace kernel::scheduler
+
+#endif // CPU_SCHEDULER_HPP

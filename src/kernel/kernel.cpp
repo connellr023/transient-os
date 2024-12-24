@@ -24,16 +24,9 @@
 
 #include "../../include/kernel/kernel.hpp"
 #include "../../include/kernel/interrupts/interrupts.hpp"
-#include "../../include/kernel/sys/sys_calls.hpp"
-#include "../../include/kernel/sys/sys_registers.hpp"
-#include "../../include/kernel/threads/scheduler.hpp"
+#include "../../include/kernel/scheduler/cpu_scheduler.hpp"
 
 namespace kernel {
-/**
- * @brief Singleton scheduler queue for the kernel.
- */
-SchedulerQueue scheduler;
-
 /**
  * @brief The output handler for kernel debugging.
  */
@@ -44,55 +37,11 @@ output_handler_t kernel_string_output_handler = nullptr;
  */
 bool is_kernel_started = false;
 
-/**
- * @brief Allocates stack space for a thread. A thread can only have a stack
- * allocated to it once. This function is not thread safe (should only be used
- * during initialization).
- * @param tcb The thread control block of the thread.
- */
-bool alloc_thread_stack(ThreadControlBlock *tcb) {
-  if (tcb->is_initialized()) {
-    return false;
-  }
-
-  void *page = memory::internal_page_alloc();
-
-  if (!page) {
-    return false;
-  }
-
-  const uint64_t page_addr = reinterpret_cast<uint64_t>(page);
-  const uint64_t sp = page_addr + THREAD_STACK_SIZE - CPU_CTX_STACK_SIZE;
-
-  uint64_t *register_stack = reinterpret_cast<uint64_t *>(sp);
-
-  // Set x1 to x29 (FP) equal to 0
-  for (int i = 1; i < LR_IDX; i++) {
-    register_stack[i] = 0;
-  }
-
-  // Set argument to x0
-  register_stack[0] = reinterpret_cast<uint64_t>(tcb->get_arg());
-
-  // Set x30 (LR) to the exit system call
-  register_stack[LR_IDX] = reinterpret_cast<uint64_t>(&sys::exit);
-
-  // Set ELR_EL1 to the thread handler
-  register_stack[ELR_EL1_IDX] = reinterpret_cast<uint64_t>(tcb->get_handler());
-
-  // Set SPSR_EL1 to the initial value
-  register_stack[SPSR_EL1_IDX] = INITIAL_SPSR_EL1_VALUE;
-
-  tcb->set_page(page);
-  tcb->set_sp(reinterpret_cast<void *>(sp));
-  tcb->mark_as_ready();
-
-  return true;
-}
-
 void set_output_handler(output_handler_t string_handler) {
   kernel_string_output_handler = string_handler;
 }
+
+bool is_started() { return is_kernel_started; }
 
 void start() {
   // Ensure we are in EL1
@@ -119,42 +68,8 @@ void start() {
   }
 }
 
-const ThreadControlBlock *internal_context_switch(void *interrupted_sp) {
-  static bool is_first_context_switch = true;
-
-  if (scheduler.is_empty()) {
-    panic("No threads to schedule");
-  }
-
-  // Avoid corrupting a thread's context stack
-  if (!is_first_context_switch) {
-    // Save context of interrupted thread
-    scheduler.peek()->set_sp(interrupted_sp);
-    scheduler.peek()->mark_as_ready();
-
-    // Goto next thread
-    scheduler.next();
-  } else {
-    // Set flag to false after first context switch
-    is_first_context_switch = false;
-  }
-
-  scheduler.peek()->mark_as_running();
-  return scheduler.peek();
-}
-
-void internal_thread_free() {
-  memory::internal_page_free(scheduler.peek()->get_page());
-  scheduler.mark_current_as_complete();
-}
-
-bool schedule_thread(ThreadControlBlock *tcb) {
-  // Not allowed to schedule threads after kernel has started (at least for now)
-  if (is_kernel_started) {
-    return false;
-  }
-
-  return alloc_thread_stack(tcb) && scheduler.enqueue(tcb);
+bool prepare_thread(ThreadControlBlock *tcb) {
+  return tcb->alloc() && scheduler::enqueue(tcb);
 }
 
 void safe_puts(const char *str) {
@@ -179,8 +94,6 @@ void safe_hex(uint64_t value) {
     kernel_string_output_handler(buffer);
   }
 }
-
-uint64_t get_thread_id() { return scheduler.peek()->get_thread_id(); }
 
 void panic(const char *msg) {
   interrupts::disable_preemption();

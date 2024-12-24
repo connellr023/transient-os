@@ -22,43 +22,33 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef INTERRUPTS_HPP
-#define INTERRUPTS_HPP
+#ifndef INTERNAL_ISR_HPP
+#define INTERNAL_ISR_HPP
 
-#include <stdint.h>
+#include "../sys/sys_calls.hpp"
+
+#define SVC_EC 0x15
 
 namespace kernel::interrupts {
 /**
- * @brief Enables the system timer interrupt controller.
+ * ### (INTERNAL) IRQ Exception Handler
+ * @brief Handles an interrupt request exception.
+ * @param interrupted_sp The stack pointer at the time of the interrupt.
+ * @return The new stack pointer.
  */
-void enable_interrupt_controller();
+void *internal_irq_exception_handler(void *interrupted_sp) asm(
+    "_internal_irq_exception_handler");
 
 /**
- * @brief Initializes the interrupt vector.
+ * ### (INTERNAL) Synchronous Exception Handler
+ * @brief Handles a synchronous exception.
+ * @param call_code The system call code. (SVC only)
+ * @param arg The argument to the system call. (SVC only)
+ * @return Stack pointer of the next thread.
  */
-void init_interrupt_vector() asm("_init_interrupt_vector");
-
-/**
- * @brief Enables preemptive interrupt requests.
- */
-void enable_preemption() asm("_enable_preemption");
-
-/**
- * @brief Disables preemptive interrupt requests.
- */
-void disable_preemption() asm("_disable_preemption");
-
-/**
- * @brief Prepares a timer interrupt to fire after a given interval.
- * @param interval_us The number of microseconds to wait before firing the
- * interrupt.
- */
-void prepare_timer_interrupt(uint32_t interval_us);
-
-/**
- * @brief Clears the timer interrupt.
- */
-void clear_timer_interrupt();
+void *internal_synch_exception_handler(
+    SystemCall call_code, void *arg,
+    void *interrupted_sp) asm("_internal_synch_exception_handler");
 } // namespace kernel::interrupts
 
-#endif // INTERRUPTS_HPP
+#endif // INTERNAL_ISR_HPP

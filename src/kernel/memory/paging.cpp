@@ -22,18 +22,18 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/memory/paging.hpp"
+#include "../../../include/kernel/memory/internal_paging.hpp"
 
 namespace kernel::memory {
 /**
- * @brief Array of booleans representing the state of each page in memory.
+ * @brief Array of booleans representing the whether or not a page is allocated.
  */
-bool memory_map[PAGE_COUNT] = {false};
+bool page_table[PAGE_COUNT] = {false};
 
 void *internal_page_alloc() {
   for (uint64_t i = 0; i < PAGE_COUNT; i++) {
-    if (!memory_map[i]) {
-      memory_map[i] = true;
+    if (!page_table[i]) {
+      page_table[i] = true;
       uint64_t *page_addr =
           reinterpret_cast<uint64_t *>(LOW_MEMORY + (i * PAGE_SIZE));
 
@@ -51,6 +51,6 @@ void *internal_page_alloc() {
 
 void internal_page_free(void *page) {
   const uint64_t page_addr = reinterpret_cast<uint64_t>(page);
-  memory_map[(page_addr - LOW_MEMORY) / PAGE_SIZE] = false;
+  page_table[(page_addr - LOW_MEMORY) / PAGE_SIZE] = false;
 }
 } // namespace kernel::memory

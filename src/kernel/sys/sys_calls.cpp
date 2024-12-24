@@ -1,4 +1,5 @@
 #include "../../../include/kernel/sys/sys_calls.hpp"
+#include "../../../include/kernel/kernel.hpp"
 
 namespace kernel::sys {
 void puts(const char *str) { trigger_sys_call(SystemCall::PutString, str); }
@@ -19,7 +20,9 @@ void yield() { trigger_sys_call(SystemCall::Yield); }
 void exit() {
   trigger_sys_call(SystemCall::Exit);
 
+  // Should not reach here
   while (true) {
+    safe_puts("should not reach here\n");
     asm volatile("wfi");
   }
 }

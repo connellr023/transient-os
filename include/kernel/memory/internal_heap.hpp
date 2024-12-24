@@ -25,48 +25,25 @@
 #ifndef HEAP_HPP
 #define HEAP_HPP
 
-#include "paging.hpp"
-#include <stdint.h>
+#include "../../../include/kernel/memory/free_list.hpp"
 
-#define MAX_HEAP_PAGES 10
-
-/**
- * @brief A node in the heap allocator's free list.
- */
-class FreeListNode {
-private:
-  uint64_t size;
-  FreeListNode *next;
-
-public:
-  void init(uint64_t size, FreeListNode *next = nullptr) {
-    this->size = size;
-    this->next = next;
-  }
-
-  uint64_t get_size() const { return size; }
-  FreeListNode *get_next() const { return next; }
-
-  void set_size(uint64_t size) { this->size = size; }
-  void set_next(FreeListNode *next) { this->next = next; }
-};
+#define FREED_MEMORY_FILL 0xDEADBEEF
 
 namespace kernel::memory {
 /**
  * ### Kernel memory heap allocator (INTERNAL)
- * @brief Allocates a block of memory on the heap. This is not thread safe and
- * should only be invoked by a system call handler.
- * guaranteed.
+ * @brief Allocates a block of memory on the heap. Should only be invoked by a
+ * system call handler.
  * @param size The size of the block to allocate.
  * @return A pointer to the allocated block. Returns nullptr if no memory is
  * available.
  */
-void *internal_heap_alloc(uint64_t size);
+void *internal_heap_alloc(FreeListNode *start_node, uint64_t size);
 
 /**
  * ### Kernel memory heap free (INTERNAL)
- * @brief Frees a block of memory on the heap. This is not thread safe and
- * should only be invoked by a system call handler.
+ * @brief Frees a block of memory on the heap. Should only be invoked by a
+ * system call handler.
  * guaranteed.
  * @param ptr The pointer to the block to free.
  */

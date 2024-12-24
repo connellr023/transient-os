@@ -22,27 +22,37 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SYS_CALL_TABLE_HPP
-#define SYS_CALL_TABLE_HPP
+#ifndef FREE_LIST_HPP
+#define FREE_LIST_HPP
 
-#include "sys_calls.hpp"
+#include <stdint.h>
 
 /**
- * @brief A function pointer type for system call handlers.
- * @param arg The argument to the system call.
- * @return The return value of the system call.
+ * @brief A node in the heap allocator's free list.
  */
-typedef void *(*system_call_handler)(const void *);
+class FreeListNode {
+private:
+  bool is_free_node;
+  uint64_t payload_size;
+  FreeListNode *next;
 
-namespace kernel::sys {
-/**
- * @brief Handles a system call by invoking the appropriate system call handler.
- * This should only be invoked by the synchronous exception handler.
- * @param call_code The system call code.
- * @param arg The argument to the system call.
- * @return The return value of the system call.
- */
-void *handle_system_call(SystemCall call_code, const void *arg);
-} // namespace kernel::sys
+public:
+  void init(uint64_t size, FreeListNode *next = nullptr) {
+    this->is_free_node = true;
+    this->payload_size = size;
+    this->next = next;
+  }
 
-#endif // SYS_CALL_TABLE_HPP
+  bool is_free() const { return is_free_node; }
+
+  uint64_t get_payload_size() const { return payload_size; }
+  FreeListNode *get_next() const { return next; }
+
+  void set_size(uint64_t size) { this->payload_size = size; }
+  void set_next(FreeListNode *next) { this->next = next; }
+
+  void mark_as_used() { this->is_free_node = false; }
+  void mark_as_free() { this->is_free_node = true; }
+};
+
+#endif // FREE_LIST_HPP

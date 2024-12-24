@@ -22,57 +22,53 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/memory/heap.hpp"
+#include "../../../include/kernel/memory/internal_heap.hpp"
 
 namespace kernel::memory {
-/**
- * @brief Array of pointers to the start of each heap page. Each heap page is
- * not necessarily contiguous.
- */
-uint8_t (*heap_pages)[MAX_HEAP_PAGES] = {nullptr};
+void *internal_heap_alloc(FreeListNode *start_node, uint64_t size) {
+  FreeListNode *current = start_node;
 
-/**
- * @brief The index of the next heap page to allocate.
- */
-uint64_t heap_page_index;
+  while (current) {
+    // Allocate in this node's payload
+    if (current->is_free() && current->get_payload_size() >= size) {
+      const uint64_t payload_start_addr =
+          reinterpret_cast<uintptr_t>(current + 1);
 
-void *internal_heap_alloc(uint64_t size) {
-  // Dont allocate more than a page (we cannot assume each heap page is
-  // contiguous)
-  if (size > PAGE_SIZE) {
-    return nullptr;
+      // Check if the node can be split
+      if (current->get_payload_size() > size + sizeof(FreeListNode)) {
+        // New node should be placed right after the payload
+        FreeListNode *new_node =
+            reinterpret_cast<FreeListNode *>(payload_start_addr + size);
+
+        const uint64_t new_size =
+            current->get_payload_size() - size - sizeof(FreeListNode);
+
+        new_node->init(new_size, current->get_next());
+
+        current->set_size(size);
+        current->set_next(new_node);
+      }
+
+      current->mark_as_used();
+      return reinterpret_cast<void *>(payload_start_addr);
+    }
+
+    // Visit next node
+    current = current->get_next();
   }
 
-  // Ensure we have a page to allocate from
-  // if (heap_page_manager.get_current_heap_page() == nullptr) {
-  //   void *heap_page = heap_page_manager.alloc_heap_page();
-
-  //   if (!heap_page) {
-  //     return nullptr;
-  //   }
-
-  //   // Initialize the heap page
-  //   // Create a free block at the start of the page
-  //   FreeListNode *free_list = reinterpret_cast<FreeListNode *>(heap_page);
-  //   free_list->set_size(size);
-  //   free_list->set_next(nullptr);
-
-  //   void *payload = reinterpret_cast<void *>(
-  //       reinterpret_cast<uint64_t>(heap_page) + sizeof(FreeListNode));
-
-  //   return payload;
-  // }
-
-  // // Find a free block in the current heap page
-  // FreeListNode *current = reinterpret_cast<FreeListNode *>(
-  //     heap_page_manager.get_current_heap_page());
-  // FreeListNode *prev = nullptr;
-
-  // while (current != nullptr) {
-  // }
-
-  return nullptr; // Maybe...
+  return nullptr;
 }
 
-void internal_heap_free(void *ptr) {}
+void internal_heap_free(void *ptr) {
+  FreeListNode *node = reinterpret_cast<FreeListNode *>(ptr) - 1;
+  node->mark_as_free();
+
+  // Fill freed memory
+  uint64_t *payload = reinterpret_cast<uint64_t *>(ptr);
+
+  for (uint64_t i = 0; i < node->get_payload_size() / sizeof(uint64_t); i++) {
+    payload[i] = FREED_MEMORY_FILL;
+  }
+}
 } // namespace kernel::memory

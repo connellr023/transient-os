@@ -25,6 +25,16 @@
 #ifndef THREAD_CONTROL_BLOCK_HPP
 #define THREAD_CONTROL_BLOCK_HPP
 
+#define CPU_CTX_STACK_SIZE (17 * 16) // 17 pairs of 8 byte registers
+
+#ifndef __ASSEMBLER__
+
+#define FP_IDX 29
+#define LR_IDX 30
+#define ELR_EL1_IDX 31
+#define SPSR_EL1_IDX 32
+
+#include "../../../include/kernel/memory/free_list.hpp"
 #include <stdint.h>
 
 typedef void (*thread_handler_t)(void *);
@@ -33,9 +43,10 @@ typedef void (*thread_handler_t)(void *);
  * @brief Enumeration of the possible states of a thread.
  */
 enum class ThreadState : uint8_t {
-  Uninitialized,
+  Unallocated,
   Ready,
   Running,
+  Sleeping,
   Complete,
 };
 
@@ -47,10 +58,14 @@ private:
   uint64_t thread_id;
   uint64_t page_addr;
   uint32_t quantum_us;
+  uint32_t sleep_until_us;
   ThreadState state;
   uint64_t sp;
   thread_handler_t handler;
   void *arg;
+
+  void init_stack();
+  void init_heap();
 
 public:
   /**
@@ -62,29 +77,50 @@ public:
    */
   void init(thread_handler_t handler, uint32_t quantum_us, void *arg = nullptr);
 
-  thread_handler_t get_handler() const { return this->handler; }
-  void *get_arg() const { return this->arg; }
+  /**
+   * @brief Allocates a page for the thread stack and heap.
+   * @return True if the page was successfully allocated, false otherwise.
+   */
+  bool alloc();
+
   void *get_page() const { return reinterpret_cast<void *>(this->page_addr); }
+
   void *get_sp() const { return reinterpret_cast<void *>(this->sp); }
+
   uint64_t get_thread_id() const { return this->thread_id; }
+
   uint32_t get_burst_time() const { return this->quantum_us; }
 
-  bool is_complete() const { return this->state == ThreadState::Complete; }
-  bool is_ready() const { return this->state == ThreadState::Ready; }
-  bool is_running() const { return this->state == ThreadState::Running; }
-  bool is_initialized() const {
-    return this->state != ThreadState::Uninitialized;
+  uint32_t get_wake_time() const { return this->sleep_until_us; }
+
+  FreeListNode *get_heap_start() const {
+    return reinterpret_cast<FreeListNode *>(this->page_addr);
   }
 
+  bool is_complete() const { return this->state == ThreadState::Complete; }
+
+  bool is_ready() const { return this->state == ThreadState::Ready; }
+
+  bool is_running() const { return this->state == ThreadState::Running; }
+
+  bool is_sleeping() const { return this->state == ThreadState::Sleeping; }
+
+  bool is_allocated() const { return this->state != ThreadState::Unallocated; }
+
   void mark_as_ready() { this->state = ThreadState::Ready; }
+
   void mark_as_running() { this->state = ThreadState::Running; }
+
   void mark_as_complete() { this->state = ThreadState::Complete; }
 
-  void set_page(void *page) {
-    this->page_addr = reinterpret_cast<uint64_t>(page);
+  void mark_as_sleeping(uint32_t sleep_until_us) {
+    this->state = ThreadState::Sleeping;
+    this->sleep_until_us = sleep_until_us;
   }
 
   void set_sp(void *sp) { this->sp = reinterpret_cast<uint64_t>(sp); }
 };
+
+#endif // __ASSEMBLER__
 
 #endif // THREAD_CONTROL_BLOCK_HPP

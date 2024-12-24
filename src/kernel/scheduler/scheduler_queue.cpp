@@ -22,53 +22,52 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef SCHEDULER_HPP
-#define SCHEDULER_HPP
+#include "../../../include/kernel/scheduler/scheduler_queue.hpp"
 
-#include "thread_control_block.hpp"
+bool SchedulerQueue::enqueue(ThreadControlBlock *tcb) {
+  if (this->is_full()) {
+    return false;
+  }
 
-#define SCHEDULER_CAPACITY 250
+  this->queue[this->tail] = tcb;
+  this->tail = (this->tail + 1) % QUEUE_CAPACITY;
+  this->size++;
 
-/**
- * @brief A simple queue for the scheduler.
- */
-class SchedulerQueue {
-private:
-  ThreadControlBlock *queue[SCHEDULER_CAPACITY]{nullptr};
+  return true;
+}
 
-  uint32_t head = 0;
-  uint32_t tail = 0;
-  uint32_t size = 0;
-  uint32_t completed = 0;
+ThreadControlBlock *SchedulerQueue::dequeue() {
+  if (this->is_empty()) {
+    return nullptr;
+  }
 
-public:
-  SchedulerQueue() = default;
+  ThreadControlBlock *tcb = this->queue[this->head];
+  this->head = (this->head + 1) % QUEUE_CAPACITY;
+  this->size--;
 
-  /**
-   * @brief Enqueues a thread in the scheduler queue.
-   * @param tcb The thread to enqueue.
-   * @return True if the thread was enqueued, false if the queue is full.
-   */
-  bool enqueue(ThreadControlBlock *tcb);
+  return tcb;
+}
 
-  /**
-   * @brief Marks the current thread as complete and increments the completed
-   * count.
-   */
-  void mark_current_as_complete();
+ThreadControlBlock *SchedulerQueue::peek() {
+  if (this->is_empty()) {
+    return nullptr;
+  }
 
-  /**
-   * @brief Switches this scheduler to the next thread.
-   */
-  void next();
+  return this->queue[this->head];
+}
 
-  bool is_empty() const { return size == 0 || completed == size; }
+ThreadControlBlock *SchedulerQueue::next() {
+  if (this->is_empty()) {
+    return nullptr;
+  }
 
-  /**
-   * @brief Peeks the thread currently at the head of the queue.
-   * @return A pointer to the thread control block.
-   */
-  ThreadControlBlock *peek() { return queue[head]; }
-};
+  // Remove the head
+  ThreadControlBlock *tcb = this->queue[this->head];
+  this->head = (this->head + 1) % QUEUE_CAPACITY;
 
-#endif // SCHEDULER_HPP
+  // Add the head to the tail
+  this->queue[this->tail] = tcb;
+  this->tail = (this->tail + 1) % QUEUE_CAPACITY;
+
+  return this->queue[this->head];
+}
