@@ -27,7 +27,7 @@
 
 #include "../tcb/thread_control_block.hpp"
 
-#define QUEUE_CAPACITY 250
+#define QUEUE_CAPACITY 260
 
 /**
  * @brief A simple queue for the scheduler.
