@@ -22,28 +22,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef INTERNAL_SYS_CALL_HANDLER_HPP
-#define INTERNAL_SYS_CALL_HANDLER_HPP
+#include <api/concurrency/atomic_guard.hpp>
+#include <kernel/interrupts/interrupts.hpp>
 
-#include <api/sys/sys_calls.hpp>
+using namespace kernel::interrupts;
 
-/**
- * @brief A function pointer type for system call handlers.
- * @param arg The argument to the system call.
- * @return The return value of the system call.
- */
-typedef void *(*system_call_handler)(const void *);
-
-namespace kernel::sys {
-/**
- * ### (INTERNAL)
- * @brief Handles a system call by invoking the appropriate system call handler.
- * This should only be invoked by the synchronous exception handler.
- * @param call_code The system call code.
- * @param arg The argument to the system call.
- * @return The return value of the system call.
- */
-void *internal_handle_sys_call(SystemCall call_code, const void *arg);
-} // namespace kernel::sys
-
-#endif // INTERNAL_SYS_CALL_HANDLER_HPP
+AtomicGuard::AtomicGuard() { disable_preemption(); }
+AtomicGuard::~AtomicGuard() { enable_preemption(); }

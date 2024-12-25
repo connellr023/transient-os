@@ -22,28 +22,14 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef INTERNAL_SYS_CALL_HANDLER_HPP
-#define INTERNAL_SYS_CALL_HANDLER_HPP
-
 #include <api/sys/sys_calls.hpp>
+#include <api/thread/thread_handle.hpp>
+#include <kernel/thread/thread_control_block.hpp>
 
-/**
- * @brief A function pointer type for system call handlers.
- * @param arg The argument to the system call.
- * @return The return value of the system call.
- */
-typedef void *(*system_call_handler)(const void *);
+uint64_t ThreadHandle::get_thread_id() { return this->tcb->get_thread_id(); }
 
-namespace kernel::sys {
-/**
- * ### (INTERNAL)
- * @brief Handles a system call by invoking the appropriate system call handler.
- * This should only be invoked by the synchronous exception handler.
- * @param call_code The system call code.
- * @param arg The argument to the system call.
- * @return The return value of the system call.
- */
-void *internal_handle_sys_call(SystemCall call_code, const void *arg);
-} // namespace kernel::sys
-
-#endif // INTERNAL_SYS_CALL_HANDLER_HPP
+void ThreadHandle::join() {
+  while (!this->tcb->is_complete()) {
+    api::sys::yield();
+  }
+}

@@ -25,14 +25,15 @@
 #ifndef SYS_CALLS_HPP
 #define SYS_CALLS_HPP
 
-#include <kernel/thread/thread_handle.hpp>
-#include <kernel/thread/thread_handler.hpp>
+#include <api/handler_types.hpp>
+#include <api/thread/thread_handle.hpp>
 #include <stdint.h>
 
 /**
  * @brief An enumeration of possible system call codes.
  */
 enum class SystemCall : uint8_t {
+  SetOutputHandler,
   PutString,
   HeapAlloc,
   HeapFree,
@@ -52,7 +53,7 @@ struct AllocThreadArgs {
   void *arg;
 };
 
-namespace kernel::sys {
+namespace api::sys {
 /**
  * @brief Utility function to trigger a system call. Can be called directly, or
  * use wrapper functions.
@@ -62,6 +63,11 @@ namespace kernel::sys {
  */
 void *trigger_sys_call(SystemCall call_code,
                        const void *arg = nullptr) asm("_trigger_sys_call");
+/**
+ * @brief Triggers a system call that sets the output handler for the kernel.
+ * @param handler The output handler to set.
+ */
+void set_output_handler(output_handler_t handler);
 
 /**
  * @brief Triggers a system call that writes a message to the output handler.
@@ -111,6 +117,6 @@ void sleep(uint32_t sleep_us);
  */
 bool spawn_thread(ThreadHandle *handle, thread_handler_t handler,
                   uint32_t quantum_us, void *arg = nullptr);
-} // namespace kernel::sys
+} // namespace api::sys
 
 #endif // SYS_CALLS_HPP

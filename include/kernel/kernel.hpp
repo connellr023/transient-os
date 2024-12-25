@@ -25,12 +25,8 @@
 #ifndef KERNEL_HPP
 #define KERNEL_HPP
 
-#include "thread/thread_control_block.hpp"
-#include <kernel/thread/thread_handle.hpp>
-#include <kernel/thread/thread_handler.hpp>
+#include <api/handler_types.hpp>
 #include <stdint.h>
-
-typedef void (*output_handler_t)(const char *);
 
 namespace kernel {
 /**
@@ -39,11 +35,10 @@ namespace kernel {
 void set_output_handler(output_handler_t output_handler);
 
 /**
- * @brief Starts the kernel and triggers the first context switch.
- * This function should be called after all initialization is done.
- * This function will not return.
+ * @brief Starts the kernel and triggers the first context switch into the main
+ * thread.
  */
-[[noreturn]] void start();
+void start() asm("_kernel_start");
 
 /**
  * @brief If something goes wrong, call this function to panic the kernel.
@@ -51,10 +46,6 @@ void set_output_handler(output_handler_t output_handler);
  * low power state.
  */
 [[noreturn]] void panic(const char *msg);
-
-// To delete later
-bool prepare_thread(ThreadHandle *handle, thread_handler_t handler,
-                    uint32_t quantum_us, void *arg = nullptr);
 
 /**
  * @brief Prints a message to the output handler.
@@ -67,12 +58,6 @@ void safe_puts(const char *str);
  * @param value The value to print.
  */
 void safe_hex(uint64_t value);
-
-/**
- * @brief Checks if the kernel has started.
- * @return True if the kernel has started, false otherwise.
- */
-bool is_started();
 } // namespace kernel
 
 #endif // KERNEL_HPP

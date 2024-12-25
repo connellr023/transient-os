@@ -25,9 +25,11 @@
 #ifndef INTERNAL_ISR_HPP
 #define INTERNAL_ISR_HPP
 
-#include "../sys/sys_calls.hpp"
+#include <api/sys/sys_calls.hpp>
 
-#define SVC_EC 0x15
+enum class SynchExceptionClass : uint8_t {
+  SVC = 0x15,
+};
 
 namespace kernel::interrupts {
 /**

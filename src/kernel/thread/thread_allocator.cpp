@@ -1,6 +1,30 @@
-#include "../../../include/kernel/memory/internal_paging.hpp"
-#include "../../../include/kernel/sys/sys_calls.hpp"
-#include "../../../include/kernel/thread/internal_thread_allocator.hpp"
+/*
+ * Copyright (C) 2024/2025 connellr023@github
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy,
+ * modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
+#include <api/sys/sys_calls.hpp>
+#include <kernel/memory/internal_paging.hpp>
+#include <kernel/thread/internal_thread_allocator.hpp>
 #include <utils/mem_utils.hpp>
 
 namespace kernel::thread {
@@ -16,7 +40,7 @@ void init_stack(void *sp, void *arg, thread_handler_t handler) {
   register_stack[0] = reinterpret_cast<uintptr_t>(arg);
 
   // Set x30 (LR) to the exit system call
-  register_stack[LR_IDX] = reinterpret_cast<uintptr_t>(&sys::exit);
+  register_stack[LR_IDX] = reinterpret_cast<uintptr_t>(&api::sys::exit);
 
   // Set ELR_EL1 to the thread handler
   register_stack[ELR_EL1_IDX] = reinterpret_cast<uintptr_t>(handler);

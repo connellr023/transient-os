@@ -22,8 +22,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/utils/concurrency/mutex.hpp"
-#include "../../../include/kernel/interrupts/interrupts.hpp"
+#include <api/concurrency/mutex.hpp>
+#include <kernel/interrupts/interrupts.hpp>
 
 using namespace kernel::interrupts;
 
