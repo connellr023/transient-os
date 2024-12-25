@@ -25,7 +25,7 @@
 #ifndef THREAD_CONTROL_BLOCK_HPP
 #define THREAD_CONTROL_BLOCK_HPP
 
-#include "../../../include/kernel/memory/free_list.hpp"
+#include <kernel/memory/free_list.hpp>
 #include <stdint.h>
 
 /**

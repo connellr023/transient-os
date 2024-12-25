@@ -33,6 +33,10 @@ This operating system is intended to still be used for very low-level programmin
 
 It is worth noting that everytime a system call is made, the scheduler preempts the callee thread and it will have to wait throught the entire round-robin cycle before it can be scheduled again. This means system calls are blocking and expensive.
 
+### Set Output Handler (`set_output_handler`)
+
+This call sets the debug output handler for the kernel. The output handler is a function that takes a `const char*` and writes it to the output device. This is intended to be used for debugging purposes.
+
 ### Put String (`put_string`)
 
 This call writes a message to the output handler. The output handler must have been initialized, or nothing will happen. This is intended as more of a test system call than anything else but can be used to safely transmit over **UART** if output handler is configured to do so.
@@ -63,9 +67,10 @@ This call spawns a new thread from a `ThreadControlBlock` and starts executing i
 
 ### Diagrams (as of now)
 
-![Memory Layout](https://github.com/connellr023/connellr023.github.io/blob/main/static/images/transient-os/memory-layout.png?raw=true)
-
-![Thread Heap Memory Layout](https://github.com/connellr023/connellr023.github.io/blob/main/static/images/transient-os/thread-heap-memory-layout.png?raw=true)
+<div align="center">
+  <img src="https://github.com/connellr023/connellr023.github.io/blob/main/static/images/transient-os/memory-layout.png?raw=true" alt="Memory Layout" width="500"/>
+  <img src="https://github.com/connellr023/connellr023.github.io/blob/main/static/images/transient-os/thread-heap-memory-layout.png?raw=true" alt="Thread Heap Memory Layout" width="400"/>
+</div>
 
 ## Development
 

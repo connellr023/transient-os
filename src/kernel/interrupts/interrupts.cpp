@@ -22,8 +22,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/interrupts/interrupts.hpp"
-#include "../../../include/kernel/peripherals/timer.hpp"
+#include <kernel/interrupts/interrupts.hpp>
+#include <kernel/peripherals/timer.hpp>
 
 namespace kernel::interrupts {
 void clear_timer_interrupt() { *TIMER_CS = TIMER_CS_M1; }

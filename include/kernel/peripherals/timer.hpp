@@ -25,7 +25,7 @@
 #ifndef TIMER_INTERRUPT_HPP
 #define TIMER_INTERRUPT_HPP
 
-#include "mmio.hpp"
+#include <kernel/peripherals/mmio.hpp>
 #include <stdint.h>
 
 #define TIMER_CS ((volatile uint32_t *)(MMIO_BASE + 0x00003000))

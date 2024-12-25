@@ -25,7 +25,7 @@
 #ifndef CPU_SCHEDULER_HPP
 #define CPU_SCHEDULER_HPP
 
-#include "../thread/thread_control_block.hpp"
+#include <kernel/thread/thread_control_block.hpp>
 
 namespace kernel::scheduler {
 /**
