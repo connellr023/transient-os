@@ -27,7 +27,7 @@
 #include "../../../include/kernel/kernel.hpp"
 #include "../../../include/kernel/scheduler/internal_cpu_scheduler.hpp"
 #include "../../../include/kernel/sys/internal_sys_call_handler.hpp"
-#include "../../../include/kernel/tcb/thread_control_block.hpp"
+#include "../../../include/kernel/thread/thread_control_block.hpp"
 
 namespace kernel::interrupts {
 void *internal_irq_exception_handler(void *interrupted_sp) {

@@ -25,7 +25,9 @@
 #ifndef KERNEL_HPP
 #define KERNEL_HPP
 
-#include "tcb/thread_control_block.hpp"
+#include "thread/thread_control_block.hpp"
+#include <kernel/thread/thread_handle.hpp>
+#include <kernel/thread/thread_handler.hpp>
 #include <stdint.h>
 
 typedef void (*output_handler_t)(const char *);
@@ -50,13 +52,9 @@ void set_output_handler(output_handler_t output_handler);
  */
 [[noreturn]] void panic(const char *msg);
 
-/**
- * @brief Prepares a thread by setting up the stack and enqueueing it in the
- * scheduler.
- * @param tcb The thread control block of the thread.
- * @return True if the thread was scheduled, false otherwise.
- */
-bool prepare_thread(ThreadControlBlock *tcb);
+// To delete later
+bool prepare_thread(ThreadHandle *handle, thread_handler_t handler,
+                    uint32_t quantum_us, void *arg = nullptr);
 
 /**
  * @brief Prints a message to the output handler.

@@ -17,6 +17,4 @@
 
 #define SPSR_EL2_VALUE 0x3C4
 
-#define INITIAL_SPSR_EL1_VALUE 0x344
-
 #endif // SYS_REGISTERS_HPP

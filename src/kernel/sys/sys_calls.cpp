@@ -1,5 +1,6 @@
 #include "../../../include/kernel/sys/sys_calls.hpp"
 #include "../../../include/kernel/kernel.hpp"
+#include <kernel/thread/internal_thread_allocator.hpp>
 
 namespace kernel::sys {
 void puts(const char *str) { trigger_sys_call(SystemCall::PutString, str); }
@@ -27,7 +28,14 @@ void sleep(uint32_t sleep_us) {
   trigger_sys_call(SystemCall::Sleep, reinterpret_cast<void *>(sleep_us));
 }
 
-bool spawn_thread(ThreadControlBlock *tcb) {
-  return static_cast<bool>(trigger_sys_call(SystemCall::SpawnThread, tcb));
+bool spawn_thread(ThreadHandle *handle, thread_handler_t handler,
+                  uint32_t quantum_us, void *arg) {
+  AllocThreadArgs args;
+  args.handle = handle;
+  args.handler = handler;
+  args.quantum_us = quantum_us;
+  args.arg = arg;
+
+  return static_cast<bool>(trigger_sys_call(SystemCall::SpawnThread, &args));
 }
 } // namespace kernel::sys

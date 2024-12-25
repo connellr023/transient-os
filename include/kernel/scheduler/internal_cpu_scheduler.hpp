@@ -1,7 +1,7 @@
 #ifndef INTERNAL_CPU_SCHEDULER_HPP
 #define INTERNAL_CPU_SCHEDULER_HPP
 
-#include "../tcb/thread_control_block.hpp"
+#include "../thread/thread_control_block.hpp"
 
 namespace kernel::scheduler {
 /**

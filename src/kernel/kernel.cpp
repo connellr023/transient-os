@@ -25,6 +25,7 @@
 #include "../../include/kernel/kernel.hpp"
 #include "../../include/kernel/interrupts/interrupts.hpp"
 #include "../../include/kernel/scheduler/cpu_scheduler.hpp"
+#include <kernel/thread/internal_thread_allocator.hpp>
 
 namespace kernel {
 /**
@@ -68,13 +69,19 @@ void start() {
   }
 }
 
-bool prepare_thread(ThreadControlBlock *tcb) {
+bool prepare_thread(ThreadHandle *handle, thread_handler_t handler,
+                    uint32_t quantum_us, void *arg) {
   // Use system calls to spawn threads after the kernel has started
   if (is_started()) {
     return false;
   }
 
-  return tcb->alloc() && scheduler::enqueue(tcb);
+  ThreadControlBlock *tcb =
+      thread::internal_alloc_thread(handler, quantum_us, arg);
+
+  handle->init(tcb);
+
+  return tcb != nullptr && scheduler::enqueue(tcb);
 }
 
 void safe_puts(const char *str) {

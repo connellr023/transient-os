@@ -37,14 +37,7 @@ SchedulerQueue primary_queue;
 
 const ThreadControlBlock *get_current_thread() { return primary_queue.peek(); }
 
-bool enqueue(ThreadControlBlock *tcb) {
-  // Threads should have their stack allocated before being enqueued.
-  if (!tcb->is_allocated()) {
-    return false;
-  }
-
-  return primary_queue.enqueue(tcb);
-}
+bool enqueue(ThreadControlBlock *tcb) { return primary_queue.enqueue(tcb); }
 
 /**
  * @brief Linearly scans the primary queue to find the next ready thread.

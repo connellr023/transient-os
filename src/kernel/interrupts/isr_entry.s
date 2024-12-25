@@ -22,7 +22,7 @@
      * DEALINGS IN THE SOFTWARE.
      */
 
-#include "../../../include/kernel/tcb/thread_control_block.hpp"
+#include "../../../include/kernel/thread/internal_thread_allocator.hpp"
 
 .section .text
 

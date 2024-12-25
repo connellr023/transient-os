@@ -25,7 +25,7 @@
 #ifndef SCHEDULER_QUEUE_HPP
 #define SCHEDULER_QUEUE_HPP
 
-#include "../tcb/thread_control_block.hpp"
+#include "../thread/thread_control_block.hpp"
 
 #define QUEUE_CAPACITY 260
 

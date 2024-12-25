@@ -25,7 +25,8 @@
 #ifndef SYS_CALLS_HPP
 #define SYS_CALLS_HPP
 
-#include "../tcb/thread_control_block.hpp"
+#include <kernel/thread/thread_handle.hpp>
+#include <kernel/thread/thread_handler.hpp>
 #include <stdint.h>
 
 /**
@@ -39,6 +40,16 @@ enum class SystemCall : uint8_t {
   Exit,
   Sleep,
   SpawnThread,
+};
+
+/**
+ * @brief Arguments for the thread allocator system call.
+ */
+struct AllocThreadArgs {
+  ThreadHandle *handle;
+  thread_handler_t handler;
+  uint32_t quantum_us;
+  void *arg;
 };
 
 namespace kernel::sys {
@@ -92,10 +103,14 @@ void sleep(uint32_t sleep_us);
 
 /**
  * @brief Triggers a system call that spawns a new thread.
- * @param tcb The thread control block of the thread to spawn.
+ * @param handle Will be populated with the handle to the new thread.
+ * @param handler The function to run in the new thread.
+ * @param quantum_us The time quantum for the new thread.
+ * @param arg The argument to pass to the new thread.
  * @return True if the thread was spawned successfully, false otherwise.
  */
-bool spawn_thread(ThreadControlBlock *tcb);
+bool spawn_thread(ThreadHandle *handle, thread_handler_t handler,
+                  uint32_t quantum_us, void *arg = nullptr);
 } // namespace kernel::sys
 
 #endif // SYS_CALLS_HPP
