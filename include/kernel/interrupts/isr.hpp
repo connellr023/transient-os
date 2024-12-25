@@ -22,35 +22,34 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef INTERNAL_CPU_SCHEDULER_HPP
-#define INTERNAL_CPU_SCHEDULER_HPP
+#ifndef ISR_HPP
+#define ISR_HPP
 
-#include <kernel/thread/thread_control_block.hpp>
+#include <api/sys/sys_calls.hpp>
 
-namespace kernel::scheduler {
+enum class SynchExceptionClass : uint8_t {
+  SVC = 0x15,
+};
+
+namespace kernel::interrupts {
 /**
- * ### (INTERNAL)
- * @brief Handles a context switch by updating the current thread's TCB and
- * scheduling the next thread. This function should never be called directly.
- * @param interrupted_sp The stack pointer of the interrupted thread.
- * @return The thread control block of the next thread to run.
+ * ### (INTERNAL) IRQ Exception Handler
+ * @brief Handles an interrupt request exception.
+ * @param interrupted_sp The stack pointer at the time of the interrupt.
+ * @return The new stack pointer.
  */
-const ThreadControlBlock *internal_context_switch(void *interrupted_sp);
-
-/**
- * ### (INTERNAL)
- * @brief Special handling for context switches when the current thread is
- * exiting.
- * @return The thread control block of the next thread to run.
- */
-const ThreadControlBlock *internal_exit_context_switch();
+void *irq_exception_handler(void *interrupted_sp) asm("_irq_exception_handler");
 
 /**
- * ### (INTERNAL)
- * @brief Marks the current thread as sleeping.
- * @param sleep_us The number of microseconds to sleep.
+ * ### (INTERNAL) Synchronous Exception Handler
+ * @brief Handles a synchronous exception.
+ * @param call_code The system call code. (SVC only)
+ * @param arg The argument to the system call. (SVC only)
+ * @return Stack pointer of the next thread.
  */
-void internal_sleep(uint32_t sleep_us);
-} // namespace kernel::scheduler
+void *
+synch_exception_handler(SystemCall call_code, void *arg,
+                        void *interrupted_sp) asm("_synch_exception_handler");
+} // namespace kernel::interrupts
 
-#endif // INTERNAL_CPU_SCHEDULER_HPP
+#endif // ISR_HPP

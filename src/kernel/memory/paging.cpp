@@ -22,7 +22,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/memory/internal_paging.hpp"
+#include <kernel/memory/paging.hpp>
 
 namespace kernel::memory {
 /**
@@ -30,7 +30,7 @@ namespace kernel::memory {
  */
 bool page_table[PAGE_COUNT] = {false};
 
-void *internal_page_alloc() {
+void *kernel_page_alloc() {
   for (uint64_t i = 0; i < PAGE_COUNT; i++) {
     if (!page_table[i]) {
       page_table[i] = true;
@@ -49,7 +49,7 @@ void *internal_page_alloc() {
   return nullptr;
 }
 
-void internal_page_free(void *page) {
+void kernel_page_free(void *page) {
   const uint64_t page_addr = reinterpret_cast<uintptr_t>(page);
   page_table[(page_addr - LOW_MEMORY) / PAGE_SIZE] = false;
 }

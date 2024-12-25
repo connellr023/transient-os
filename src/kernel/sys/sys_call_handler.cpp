@@ -24,15 +24,13 @@
 
 #include <api/sys/sys_calls.hpp>
 #include <kernel/kernel.hpp>
-#include <kernel/memory/internal_heap.hpp>
-#include <kernel/memory/internal_paging.hpp>
+#include <kernel/memory/heap.hpp>
 #include <kernel/scheduler/cpu_scheduler.hpp>
-#include <kernel/scheduler/internal_cpu_scheduler.hpp>
-#include <kernel/sys/internal_sys_call_handler.hpp>
-#include <kernel/thread/internal_thread_allocator.hpp>
+#include <kernel/sys/sys_call_handler.hpp>
+#include <kernel/thread/thread_allocator.hpp>
 
 namespace kernel::sys {
-void *internal_handle_sys_call(SystemCall call_code, const void *arg) {
+void *handle_sys_call(SystemCall call_code, const void *arg) {
   switch (call_code) {
   case SystemCall::SetOutputHandler: {
     output_handler_t handler =
@@ -47,24 +45,24 @@ void *internal_handle_sys_call(SystemCall call_code, const void *arg) {
   }
   case SystemCall::HeapAlloc: {
     const uint64_t size = reinterpret_cast<uintptr_t>(arg);
-    return memory::internal_heap_alloc(
+    return memory::kernel_heap_alloc(
         scheduler::get_current_thread()->get_heap_start(), size);
   }
   case SystemCall::HeapFree: {
     void *ptr = const_cast<void *>(arg);
-    memory::internal_heap_free(ptr);
+    memory::kernel_heap_free(ptr);
     break;
   }
   case SystemCall::Sleep: {
     const uint32_t sleep_us = reinterpret_cast<uintptr_t>(arg);
-    scheduler::internal_sleep(sleep_us);
+    scheduler::sleep_current(sleep_us);
     break;
   }
   case SystemCall::SpawnThread: {
     AllocThreadArgs *alloc_thread_args =
         reinterpret_cast<AllocThreadArgs *>(const_cast<void *>(arg));
 
-    ThreadControlBlock *tcb = thread::internal_alloc_thread(
+    ThreadControlBlock *tcb = thread::kernel_thread_alloc(
         alloc_thread_args->handler, alloc_thread_args->quantum_us,
         alloc_thread_args->arg);
 

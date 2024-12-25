@@ -22,7 +22,7 @@
      * DEALINGS IN THE SOFTWARE.
      */
 
-#include <kernel/memory/internal_paging.hpp>
+#include <kernel/memory/paging.hpp>
 #include <kernel/sys/sys_registers.hpp>
 
 .section .text.boot

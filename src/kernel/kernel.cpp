@@ -25,7 +25,7 @@
 #include <kernel/interrupts/interrupts.hpp>
 #include <kernel/kernel.hpp>
 #include <kernel/scheduler/cpu_scheduler.hpp>
-#include <kernel/thread/internal_thread_allocator.hpp>
+#include <kernel/thread/thread_allocator.hpp>
 
 // Link to main function for executing main thread
 // This will essentially serve as the first thread
@@ -50,13 +50,13 @@ bool init_main_thread() {
   safe_puts("\n");
 
   // Allocate the main thread
-  ThreadControlBlock *main_tcb = thread::internal_alloc_thread(
+  ThreadControlBlock *main_tcb = thread::kernel_thread_alloc(
       reinterpret_cast<thread_handler_t>(&main), main_thread_quantum);
 
   return main_tcb != nullptr && scheduler::enqueue(main_tcb);
 }
 
-void start() {
+void kernel_start() {
   // Ensure we are in EL1
   uint64_t current_el;
   asm volatile("mrs %0, CurrentEL" : "=r"(current_el));

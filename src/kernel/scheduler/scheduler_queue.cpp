@@ -22,7 +22,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/scheduler/scheduler_queue.hpp"
+#include <kernel/scheduler/scheduler_queue.hpp>
 
 bool SchedulerQueue::enqueue(ThreadControlBlock *tcb) {
   if (this->is_full()) {

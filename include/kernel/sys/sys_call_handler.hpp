@@ -22,35 +22,27 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef INTERNAL_ISR_HPP
-#define INTERNAL_ISR_HPP
+#ifndef SYS_CALL_HANDLER_HPP
+#define SYS_CALL_HANDLER_HPP
 
 #include <api/sys/sys_calls.hpp>
 
-enum class SynchExceptionClass : uint8_t {
-  SVC = 0x15,
-};
-
-namespace kernel::interrupts {
 /**
- * ### (INTERNAL) IRQ Exception Handler
- * @brief Handles an interrupt request exception.
- * @param interrupted_sp The stack pointer at the time of the interrupt.
- * @return The new stack pointer.
+ * @brief A function pointer type for system call handlers.
+ * @param arg The argument to the system call.
+ * @return The return value of the system call.
  */
-void *internal_irq_exception_handler(void *interrupted_sp) asm(
-    "_internal_irq_exception_handler");
+typedef void *(*system_call_handler)(const void *);
 
+namespace kernel::sys {
 /**
- * ### (INTERNAL) Synchronous Exception Handler
- * @brief Handles a synchronous exception.
- * @param call_code The system call code. (SVC only)
- * @param arg The argument to the system call. (SVC only)
- * @return Stack pointer of the next thread.
+ * @brief Handles a system call by invoking the appropriate system call handler.
+ * This should only be invoked by the synchronous exception handler.
+ * @param call_code The system call code.
+ * @param arg The argument to the system call.
+ * @return The return value of the system call.
  */
-void *internal_synch_exception_handler(
-    SystemCall call_code, void *arg,
-    void *interrupted_sp) asm("_internal_synch_exception_handler");
-} // namespace kernel::interrupts
+void *handle_sys_call(SystemCall call_code, const void *arg);
+} // namespace kernel::sys
 
-#endif // INTERNAL_ISR_HPP
+#endif // SYS_CALL_HANDLER_HPP

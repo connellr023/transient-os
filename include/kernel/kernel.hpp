@@ -38,7 +38,7 @@ void set_output_handler(output_handler_t output_handler);
  * @brief Starts the kernel and triggers the first context switch into the main
  * thread.
  */
-void start() asm("_kernel_start");
+void kernel_start() asm("_kernel_start");
 
 /**
  * @brief If something goes wrong, call this function to panic the kernel.

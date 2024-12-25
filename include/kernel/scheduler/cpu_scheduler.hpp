@@ -40,6 +40,27 @@ bool enqueue(ThreadControlBlock *tcb);
  * @return The thread control block of the current thread.
  */
 const ThreadControlBlock *get_current_thread();
+
+/**
+ * @brief Handles a context switch by updating the current thread's TCB and
+ * scheduling the next thread. This function should never be called directly.
+ * @param interrupted_sp The stack pointer of the interrupted thread.
+ * @return The thread control block of the next thread to run.
+ */
+const ThreadControlBlock *context_switch(void *interrupted_sp);
+
+/**
+ * @brief Special handling for context switches when the current thread is
+ * exiting.
+ * @return The thread control block of the next thread to run.
+ */
+const ThreadControlBlock *exit_context_switch();
+
+/**
+ * @brief Marks the current thread as sleeping.
+ * @param sleep_us The number of microseconds to sleep.
+ */
+void sleep_current(uint32_t sleep_us);
 } // namespace kernel::scheduler
 
 #endif // CPU_SCHEDULER_HPP

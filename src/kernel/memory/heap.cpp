@@ -22,11 +22,11 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/memory/internal_heap.hpp"
-#include "../../../include/utils/mem_utils.hpp"
+#include <kernel/memory/heap.hpp>
+#include <utils/mem_utils.hpp>
 
 namespace kernel::memory {
-void *internal_heap_alloc(FreeListNode *start_node, uint64_t size) {
+void *kernel_heap_alloc(FreeListNode *start_node, uint64_t size) {
   FreeListNode *current = start_node;
   size = align_up(size);
 
@@ -62,7 +62,7 @@ void *internal_heap_alloc(FreeListNode *start_node, uint64_t size) {
   return nullptr;
 }
 
-void internal_heap_free(void *ptr) {
+void kernel_heap_free(void *ptr) {
   FreeListNode *node = reinterpret_cast<FreeListNode *>(ptr) - 1;
   node->mark_as_free();
 

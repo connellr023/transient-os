@@ -22,7 +22,7 @@
      * DEALINGS IN THE SOFTWARE.
      */
 
-#include <kernel/thread/internal_thread_allocator.hpp>
+#include <kernel/thread/thread_allocator.hpp>
 
 .section .text
 
@@ -95,7 +95,7 @@ _irq_handler:
 
     // Pass the base address of the saved registers to the interrupt service routine
     mov x0, sp
-    bl _internal_irq_exception_handler
+    bl _irq_exception_handler
 
     // Update the stack pointer to the next thread
     mov sp, x0
@@ -117,7 +117,7 @@ _synch_handler:
     mov x1, x0 // Move syscall argument into x1
     mov w0, w8 // Move call code into w0
     mov x2, sp // Move interrupted stack pointer into x2
-    bl _internal_synch_exception_handler
+    bl _synch_exception_handler
 
     // Update the stack pointer to the next thread
     mov sp, x0

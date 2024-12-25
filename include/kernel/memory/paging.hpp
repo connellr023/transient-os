@@ -22,8 +22,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef INTERNAL_PAGING_HPP
-#define INTERNAL_PAGING_HPP
+#ifndef PAGING_HPP
+#define PAGING_HPP
 
 #include <kernel/peripherals/mmio.hpp>
 
@@ -48,29 +48,29 @@
 #define THREAD_HEAP_SIZE                                                       \
   (PAGE_SIZE - THREAD_STACK_SIZE) // Rest of page for heap
 
-#define MEMORY_FILL 0xB0BABABE // ;)
+#define MEMORY_FILL 0xB0BABABE // ♥(ˆ⌣ˆԅ)
 
 #include <stdint.h>
 
 namespace kernel::memory {
 /**
- * ### Page allocator (INTERNAL)
+ * ### Page allocator
  * @brief Allocates a page of memory. This operation is not thread safe and
  * should only be invoked by a system call handler.
  * @return A pointer to the allocated page. Returns nullptr if no memory is
  * available.
  */
-void *internal_page_alloc();
+void *kernel_page_alloc();
 
 /**
- * ### Page deallocator (INTERNAL)
+ * ### Page deallocator
  * @brief Frees a page of memory. This operation is not thread safe and should
  * only be invoked by a system call handler.
  * @param page The page to free.
  */
-void internal_page_free(void *page);
+void kernel_page_free(void *page);
 } // namespace kernel::memory
 
 #endif // __ASSEMBLER__
 
-#endif // INTERNAL_PAGING_HPP
+#endif // PAGING_HPP

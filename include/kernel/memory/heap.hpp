@@ -31,23 +31,23 @@
 
 namespace kernel::memory {
 /**
- * ### Kernel memory heap allocator (INTERNAL)
+ * ### Kernel memory heap allocator
  * @brief Allocates a block of memory on the heap. Should only be invoked by a
  * system call handler.
  * @param size The size of the block to allocate.
  * @return A pointer to the allocated block. Returns nullptr if no memory is
  * available.
  */
-void *internal_heap_alloc(FreeListNode *start_node, uint64_t size);
+void *kernel_heap_alloc(FreeListNode *start_node, uint64_t size);
 
 /**
- * ### Kernel memory heap free (INTERNAL)
+ * ### Kernel memory heap free
  * @brief Frees a block of memory on the heap. Should only be invoked by a
  * system call handler.
  * guaranteed.
  * @param ptr The pointer to the block to free.
  */
-void internal_heap_free(void *ptr);
+void kernel_heap_free(void *ptr);
 } // namespace kernel::memory
 
 #endif // INTERNAL_HEAP_HPP

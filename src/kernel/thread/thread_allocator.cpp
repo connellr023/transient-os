@@ -23,8 +23,8 @@
  */
 
 #include <api/sys/sys_calls.hpp>
-#include <kernel/memory/internal_paging.hpp>
-#include <kernel/thread/internal_thread_allocator.hpp>
+#include <kernel/memory/paging.hpp>
+#include <kernel/thread/thread_allocator.hpp>
 #include <utils/mem_utils.hpp>
 
 namespace kernel::thread {
@@ -54,9 +54,9 @@ void init_heap(void *page) {
   start_node->init(THREAD_HEAP_SIZE - sizeof(FreeListNode));
 }
 
-ThreadControlBlock *internal_alloc_thread(thread_handler_t handler,
-                                          uint32_t quantum_us, void *arg) {
-  void *page = memory::internal_page_alloc();
+ThreadControlBlock *kernel_thread_alloc(thread_handler_t handler,
+                                        uint32_t quantum_us, void *arg) {
+  void *page = memory::kernel_page_alloc();
 
   if (!page) {
     return nullptr;

@@ -22,17 +22,17 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include <kernel/interrupts/internal_isr.hpp>
 #include <kernel/interrupts/interrupts.hpp>
+#include <kernel/interrupts/isr.hpp>
 #include <kernel/kernel.hpp>
-#include <kernel/scheduler/internal_cpu_scheduler.hpp>
-#include <kernel/sys/internal_sys_call_handler.hpp>
+#include <kernel/scheduler/cpu_scheduler.hpp>
+#include <kernel/sys/sys_call_handler.hpp>
 #include <kernel/thread/thread_control_block.hpp>
 
 namespace kernel::interrupts {
-void *internal_irq_exception_handler(void *interrupted_sp) {
+void *irq_exception_handler(void *interrupted_sp) {
   const ThreadControlBlock *next_tcb =
-      scheduler::internal_context_switch(interrupted_sp);
+      scheduler::context_switch(interrupted_sp);
 
   prepare_timer_interrupt(next_tcb->get_quantum());
   clear_timer_interrupt();
@@ -41,8 +41,8 @@ void *internal_irq_exception_handler(void *interrupted_sp) {
   return next_tcb->get_sp();
 }
 
-void *internal_synch_exception_handler(SystemCall call_code, void *arg,
-                                       void *interrupted_sp) {
+void *synch_exception_handler(SystemCall call_code, void *arg,
+                              void *interrupted_sp) {
   // Check if the exception was a system call
   uint64_t ec;
   asm volatile("mrs %0, esr_el1" : "=r"(ec));
@@ -54,8 +54,7 @@ void *internal_synch_exception_handler(SystemCall call_code, void *arg,
 
   // Special handling for exit system call
   if (call_code == SystemCall::Exit) {
-    const ThreadControlBlock *next_tcb =
-        scheduler::internal_exit_context_switch();
+    const ThreadControlBlock *next_tcb = scheduler::exit_context_switch();
 
     prepare_timer_interrupt(next_tcb->get_quantum());
     clear_timer_interrupt();
@@ -64,13 +63,13 @@ void *internal_synch_exception_handler(SystemCall call_code, void *arg,
   }
 
   // Handle all other system calls
-  void *value = sys::internal_handle_sys_call(call_code, arg);
+  void *value = sys::handle_sys_call(call_code, arg);
 
   // Write return value to x0 register on the interrupted stack
   uint64_t *sp = reinterpret_cast<uint64_t *>(interrupted_sp);
   sp[0] = reinterpret_cast<uintptr_t>(value);
 
   // Switch to a different thread
-  return internal_irq_exception_handler(interrupted_sp);
+  return irq_exception_handler(interrupted_sp);
 }
 } // namespace kernel::interrupts

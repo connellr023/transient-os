@@ -72,6 +72,10 @@ This call spawns a new thread from a `ThreadControlBlock` and starts executing i
   <img src="https://github.com/connellr023/connellr023.github.io/blob/main/static/images/transient-os/thread-heap-memory-layout.png?raw=true" alt="Thread Heap Memory Layout" width="400"/>
 </div>
 
+### Usage
+
+When writing code that utilizes this operating system, it is intended that you only include header files from `include/api` as these are the only files that are intended to be used by the user. The `include/kernel` directory is for internal kernel use only.
+
 ## Development
 
 Developed and tested by [connellr023](https://github.com/connellr023) in 2024/2025.

@@ -22,28 +22,40 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef INTERNAL_SYS_CALL_HANDLER_HPP
-#define INTERNAL_SYS_CALL_HANDLER_HPP
+#ifndef INTERNAL_THREAD_ALLOCATOR_HPP
+#define INTERNAL_THREAD_ALLOCATOR_HPP
 
-#include <api/sys/sys_calls.hpp>
+#define CPU_CTX_STACK_SIZE (34 * 8) // 34 registers * 8 bytes per register
 
+#ifndef __ASSEMBLER__
+
+#include <api/handler_types.hpp>
+#include <kernel/thread/thread_control_block.hpp>
+
+#define FP_IDX 29
+#define LR_IDX 30
+#define ELR_EL1_IDX 31
+#define SPSR_EL1_IDX 32
+
+enum class PSRExceptionLevel : uint8_t {
+  EL0t = 0x00,
+  EL1t = 0x04,
+};
+
+namespace kernel::thread {
 /**
- * @brief A function pointer type for system call handlers.
- * @param arg The argument to the system call.
- * @return The return value of the system call.
+ * @brief Allocates and initializes a page of memory for a new thread.
+ * @param handler The handler function for the thread.
+ * @param quantum_us The time quantum for the thread.
+ * @param arg The argument to pass to the thread handler.
+ * @return A pointer to the thread control block for the new thread. Will be
+ * nullptr if allocation fails.
  */
-typedef void *(*system_call_handler)(const void *);
+ThreadControlBlock *kernel_thread_alloc(thread_handler_t handler,
+                                        uint32_t quantum_us,
+                                        void *arg = nullptr);
+} // namespace kernel::thread
 
-namespace kernel::sys {
-/**
- * ### (INTERNAL)
- * @brief Handles a system call by invoking the appropriate system call handler.
- * This should only be invoked by the synchronous exception handler.
- * @param call_code The system call code.
- * @param arg The argument to the system call.
- * @return The return value of the system call.
- */
-void *internal_handle_sys_call(SystemCall call_code, const void *arg);
-} // namespace kernel::sys
+#endif // __ASSEMBLER__
 
-#endif // INTERNAL_SYS_CALL_HANDLER_HPP
+#endif // INTERNAL_THREAD_ALLOCATOR_HPP

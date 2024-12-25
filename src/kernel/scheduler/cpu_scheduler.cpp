@@ -22,12 +22,11 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/scheduler/cpu_scheduler.hpp"
-#include "../../../include/kernel/kernel.hpp"
-#include "../../../include/kernel/memory/internal_paging.hpp"
-#include "../../../include/kernel/peripherals/timer.hpp"
-#include "../../../include/kernel/scheduler/internal_cpu_scheduler.hpp"
-#include "../../../include/kernel/scheduler/scheduler_queue.hpp"
+#include <kernel/kernel.hpp>
+#include <kernel/memory/paging.hpp>
+#include <kernel/peripherals/timer.hpp>
+#include <kernel/scheduler/cpu_scheduler.hpp>
+#include <kernel/scheduler/scheduler_queue.hpp>
 
 namespace kernel::scheduler {
 /**
@@ -64,7 +63,7 @@ ThreadControlBlock *find_next_thread() {
   return next;
 }
 
-const ThreadControlBlock *internal_context_switch(void *interrupted_sp) {
+const ThreadControlBlock *context_switch(void *interrupted_sp) {
   // Flag to indicate if the first context switch has occurred.
   static bool is_first_context_switch = true;
 
@@ -101,11 +100,11 @@ const ThreadControlBlock *internal_context_switch(void *interrupted_sp) {
   return next;
 }
 
-const ThreadControlBlock *internal_exit_context_switch() {
+const ThreadControlBlock *exit_context_switch() {
   ThreadControlBlock *tcb = primary_queue.dequeue();
 
   // Free thread resources
-  memory::internal_page_free(tcb->get_page());
+  memory::kernel_page_free(tcb->get_page());
   tcb->mark_as_complete();
 
   if (primary_queue.is_empty()) {
@@ -124,7 +123,7 @@ const ThreadControlBlock *internal_exit_context_switch() {
   return next_tcb;
 }
 
-void internal_sleep(uint32_t sleep_us) {
+void sleep_current(uint32_t sleep_us) {
   primary_queue.peek()->mark_as_sleeping(*TIMER_COUNTER_LOW + sleep_us);
 }
 } // namespace kernel::scheduler
