@@ -26,4 +26,8 @@ void exit() {
 void sleep(uint32_t sleep_us) {
   trigger_sys_call(SystemCall::Sleep, reinterpret_cast<void *>(sleep_us));
 }
+
+bool spawn_thread(ThreadControlBlock *tcb) {
+  return static_cast<bool>(trigger_sys_call(SystemCall::SpawnThread, tcb));
+}
 } // namespace kernel::sys

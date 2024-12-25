@@ -69,6 +69,11 @@ void start() {
 }
 
 bool prepare_thread(ThreadControlBlock *tcb) {
+  // Use system calls to spawn threads after the kernel has started
+  if (is_started()) {
+    return false;
+  }
+
   return tcb->alloc() && scheduler::enqueue(tcb);
 }
 

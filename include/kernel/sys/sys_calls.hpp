@@ -25,6 +25,7 @@
 #ifndef SYS_CALLS_HPP
 #define SYS_CALLS_HPP
 
+#include "../tcb/thread_control_block.hpp"
 #include <stdint.h>
 
 /**
@@ -37,6 +38,7 @@ enum class SystemCall : uint8_t {
   Yield,
   Exit,
   Sleep,
+  SpawnThread,
 };
 
 namespace kernel::sys {
@@ -87,6 +89,13 @@ void yield();
  * @param sleep_us The number of microseconds to sleep for.
  */
 void sleep(uint32_t sleep_us);
+
+/**
+ * @brief Triggers a system call that spawns a new thread.
+ * @param tcb The thread control block of the thread to spawn.
+ * @return True if the thread was spawned successfully, false otherwise.
+ */
+bool spawn_thread(ThreadControlBlock *tcb);
 } // namespace kernel::sys
 
 #endif // SYS_CALLS_HPP

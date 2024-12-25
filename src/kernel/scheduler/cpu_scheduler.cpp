@@ -38,9 +38,8 @@ SchedulerQueue primary_queue;
 const ThreadControlBlock *get_current_thread() { return primary_queue.peek(); }
 
 bool enqueue(ThreadControlBlock *tcb) {
-  // For now, only allow enqueuing if the kernel has not started.
-  // Threads should also have their stack allocated before being enqueued.
-  if (is_started() || !tcb->is_allocated()) {
+  // Threads should have their stack allocated before being enqueued.
+  if (!tcb->is_allocated()) {
     return false;
   }
 

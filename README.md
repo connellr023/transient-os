@@ -31,7 +31,9 @@ This operating system is intended to still be used for very low-level programmin
 
 ## System Calls
 
-### `puts` - Put String
+It is worth noting that everytime a system call is made, the scheduler preempts the callee thread and it will have to wait throught the entire round-robin cycle before it can be scheduled again. This means system calls are blocking and expensive.
+
+### Put String (`put_string`)
 
 This call writes a message to the output handler. The output handler must have been initialized, or nothing will happen. This is intended as more of a test system call than anything else but can be used to safely transmit over **UART** if output handler is configured to do so.
 
@@ -54,6 +56,10 @@ This call exits the current thread and cleans up any resources it was using.
 ### Sleep (`sleep`)
 
 This call sleeps for at least the specified number of microseconds before resuming execution.
+
+### Spawn Thread (`spawn_thread`)
+
+This call spawns a new thread from a `ThreadControlBlock` and starts executing it.
 
 ### Diagrams (as of now)
 

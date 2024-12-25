@@ -52,6 +52,11 @@ void *internal_handle_sys_call(SystemCall call_code, const void *arg) {
     scheduler::internal_sleep(sleep_us);
     break;
   }
+  case SystemCall::SpawnThread: {
+    ThreadControlBlock *tcb =
+        reinterpret_cast<ThreadControlBlock *>(const_cast<void *>(arg));
+    return reinterpret_cast<void *>(tcb->alloc() && scheduler::enqueue(tcb));
+  }
   default:
     // Yield system call does nothing so this case will be hit for it
     break;
