@@ -86,13 +86,6 @@ void *kernel_heap_realloc(FreeListNode *start_node, void *ptr,
 
   FreeListNode *current_block_node = reinterpret_cast<FreeListNode *>(ptr) - 1;
 
-  // If new size fits within the current block, return the current block with
-  // updated size
-  if (current_block_node->get_payload_size() >= new_size) {
-    current_block_node->set_size(new_size);
-    return ptr;
-  }
-
   // Allocate a new block with the new size
   void *new_block = kernel_heap_alloc(start_node, new_size);
 
