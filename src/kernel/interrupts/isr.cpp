@@ -68,7 +68,7 @@ void *internal_synch_exception_handler(SystemCall call_code, void *arg,
 
   // Write return value to x0 register on the interrupted stack
   uint64_t *sp = reinterpret_cast<uint64_t *>(interrupted_sp);
-  sp[0] = reinterpret_cast<uint64_t>(value);
+  sp[0] = reinterpret_cast<uintptr_t>(value);
 
   // Switch to a different thread
   return internal_irq_exception_handler(interrupted_sp);
