@@ -28,7 +28,7 @@
 namespace kernel::memory {
 void *kernel_heap_alloc(FreeListNode *start_node, uint64_t size) {
   FreeListNode *current = start_node;
-  size = align_up(size);
+  size = utils::align_up(size);
 
   while (current != nullptr) {
     // Allocate in this node's payload
@@ -72,5 +72,40 @@ void kernel_heap_free(void *ptr) {
   for (uint64_t i = 0; i < node->get_payload_size() / sizeof(uint64_t); i++) {
     payload[i] = FREED_MEMORY_FILL;
   }
+}
+
+void *kernel_heap_realloc(FreeListNode *start_node, void *ptr,
+                          uint64_t new_size) {
+  new_size = utils::align_up(new_size);
+
+  // Free old block if new size is 0
+  if (new_size == 0) {
+    kernel_heap_free(ptr);
+    return nullptr;
+  }
+
+  FreeListNode *current_block_node = reinterpret_cast<FreeListNode *>(ptr) - 1;
+
+  // If new size fits within the current block, return the current block with
+  // updated size
+  if (current_block_node->get_payload_size() >= new_size) {
+    current_block_node->set_size(new_size);
+    return ptr;
+  }
+
+  // Allocate a new block with the new size
+  void *new_block = kernel_heap_alloc(start_node, new_size);
+
+  if (!new_block) {
+    return nullptr;
+  }
+
+  // Copy the old block's data to the new block
+  utils::memcpy(new_block, ptr, current_block_node->get_payload_size());
+
+  // Free the old block
+  kernel_heap_free(ptr);
+
+  return new_block;
 }
 } // namespace kernel::memory

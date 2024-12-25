@@ -39,6 +39,14 @@ void *heap_alloc(uint64_t size) {
 
 void heap_free(void *ptr) { trigger_sys_call(SystemCall::HeapFree, ptr); }
 
+void heap_realloc(void *ptr, uint64_t new_size) {
+  HeapReallocArgs args;
+  args.ptr = ptr;
+  args.new_size = new_size;
+
+  trigger_sys_call(SystemCall::HeapRealloc, &args);
+}
+
 void yield() { trigger_sys_call(SystemCall::Yield); }
 
 void exit() {

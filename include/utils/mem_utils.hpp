@@ -28,6 +28,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+namespace utils {
 /**
  * @brief Aligns a value to the next multiple of the alignment.
  */
@@ -41,5 +42,6 @@ extern "C" {
  */
 void *memcpy(void *dest, const void *src, size_t n);
 }
+} // namespace utils
 
 #endif // MEM_UTILS_HPP

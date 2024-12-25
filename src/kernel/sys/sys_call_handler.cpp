@@ -48,6 +48,14 @@ void *handle_sys_call(SystemCall call_code, const void *arg) {
     return memory::kernel_heap_alloc(
         scheduler::get_current_thread()->get_heap_start(), size);
   }
+  case SystemCall::HeapRealloc: {
+    HeapReallocArgs *realloc_args =
+        reinterpret_cast<HeapReallocArgs *>(const_cast<void *>(arg));
+
+    return memory::kernel_heap_realloc(
+        scheduler::get_current_thread()->get_heap_start(), realloc_args->ptr,
+        realloc_args->new_size);
+  }
   case SystemCall::HeapFree: {
     void *ptr = const_cast<void *>(arg);
     memory::kernel_heap_free(ptr);

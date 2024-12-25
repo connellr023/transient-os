@@ -37,6 +37,7 @@ enum class SystemCall : uint8_t {
   PutString,
   HeapAlloc,
   HeapFree,
+  HeapRealloc,
   Yield,
   Exit,
   Sleep,
@@ -51,6 +52,11 @@ struct AllocThreadArgs {
   thread_handler_t handler;
   uint32_t quantum_us;
   void *arg;
+};
+
+struct HeapReallocArgs {
+  void *ptr;
+  uint64_t new_size;
 };
 
 namespace api::sys {
@@ -88,6 +94,13 @@ void *heap_alloc(uint64_t size);
  * @param ptr The pointer to the block to free.
  */
 void heap_free(void *ptr);
+
+/**
+ * @brief Triggers a system call that reallocates a block of memory on the heap.
+ * @param ptr The pointer to the block to reallocate.
+ * @param new_size The new size of the block.
+ */
+void heap_realloc(void *ptr, uint64_t new_size);
 
 /**
  * @brief Triggers a system call that yields the current thread.

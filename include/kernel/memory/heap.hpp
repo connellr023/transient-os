@@ -44,10 +44,21 @@ void *kernel_heap_alloc(FreeListNode *start_node, uint64_t size);
  * ### Kernel memory heap free
  * @brief Frees a block of memory on the heap. Should only be invoked by a
  * system call handler.
- * guaranteed.
  * @param ptr The pointer to the block to free.
  */
 void kernel_heap_free(void *ptr);
+
+/**
+ * ### Kernel memory heap realloc
+ * @brief Reallocates a block of memory on the heap. Should only be invoked by a
+ * system call handler.
+ * @param start_node The start node of the free list.
+ * @param ptr The pointer to the block to reallocate.
+ * @param new_size The new size of the block.
+ * @return A pointer to the reallocated block.
+ */
+void *kernel_heap_realloc(FreeListNode *start_node, void *ptr,
+                          uint64_t new_size);
 } // namespace kernel::memory
 
 #endif // INTERNAL_HEAP_HPP

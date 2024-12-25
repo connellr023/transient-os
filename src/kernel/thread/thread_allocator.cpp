@@ -25,7 +25,6 @@
 #include <api/sys/sys_calls.hpp>
 #include <kernel/memory/paging.hpp>
 #include <kernel/thread/thread_allocator.hpp>
-#include <utils/mem_utils.hpp>
 
 namespace kernel::thread {
 void init_stack(void *sp, void *arg, thread_handler_t handler) {
@@ -63,7 +62,7 @@ ThreadControlBlock *kernel_thread_alloc(thread_handler_t handler,
   }
 
   const uint64_t page_addr = reinterpret_cast<uintptr_t>(page);
-  uint64_t sp = page_addr + PAGE_SIZE - align_up(sizeof(ThreadControlBlock));
+  uint64_t sp = page_addr + PAGE_SIZE - sizeof(ThreadControlBlock);
 
   // Thread control blocks will be placed just before the thread's
   // stack space
