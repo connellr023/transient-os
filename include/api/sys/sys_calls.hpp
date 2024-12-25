@@ -25,13 +25,15 @@
 #ifndef SYS_CALLS_HPP
 #define SYS_CALLS_HPP
 
-#include "../tcb/thread_control_block.hpp"
+#include <api/handler_types.hpp>
+#include <api/thread/thread_handle.hpp>
 #include <stdint.h>
 
 /**
  * @brief An enumeration of possible system call codes.
  */
 enum class SystemCall : uint8_t {
+  SetOutputHandler,
   PutString,
   HeapAlloc,
   HeapFree,
@@ -41,7 +43,17 @@ enum class SystemCall : uint8_t {
   SpawnThread,
 };
 
-namespace kernel::sys {
+/**
+ * @brief Arguments for the thread allocator system call.
+ */
+struct AllocThreadArgs {
+  ThreadHandle *handle;
+  thread_handler_t handler;
+  uint32_t quantum_us;
+  void *arg;
+};
+
+namespace api::sys {
 /**
  * @brief Utility function to trigger a system call. Can be called directly, or
  * use wrapper functions.
@@ -51,6 +63,11 @@ namespace kernel::sys {
  */
 void *trigger_sys_call(SystemCall call_code,
                        const void *arg = nullptr) asm("_trigger_sys_call");
+/**
+ * @brief Triggers a system call that sets the output handler for the kernel.
+ * @param handler The output handler to set.
+ */
+void set_output_handler(output_handler_t handler);
 
 /**
  * @brief Triggers a system call that writes a message to the output handler.
@@ -92,10 +109,14 @@ void sleep(uint32_t sleep_us);
 
 /**
  * @brief Triggers a system call that spawns a new thread.
- * @param tcb The thread control block of the thread to spawn.
+ * @param handle Will be populated with the handle to the new thread.
+ * @param handler The function to run in the new thread.
+ * @param quantum_us The time quantum for the new thread.
+ * @param arg The argument to pass to the new thread.
  * @return True if the thread was spawned successfully, false otherwise.
  */
-bool spawn_thread(ThreadControlBlock *tcb);
-} // namespace kernel::sys
+bool spawn_thread(ThreadHandle *handle, thread_handler_t handler,
+                  uint32_t quantum_us, void *arg = nullptr);
+} // namespace api::sys
 
 #endif // SYS_CALLS_HPP

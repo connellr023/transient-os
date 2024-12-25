@@ -25,25 +25,13 @@
 #ifndef THREAD_CONTROL_BLOCK_HPP
 #define THREAD_CONTROL_BLOCK_HPP
 
-#define CPU_CTX_STACK_SIZE (34 * 8) // 34 registers * 8 bytes per register
-
-#ifndef __ASSEMBLER__
-
-#define FP_IDX 29
-#define LR_IDX 30
-#define ELR_EL1_IDX 31
-#define SPSR_EL1_IDX 32
-
-#include "../../../include/kernel/memory/free_list.hpp"
+#include <kernel/memory/free_list.hpp>
 #include <stdint.h>
-
-typedef void (*thread_handler_t)(void *);
 
 /**
  * @brief Enumeration of the possible states of a thread.
  */
 enum class ThreadState : uint8_t {
-  Unallocated,
   Ready,
   Running,
   Sleeping,
@@ -59,29 +47,19 @@ private:
   uint64_t page_addr;
   uint32_t quantum_us;
   uint32_t wake_time;
-  ThreadState state;
   uint64_t sp;
-  thread_handler_t handler;
-  void *arg;
-
-  void init_stack();
-  void init_heap();
+  ThreadState state;
 
 public:
   /**
    * @brief Initializes a thread control block.
-   * @param handler A pointer to the function that the thread will run.
    * @param quantum_us The amount of microseconds the thread will run for before
    * being interrupted.
-   * @param arg An optional argument to pass to the thread function.
+   * @param page The address of the page allocated for the thread stack and
+   * heap.
+   * @param sp The stack pointer of the thread.
    */
-  void init(thread_handler_t handler, uint32_t quantum_us, void *arg = nullptr);
-
-  /**
-   * @brief Allocates a page for the thread stack and heap.
-   * @return True if the page was successfully allocated, false otherwise.
-   */
-  bool alloc();
+  void init(uint32_t quantum_us, void *page, void *sp);
 
   /**
    * @brief Frees the page allocated for the thread stack and heap.
@@ -124,8 +102,6 @@ public:
 
   bool is_sleeping() const { return this->state == ThreadState::Sleeping; }
 
-  bool is_allocated() const { return this->state != ThreadState::Unallocated; }
-
   void mark_as_ready() { this->state = ThreadState::Ready; }
 
   void mark_as_running() { this->state = ThreadState::Running; }
@@ -147,7 +123,5 @@ public:
    */
   void set_sp(void *sp) { this->sp = reinterpret_cast<uintptr_t>(sp); }
 };
-
-#endif // __ASSEMBLER__
 
 #endif // THREAD_CONTROL_BLOCK_HPP

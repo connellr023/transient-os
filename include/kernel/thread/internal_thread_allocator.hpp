@@ -22,21 +22,40 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include <kernel/interrupts/interrupts.hpp>
-#include <kernel/peripherals/timer.hpp>
+#ifndef INTERNAL_THREAD_ALLOCATOR_HPP
+#define INTERNAL_THREAD_ALLOCATOR_HPP
 
-namespace kernel::interrupts {
-void clear_timer_interrupt() { *TIMER_CS = TIMER_CS_M1; }
+#define CPU_CTX_STACK_SIZE (34 * 8) // 34 registers * 8 bytes per register
 
-void prepare_timer_interrupt(uint32_t interval_us) {
-  static uint32_t current_us = 0;
+#ifndef __ASSEMBLER__
 
-  current_us = *TIMER_COUNTER_LOW;
-  *TIMER_CMP_1 = current_us + interval_us;
-}
+#include <api/thread/thread_handle.hpp>
+#include <kernel/thread/thread_control_block.hpp>
 
-void enable_interrupt_controller() {
-  // Enable the system timer IRQ
-  *ENABLE_IRQS_1 = SYSTEM_TIMER_IRQ_1;
-}
-} // namespace kernel::interrupts
+#define FP_IDX 29
+#define LR_IDX 30
+#define ELR_EL1_IDX 31
+#define SPSR_EL1_IDX 32
+
+enum class PSRExceptionLevel : uint8_t {
+  EL0t = 0x00,
+  EL1t = 0x04,
+};
+
+namespace kernel::thread {
+/**
+ * @brief Allocates and initializes a page of memory for a new thread.
+ * @param handler The handler function for the thread.
+ * @param quantum_us The time quantum for the thread.
+ * @param arg The argument to pass to the thread handler.
+ * @return A pointer to the thread control block for the new thread. Will be
+ * nullptr if allocation fails.
+ */
+ThreadControlBlock *internal_alloc_thread(thread_handler_t handler,
+                                          uint32_t quantum_us,
+                                          void *arg = nullptr);
+} // namespace kernel::thread
+
+#endif // __ASSEMBLER__
+
+#endif // INTERNAL_THREAD_ALLOCATOR_HPP

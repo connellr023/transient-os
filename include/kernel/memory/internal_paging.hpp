@@ -25,7 +25,7 @@
 #ifndef INTERNAL_PAGING_HPP
 #define INTERNAL_PAGING_HPP
 
-#include "../peripherals/mmio.hpp"
+#include <kernel/peripherals/mmio.hpp>
 
 #define PAGE_SHIFT 12 // 4KB page size
 #define TABLE_SHIFT 9

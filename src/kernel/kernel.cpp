@@ -22,9 +22,14 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../include/kernel/kernel.hpp"
-#include "../../include/kernel/interrupts/interrupts.hpp"
-#include "../../include/kernel/scheduler/cpu_scheduler.hpp"
+#include <kernel/interrupts/interrupts.hpp>
+#include <kernel/kernel.hpp>
+#include <kernel/scheduler/cpu_scheduler.hpp>
+#include <kernel/thread/internal_thread_allocator.hpp>
+
+// Link to main function for executing main thread
+// This will essentially serve as the first thread
+extern "C" int main();
 
 namespace kernel {
 /**
@@ -32,16 +37,24 @@ namespace kernel {
  */
 output_handler_t kernel_string_output_handler = nullptr;
 
-/**
- * @brief Flag to indicate if the kernel has started.
- */
-bool is_kernel_started = false;
-
 void set_output_handler(output_handler_t string_handler) {
   kernel_string_output_handler = string_handler;
 }
 
-bool is_started() { return is_kernel_started; }
+bool init_main_thread() {
+  constexpr uint32_t main_thread_quantum = 1500;
+
+  // Print address of main function
+  safe_puts("Main function address: ");
+  safe_hex(reinterpret_cast<uint64_t>(&main));
+  safe_puts("\n");
+
+  // Allocate the main thread
+  ThreadControlBlock *main_tcb = thread::internal_alloc_thread(
+      reinterpret_cast<thread_handler_t>(&main), main_thread_quantum);
+
+  return main_tcb != nullptr && scheduler::enqueue(main_tcb);
+}
 
 void start() {
   // Ensure we are in EL1
@@ -49,8 +62,8 @@ void start() {
   asm volatile("mrs %0, CurrentEL" : "=r"(current_el));
   current_el >>= 2;
 
-  if (current_el != 1) {
-    panic("Not running in EL1");
+  if (current_el != 1 || !init_main_thread()) {
+    return;
   }
 
   // Initialize the interrupt controller and timer
@@ -58,23 +71,12 @@ void start() {
   interrupts::enable_interrupt_controller();
   interrupts::enable_preemption();
 
-  is_kernel_started = true;
-
   // Trigger the first timer interrupt
   interrupts::prepare_timer_interrupt(15);
 
   while (true) {
     asm volatile("wfi");
   }
-}
-
-bool prepare_thread(ThreadControlBlock *tcb) {
-  // Use system calls to spawn threads after the kernel has started
-  if (is_started()) {
-    return false;
-  }
-
-  return tcb->alloc() && scheduler::enqueue(tcb);
 }
 
 void safe_puts(const char *str) {

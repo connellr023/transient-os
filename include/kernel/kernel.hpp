@@ -25,10 +25,8 @@
 #ifndef KERNEL_HPP
 #define KERNEL_HPP
 
-#include "tcb/thread_control_block.hpp"
+#include <api/handler_types.hpp>
 #include <stdint.h>
-
-typedef void (*output_handler_t)(const char *);
 
 namespace kernel {
 /**
@@ -37,11 +35,10 @@ namespace kernel {
 void set_output_handler(output_handler_t output_handler);
 
 /**
- * @brief Starts the kernel and triggers the first context switch.
- * This function should be called after all initialization is done.
- * This function will not return.
+ * @brief Starts the kernel and triggers the first context switch into the main
+ * thread.
  */
-[[noreturn]] void start();
+void start() asm("_kernel_start");
 
 /**
  * @brief If something goes wrong, call this function to panic the kernel.
@@ -49,14 +46,6 @@ void set_output_handler(output_handler_t output_handler);
  * low power state.
  */
 [[noreturn]] void panic(const char *msg);
-
-/**
- * @brief Prepares a thread by setting up the stack and enqueueing it in the
- * scheduler.
- * @param tcb The thread control block of the thread.
- * @return True if the thread was scheduled, false otherwise.
- */
-bool prepare_thread(ThreadControlBlock *tcb);
 
 /**
  * @brief Prints a message to the output handler.
@@ -69,12 +58,6 @@ void safe_puts(const char *str);
  * @param value The value to print.
  */
 void safe_hex(uint64_t value);
-
-/**
- * @brief Checks if the kernel has started.
- * @return True if the kernel has started, false otherwise.
- */
-bool is_started();
 } // namespace kernel
 
 #endif // KERNEL_HPP

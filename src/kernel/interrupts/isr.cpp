@@ -22,12 +22,12 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/interrupts/internal_isr.hpp"
-#include "../../../include/kernel/interrupts/interrupts.hpp"
-#include "../../../include/kernel/kernel.hpp"
-#include "../../../include/kernel/scheduler/internal_cpu_scheduler.hpp"
-#include "../../../include/kernel/sys/internal_sys_call_handler.hpp"
-#include "../../../include/kernel/tcb/thread_control_block.hpp"
+#include <kernel/interrupts/internal_isr.hpp>
+#include <kernel/interrupts/interrupts.hpp>
+#include <kernel/kernel.hpp>
+#include <kernel/scheduler/internal_cpu_scheduler.hpp>
+#include <kernel/sys/internal_sys_call_handler.hpp>
+#include <kernel/thread/thread_control_block.hpp>
 
 namespace kernel::interrupts {
 void *internal_irq_exception_handler(void *interrupted_sp) {
@@ -48,7 +48,7 @@ void *internal_synch_exception_handler(SystemCall call_code, void *arg,
   asm volatile("mrs %0, esr_el1" : "=r"(ec));
   ec >>= 26;
 
-  if (ec != SVC_EC) {
+  if (ec != static_cast<uint64_t>(SynchExceptionClass::SVC)) {
     panic("Non-SVC synchronous exception occurred");
   }
 
@@ -68,7 +68,7 @@ void *internal_synch_exception_handler(SystemCall call_code, void *arg,
 
   // Write return value to x0 register on the interrupted stack
   uint64_t *sp = reinterpret_cast<uint64_t *>(interrupted_sp);
-  sp[0] = reinterpret_cast<uint64_t>(value);
+  sp[0] = reinterpret_cast<uintptr_t>(value);
 
   // Switch to a different thread
   return internal_irq_exception_handler(interrupted_sp);

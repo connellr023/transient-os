@@ -25,7 +25,7 @@
 #ifndef INTERNAL_HEAP_HPP
 #define INTERNAL_HEAP_HPP
 
-#include "../../../include/kernel/memory/free_list.hpp"
+#include <kernel/memory/free_list.hpp>
 
 #define FREED_MEMORY_FILL 0xDEADBEEF
 

@@ -1,7 +1,7 @@
 #ifndef MUTEX_LOCK_GUARD_HPP
 #define MUTEX_LOCK_GUARD_HPP
 
-#include "mutex.hpp"
+#include <api/concurrency/mutex.hpp>
 
 /**
  * RAII class for locking and unlocking a mutex.

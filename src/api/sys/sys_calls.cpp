@@ -22,28 +22,46 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef INTERNAL_SYS_CALL_HANDLER_HPP
-#define INTERNAL_SYS_CALL_HANDLER_HPP
-
 #include <api/sys/sys_calls.hpp>
 
-/**
- * @brief A function pointer type for system call handlers.
- * @param arg The argument to the system call.
- * @return The return value of the system call.
- */
-typedef void *(*system_call_handler)(const void *);
+namespace api::sys {
+void set_output_handler(output_handler_t handler) {
+  trigger_sys_call(SystemCall::SetOutputHandler,
+                   reinterpret_cast<void *>(handler));
+}
 
-namespace kernel::sys {
-/**
- * ### (INTERNAL)
- * @brief Handles a system call by invoking the appropriate system call handler.
- * This should only be invoked by the synchronous exception handler.
- * @param call_code The system call code.
- * @param arg The argument to the system call.
- * @return The return value of the system call.
- */
-void *internal_handle_sys_call(SystemCall call_code, const void *arg);
-} // namespace kernel::sys
+void puts(const char *str) { trigger_sys_call(SystemCall::PutString, str); }
 
-#endif // INTERNAL_SYS_CALL_HANDLER_HPP
+void *heap_alloc(uint64_t size) {
+  return trigger_sys_call(SystemCall::HeapAlloc,
+                          reinterpret_cast<void *>(size));
+}
+
+void heap_free(void *ptr) { trigger_sys_call(SystemCall::HeapFree, ptr); }
+
+void yield() { trigger_sys_call(SystemCall::Yield); }
+
+void exit() {
+  trigger_sys_call(SystemCall::Exit);
+
+  // Should not reach here
+  while (true) {
+    asm volatile("wfi");
+  }
+}
+
+void sleep(uint32_t sleep_us) {
+  trigger_sys_call(SystemCall::Sleep, reinterpret_cast<void *>(sleep_us));
+}
+
+bool spawn_thread(ThreadHandle *handle, thread_handler_t handler,
+                  uint32_t quantum_us, void *arg) {
+  AllocThreadArgs args;
+  args.handle = handle;
+  args.handler = handler;
+  args.quantum_us = quantum_us;
+  args.arg = arg;
+
+  return static_cast<bool>(trigger_sys_call(SystemCall::SpawnThread, &args));
+}
+} // namespace api::sys

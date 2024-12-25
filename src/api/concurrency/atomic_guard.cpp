@@ -22,21 +22,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include <api/concurrency/atomic_guard.hpp>
 #include <kernel/interrupts/interrupts.hpp>
-#include <kernel/peripherals/timer.hpp>
 
-namespace kernel::interrupts {
-void clear_timer_interrupt() { *TIMER_CS = TIMER_CS_M1; }
+using namespace kernel::interrupts;
 
-void prepare_timer_interrupt(uint32_t interval_us) {
-  static uint32_t current_us = 0;
-
-  current_us = *TIMER_COUNTER_LOW;
-  *TIMER_CMP_1 = current_us + interval_us;
-}
-
-void enable_interrupt_controller() {
-  // Enable the system timer IRQ
-  *ENABLE_IRQS_1 = SYSTEM_TIMER_IRQ_1;
-}
-} // namespace kernel::interrupts
+AtomicGuard::AtomicGuard() { disable_preemption(); }
+AtomicGuard::~AtomicGuard() { enable_preemption(); }

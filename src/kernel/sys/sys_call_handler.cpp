@@ -22,16 +22,24 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/kernel.hpp"
-#include "../../../include/kernel/memory/internal_heap.hpp"
-#include "../../../include/kernel/memory/internal_paging.hpp"
-#include "../../../include/kernel/scheduler/cpu_scheduler.hpp"
-#include "../../../include/kernel/scheduler/internal_cpu_scheduler.hpp"
-#include "../../../include/kernel/sys/internal_sys_call_handler.hpp"
+#include <api/sys/sys_calls.hpp>
+#include <kernel/kernel.hpp>
+#include <kernel/memory/internal_heap.hpp>
+#include <kernel/memory/internal_paging.hpp>
+#include <kernel/scheduler/cpu_scheduler.hpp>
+#include <kernel/scheduler/internal_cpu_scheduler.hpp>
+#include <kernel/sys/internal_sys_call_handler.hpp>
+#include <kernel/thread/internal_thread_allocator.hpp>
 
 namespace kernel::sys {
 void *internal_handle_sys_call(SystemCall call_code, const void *arg) {
   switch (call_code) {
+  case SystemCall::SetOutputHandler: {
+    output_handler_t handler =
+        reinterpret_cast<output_handler_t>(const_cast<void *>(arg));
+    set_output_handler(handler);
+    break;
+  }
   case SystemCall::PutString: {
     const char *str = reinterpret_cast<const char *>(arg);
     safe_puts(str);
@@ -53,9 +61,16 @@ void *internal_handle_sys_call(SystemCall call_code, const void *arg) {
     break;
   }
   case SystemCall::SpawnThread: {
-    ThreadControlBlock *tcb =
-        reinterpret_cast<ThreadControlBlock *>(const_cast<void *>(arg));
-    return reinterpret_cast<void *>(tcb->alloc() && scheduler::enqueue(tcb));
+    AllocThreadArgs *alloc_thread_args =
+        reinterpret_cast<AllocThreadArgs *>(const_cast<void *>(arg));
+
+    ThreadControlBlock *tcb = thread::internal_alloc_thread(
+        alloc_thread_args->handler, alloc_thread_args->quantum_us,
+        alloc_thread_args->arg);
+
+    alloc_thread_args->handle->init(tcb);
+
+    return reinterpret_cast<void *>(tcb != nullptr && scheduler::enqueue(tcb));
   }
   default:
     // Yield system call does nothing so this case will be hit for it

@@ -22,10 +22,36 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/utils/concurrency/atomic_guard.hpp"
-#include "../../../include/kernel/interrupts/interrupts.hpp"
+#ifndef THREAD_HANDLE_HPP
+#define THREAD_HANDLE_HPP
 
-using namespace kernel::interrupts;
+#include <stdint.h>
 
-AtomicGuard::AtomicGuard() { disable_preemption(); }
-AtomicGuard::~AtomicGuard() { enable_preemption(); }
+// Forward declaration to avoid exposing kernel headers
+class ThreadControlBlock;
+
+class ThreadHandle {
+private:
+  ThreadControlBlock *tcb;
+
+public:
+  /**
+   * @brief Initializes the thread handle with the given thread control block.
+   * @param tcb The thread control block.
+   */
+  void init(ThreadControlBlock *tcb) { this->tcb = tcb; }
+
+  /**
+   * @brief Gets the ID of the thread associated with this handle.
+   * @return The thread ID.
+   */
+  uint64_t get_thread_id();
+
+  /**
+   * @brief Blocks the current thread until the thread associated with this
+   * handle completes.
+   */
+  void join();
+};
+
+#endif // THREAD_HANDLE_HPP

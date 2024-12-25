@@ -22,21 +22,15 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include <kernel/interrupts/interrupts.hpp>
-#include <kernel/peripherals/timer.hpp>
+#include "../../../include/kernel/thread/thread_control_block.hpp"
 
-namespace kernel::interrupts {
-void clear_timer_interrupt() { *TIMER_CS = TIMER_CS_M1; }
+void ThreadControlBlock::init(uint32_t quantum_us, void *page, void *sp) {
+  static volatile uint64_t thread_id_counter = 0;
 
-void prepare_timer_interrupt(uint32_t interval_us) {
-  static uint32_t current_us = 0;
-
-  current_us = *TIMER_COUNTER_LOW;
-  *TIMER_CMP_1 = current_us + interval_us;
+  this->thread_id = thread_id_counter++;
+  this->page_addr = reinterpret_cast<uintptr_t>(page);
+  this->quantum_us = quantum_us;
+  this->wake_time = 0;
+  this->sp = reinterpret_cast<uintptr_t>(sp);
+  this->state = ThreadState::Ready;
 }
-
-void enable_interrupt_controller() {
-  // Enable the system timer IRQ
-  *ENABLE_IRQS_1 = SYSTEM_TIMER_IRQ_1;
-}
-} // namespace kernel::interrupts

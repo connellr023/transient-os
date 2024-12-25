@@ -22,8 +22,8 @@
      * DEALINGS IN THE SOFTWARE.
      */
 
-#include "../../include/kernel/memory/internal_paging.hpp"
-#include "../../include/kernel/sys/sys_registers.hpp"
+#include <kernel/memory/internal_paging.hpp>
+#include <kernel/sys/sys_registers.hpp>
 
 .section .text.boot
 
@@ -32,24 +32,25 @@ _start:
     // Read cpu id, stop slave cores
     mrs         x0, mpidr_el1
     tst         x0, 0x3
-    b.eq        master
-    // If CPU ID > 0, stop
-hang:
-    wfe
-    b           hang
+    b.eq        _master
 
-master:
+    // If CPU ID > 0, stop
+_hang:
+    wfe
+    b           _hang
+
+_master:
     // Clear bss section
     ldr         x1, =__bss_start
     ldr         w2, =__bss_size
 
-clear_bss:
-    cbz         w2, done_clear
+_clear_bss:
+    cbz         w2, _done_clear
     str         xzr, [x1], #8
     sub         w2, w2, #1
-    cbnz        w2, clear_bss
+    cbnz        w2, _clear_bss
 
-done_clear:
+_done_clear:
     ldr         x0, =SCTLR_EL1_VALUE
     msr         sctlr_el1, x0
 
@@ -59,7 +60,7 @@ done_clear:
     mov         x2, #SPSR_EL2_VALUE
     msr         spsr_el2, x2
 
-    adr         x2, el1_entry
+    adr         x2, _el1_entry
     msr         elr_el2, x2
 
     ldr         x0, =_start
@@ -71,11 +72,11 @@ done_clear:
 
     eret
 
-el1_entry:
+_el1_entry:
     // Switch to using SP_EL0
     msr         spsel, xzr
     mov         sp, x0
 
-    // Enter main kernel initialization function
-    bl          main
-    b           hang
+    // Enter kernel start function
+    bl          _kernel_start
+    b           _hang

@@ -23,21 +23,14 @@
  */
 
 #include "../../../include/kernel/memory/internal_heap.hpp"
-#include <stddef.h>
+#include "../../../include/utils/mem_utils.hpp"
 
 namespace kernel::memory {
-/**
- * @brief Aligns a value to the next multiple of the alignment.
- */
-constexpr uint64_t align_up(uint64_t value) {
-  return (value + alignof(max_align_t) - 1) & ~(alignof(max_align_t) - 1);
-}
-
 void *internal_heap_alloc(FreeListNode *start_node, uint64_t size) {
   FreeListNode *current = start_node;
   size = align_up(size);
 
-  while (current) {
+  while (current != nullptr) {
     // Allocate in this node's payload
     if (current->is_free() && current->get_payload_size() >= size) {
       const uint64_t payload_start_addr =
