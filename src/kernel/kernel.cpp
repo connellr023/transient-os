@@ -44,11 +44,6 @@ void set_output_handler(output_handler_t string_handler) {
 bool init_main_thread() {
   constexpr uint32_t main_thread_quantum = 1500;
 
-  // Print address of main function
-  safe_puts("Main function address: ");
-  safe_hex(reinterpret_cast<uint64_t>(&main));
-  safe_puts("\n");
-
   // Allocate the main thread
   ThreadControlBlock *main_tcb = thread::kernel_thread_alloc(
       reinterpret_cast<thread_handler_t>(&main), main_thread_quantum);
