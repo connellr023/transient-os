@@ -41,7 +41,8 @@ enum class SystemCall : uint8_t {
   Yield,
   Exit,
   Sleep,
-  SpawnThread,
+  SpawnKernelThread,
+  SpawnUserThread,
 };
 
 /**
@@ -121,15 +122,27 @@ void yield();
 void sleep(uint32_t sleep_us);
 
 /**
- * @brief Triggers a system call that spawns a new thread.
+ * @brief Triggers a system call that spawns a kernel-mode thread. Can only be
+ * created by other kernel threads.
  * @param handle Will be populated with the handle to the new thread.
  * @param handler The function to run in the new thread.
  * @param quantum_us The time quantum for the new thread.
  * @param arg The argument to pass to the new thread.
  * @return True if the thread was spawned successfully, false otherwise.
  */
-bool spawn_thread(ThreadHandle *handle, thread_handler_t handler,
-                  uint32_t quantum_us, void *arg = nullptr);
+bool spawn_kernel_thread(ThreadHandle *handle, thread_handler_t handler,
+                         uint32_t quantum_us, void *arg = nullptr);
+
+/**
+ * @brief Triggers a system call that spawns a user-mode thread.
+ * @param handle Will be populated with the handle to the new thread.
+ * @param handler The function to run in the new thread.
+ * @param quantum_us The time quantum for the new thread.
+ * @param arg The argument to pass to the new thread.
+ * @return True if the thread was spawned successfully, false otherwise.
+ */
+bool spawn_user_thread(ThreadHandle *handle, thread_handler_t handler,
+                       uint32_t quantum_us, void *arg = nullptr);
 } // namespace api::sys
 
 #endif // SYS_CALLS_HPP

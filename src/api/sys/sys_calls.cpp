@@ -62,14 +62,27 @@ void sleep(uint32_t sleep_us) {
   trigger_sys_call(SystemCall::Sleep, reinterpret_cast<void *>(sleep_us));
 }
 
-bool spawn_thread(ThreadHandle *handle, thread_handler_t handler,
-                  uint32_t quantum_us, void *arg) {
+bool spawn_kernel_thread(ThreadHandle *handle, thread_handler_t handler,
+                         uint32_t quantum_us, void *arg) {
   AllocThreadArgs args;
   args.handle = handle;
   args.handler = handler;
   args.quantum_us = quantum_us;
   args.arg = arg;
 
-  return static_cast<bool>(trigger_sys_call(SystemCall::SpawnThread, &args));
+  return static_cast<bool>(
+      trigger_sys_call(SystemCall::SpawnKernelThread, &args));
+}
+
+bool spawn_user_thread(ThreadHandle *handle, thread_handler_t handler,
+                       uint32_t quantum_us, void *arg) {
+  AllocThreadArgs args;
+  args.handle = handle;
+  args.handler = handler;
+  args.quantum_us = quantum_us;
+  args.arg = arg;
+
+  return static_cast<bool>(
+      trigger_sys_call(SystemCall::SpawnUserThread, &args));
 }
 } // namespace api::sys

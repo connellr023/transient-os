@@ -26,26 +26,39 @@
 
 .globl _init_interrupt_vector
 _init_interrupt_vector:
-        adrp    x0, _vectors
-        add     x0, x0, :lo12:_vectors
-        msr     vbar_el1, x0
+        ldr             x0, =_vectors
+        msr             vbar_el1, x0
         ret
 
 .globl _enable_preemption
 _enable_preemption:
-        msr     daifclr, #2
+        msr             daifclr, #2
         ret
 
 .globl _disable_preemption
 _disable_preemption:
-        msr     daifset, #2
+        msr             daifset, #2
         ret
+
+.macro vec_entry label
+.align 7
+        b               \label
+.endm
+
+.macro skip_vec_entry
+.align 7
+        nop
+.endm
 
 .align 11
 .globl _vectors
 _vectors:
-.align 7
-        b       _synch_handler
+        // EL1 handlers
+        vec_entry       _synch_handler
+        vec_entry       _irq_handler
+        skip_vec_entry
+        skip_vec_entry
 
-.align 7
-        b       _irq_handler
+        // EL0 handlers
+        vec_entry       _synch_handler
+        vec_entry       _irq_handler

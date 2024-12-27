@@ -27,7 +27,7 @@
 #include <kernel/thread/thread_allocator.hpp>
 
 namespace kernel::thread {
-void init_stack(void *sp, void *arg, thread_handler_t handler) {
+void init_stack(void *sp, void *arg, thread_handler_t handler, PSRMode mode) {
   uint64_t *register_stack = reinterpret_cast<uint64_t *>(sp);
 
   // Set x1 to x29 (FP) equal to 0
@@ -44,8 +44,8 @@ void init_stack(void *sp, void *arg, thread_handler_t handler) {
   // Set ELR_EL1 to the thread handler
   register_stack[ELR_EL1_IDX] = reinterpret_cast<uintptr_t>(handler);
 
-  // Set SPSR_EL1 to the initial value
-  register_stack[SPSR_EL1_IDX] = static_cast<uint64_t>(PSRExceptionLevel::EL1t);
+  // Set PSR Mode in SPSR_EL1
+  register_stack[SPSR_EL1_IDX] = static_cast<uint64_t>(mode);
 }
 
 void init_heap(void *page) {
@@ -54,7 +54,8 @@ void init_heap(void *page) {
 }
 
 ThreadControlBlock *kernel_thread_alloc(thread_handler_t handler,
-                                        uint32_t quantum_us, void *arg) {
+                                        uint32_t quantum_us, PSRMode mode,
+                                        void *arg) {
   void *page = memory::kernel_page_alloc();
 
   if (!page) {
@@ -71,7 +72,7 @@ ThreadControlBlock *kernel_thread_alloc(thread_handler_t handler,
   // Start stack for thread just after the thread control block
   sp -= CPU_CTX_STACK_SIZE;
 
-  init_stack(reinterpret_cast<void *>(sp), arg, handler);
+  init_stack(reinterpret_cast<void *>(sp), arg, handler, mode);
   init_heap(page);
 
   tcb->init(quantum_us, page, reinterpret_cast<void *>(sp));

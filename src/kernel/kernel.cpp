@@ -28,7 +28,6 @@
 #include <kernel/thread/thread_allocator.hpp>
 
 // Link to main function for executing main thread
-// This will essentially serve as the first thread
 extern "C" int main();
 
 namespace kernel {
@@ -45,8 +44,10 @@ bool init_main_thread() {
   constexpr uint32_t main_thread_quantum = 1500;
 
   // Allocate the main thread
-  ThreadControlBlock *main_tcb = thread::kernel_thread_alloc(
-      reinterpret_cast<thread_handler_t>(&main), main_thread_quantum);
+  // Main thread will be first thread run in kernel mode
+  ThreadControlBlock *main_tcb =
+      thread::kernel_thread_alloc(reinterpret_cast<thread_handler_t>(&main),
+                                  main_thread_quantum, PSRMode::EL1t);
 
   return main_tcb != nullptr && scheduler::enqueue(main_tcb);
 }
