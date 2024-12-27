@@ -51,14 +51,14 @@ _clear_bss:
     cbnz        w2, _clear_bss
 
 _done_clear:
-    ldr         x0, =SCTLR_EL1_VALUE
+    ldr         x0, =SCTLR_EL1_MMU_DISABLED_VALUE
     msr         sctlr_el1, x0
 
     ldr         x0, =HCR_EL2_VALUE
     msr         hcr_el2, x0
 
-    mov         x2, #SPSR_EL2_VALUE
-    msr         spsr_el2, x2
+    ldr         x0, =SPSR_EL2_VALUE
+    msr         spsr_el2, x0
 
     adr         x2, _el1_entry
     msr         elr_el2, x2

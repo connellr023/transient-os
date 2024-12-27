@@ -36,6 +36,8 @@ constexpr uint64_t align_up(uint64_t value) {
   return (value + alignof(max_align_t) - 1) & ~(alignof(max_align_t) - 1);
 }
 
+uint32_t atomic_swap(volatile uint32_t *addr, uint32_t new_value);
+
 extern "C" {
 /**
  * @brief Copies n bytes from src to dest.

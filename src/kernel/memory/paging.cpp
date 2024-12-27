@@ -24,6 +24,8 @@
 
 #include <kernel/memory/paging.hpp>
 
+extern const uint64_t _end;
+
 namespace kernel::memory {
 /**
  * @brief Array of booleans representing the whether or not a page is allocated.

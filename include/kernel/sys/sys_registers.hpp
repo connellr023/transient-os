@@ -9,9 +9,13 @@
 #define SCTLR_MMU_DISABLED (0 << 0)
 #define SCTLR_MMU_ENABLED (1 << 0)
 
-#define SCTLR_EL1_VALUE                                                        \
+#define SCTLR_EL1_MMU_DISABLED_VALUE                                           \
   (SCTLR_RESERVED | SCTLR_EE_LITTLE_ENDIAN | SCTLR_I_CACHE_DISABLED |          \
    SCTLR_D_CACHE_DISABLED | SCTLR_MMU_DISABLED)
+
+#define SCTLR_EL1_MMU_ENABLED_VALUE                                            \
+  (SCTLR_RESERVED | SCTLR_EE_LITTLE_ENDIAN | SCTLR_EOE_LITTLE_ENDIAN |         \
+   SCTLR_I_CACHE_DISABLED | SCTLR_D_CACHE_DISABLED | SCTLR_MMU_ENABLED)
 
 #define HCR_EL2_VALUE ((1 << 31) | (1 << 1))
 
