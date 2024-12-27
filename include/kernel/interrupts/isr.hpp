@@ -28,7 +28,10 @@
 #include <api/sys/sys_calls.hpp>
 
 enum class SynchExceptionClass : uint8_t {
+  Unknown = 0x0,
   SVC = 0x15,
+  InstructionAbort = 0x20,
+  DataAbort = 0x25,
 };
 
 namespace kernel::interrupts {

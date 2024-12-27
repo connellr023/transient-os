@@ -57,8 +57,8 @@ _done_clear:
     ldr         x0, =HCR_EL2_VALUE
     msr         hcr_el2, x0
 
-    mov         x2, #SPSR_EL2_VALUE
-    msr         spsr_el2, x2
+    ldr         x0, =SPSR_EL2_VALUE
+    msr         spsr_el2, x0
 
     adr         x2, _el1_entry
     msr         elr_el2, x2

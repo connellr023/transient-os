@@ -27,6 +27,13 @@
 #include <kernel/thread/thread_allocator.hpp>
 
 namespace kernel::thread {
+/**
+ * @brief Initializes the stack for a new thread.
+ * @param sp The stack pointer for the thread.
+ * @param arg The argument to pass to the thread handler.
+ * @param handler The function to run in the new thread.
+ * @param mode Is the initial value of the PSR mode bits.
+ */
 void init_stack(void *sp, void *arg, thread_handler_t handler, PSRMode mode) {
   uint64_t *register_stack = reinterpret_cast<uint64_t *>(sp);
 
@@ -48,6 +55,11 @@ void init_stack(void *sp, void *arg, thread_handler_t handler, PSRMode mode) {
   register_stack[SPSR_EL1_IDX] = static_cast<uint64_t>(mode);
 }
 
+/**
+ * @brief Initializes the heap for a new thread.
+ * @param page The threads memory page. The heap will be initialized at the
+ * bottom of the page.
+ */
 void init_heap(void *page) {
   FreeListNode *start_node = reinterpret_cast<FreeListNode *>(page);
   start_node->init(THREAD_HEAP_SIZE - sizeof(FreeListNode));

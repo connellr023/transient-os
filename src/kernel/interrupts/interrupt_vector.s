@@ -53,12 +53,26 @@ _disable_preemption:
 .align 11
 .globl _vectors
 _vectors:
-        // EL1 handlers
+        // EL1t handlers
         vec_entry       _synch_handler
         vec_entry       _irq_handler
+        skip_vec_entry
+        skip_vec_entry
+
+        // EL1h handlers
+        skip_vec_entry
+        skip_vec_entry
         skip_vec_entry
         skip_vec_entry
 
         // EL0 handlers
         vec_entry       _synch_handler
         vec_entry       _irq_handler
+        skip_vec_entry
+        skip_vec_entry
+
+        // EL0 32-bit handlers
+        skip_vec_entry
+        skip_vec_entry
+        skip_vec_entry
+        skip_vec_entry

@@ -51,7 +51,7 @@ void *handle_sys_call(SystemCall call_code, PSRMode callee_mode,
   }
   case SystemCall::PutString: {
     const char *str = reinterpret_cast<const char *>(arg);
-    safe_puts(str);
+    dbg_puts(str);
     break;
   }
   case SystemCall::HeapAlloc: {

@@ -51,13 +51,19 @@ void kernel_start() asm("_kernel_start");
  * @brief Prints a message to the output handler.
  * @param str The message to print.
  */
-void safe_puts(const char *str);
+void dbg_puts(const char *str);
+
+/**
+ * @brief Prints a message to the output handler followed by a newline.
+ * @param str The message to print.
+ */
+void dbg_putln(const char *str);
 
 /**
  * @brief Prints a hex value to the output handler.
  * @param value The value to print.
  */
-void safe_hex(uint64_t value);
+void dbg_put_hex(uint64_t value);
 } // namespace kernel
 
 #endif // KERNEL_HPP

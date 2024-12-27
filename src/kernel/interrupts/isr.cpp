@@ -45,12 +45,29 @@ void *irq_exception_handler(void *interrupted_sp) {
 void *synch_exception_handler(SystemCall call_code, void *arg,
                               void *interrupted_sp) {
   // Check if the exception was a system call
-  uint64_t ec;
-  asm volatile("mrs %0, esr_el1" : "=r"(ec));
-  ec >>= 26;
+  uint64_t ec_val;
+  asm volatile("mrs %0, esr_el1" : "=r"(ec_val));
+  ec_val = (ec_val >> 26) & 0x3F;
 
-  if (ec != static_cast<uint64_t>(SynchExceptionClass::SVC)) {
-    panic("Segmentation fault");
+  const SynchExceptionClass ec = static_cast<SynchExceptionClass>(ec_val);
+
+  switch (ec) {
+  case SynchExceptionClass::SVC: {
+    // Handle system call
+    break;
+  }
+  case SynchExceptionClass::Unknown:
+  case SynchExceptionClass::InstructionAbort:
+  case SynchExceptionClass::DataAbort: {
+    dbg_putln("Segmentation fault (thread killed)");
+
+    // Kill the current thread
+    call_code = SystemCall::Exit;
+    break;
+  }
+  default: {
+    panic("Unimplemented exception class handler");
+  }
   }
 
   // Special handling for exit system call

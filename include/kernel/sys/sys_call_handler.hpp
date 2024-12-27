@@ -26,6 +26,7 @@
 #define SYS_CALL_HANDLER_HPP
 
 #include <api/sys/sys_calls.hpp>
+#include <kernel/thread/thread_allocator.hpp>
 
 /**
  * @brief A function pointer type for system call handlers.
