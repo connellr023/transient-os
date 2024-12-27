@@ -62,27 +62,29 @@ void sleep(uint32_t sleep_us) {
   trigger_sys_call(SystemCall::Sleep, reinterpret_cast<void *>(sleep_us));
 }
 
-bool spawn_kernel_thread(ThreadHandle *handle, thread_handler_t handler,
-                         uint32_t quantum_us, void *arg) {
+/**
+ * @brief Helper function to spawn a thread either in kernel or user mode.
+ */
+bool spawn_thread(ThreadHandle *handle, thread_handler_t handler,
+                  uint32_t quantum_us, void *arg, bool is_kernel) {
   AllocThreadArgs args;
   args.handle = handle;
   args.handler = handler;
   args.quantum_us = quantum_us;
   args.arg = arg;
 
-  return static_cast<bool>(
-      trigger_sys_call(SystemCall::SpawnKernelThread, &args));
+  return static_cast<bool>(trigger_sys_call(
+      is_kernel ? SystemCall::SpawnKernelThread : SystemCall::SpawnUserThread,
+      &args));
+}
+
+bool spawn_kernel_thread(ThreadHandle *handle, thread_handler_t handler,
+                         uint32_t quantum_us, void *arg) {
+  return spawn_thread(handle, handler, quantum_us, arg, true);
 }
 
 bool spawn_user_thread(ThreadHandle *handle, thread_handler_t handler,
                        uint32_t quantum_us, void *arg) {
-  AllocThreadArgs args;
-  args.handle = handle;
-  args.handler = handler;
-  args.quantum_us = quantum_us;
-  args.arg = arg;
-
-  return static_cast<bool>(
-      trigger_sys_call(SystemCall::SpawnUserThread, &args));
+  return spawn_thread(handle, handler, quantum_us, arg, false);
 }
 } // namespace api::sys
