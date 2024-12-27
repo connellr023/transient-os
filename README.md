@@ -1,6 +1,6 @@
 # $\text{Transient OS}$
 
-> A work in progress _time-sharing_ operating system for concurrency on the **Raspberry Pi 3**.
+> A robust _time-sharing_ operating system designed for building concurrent systems on the **Raspberry Pi 3**.
 
 ![Raspberry Pi](https://img.shields.io/badge/-Raspberry_Pi-C51A4A?style=for-the-badge&logo=Raspberry-Pi)
 ![C++](https://img.shields.io/badge/c++-%2300599C.svg?style=for-the-badge&logo=cplusplus&logoColor=white)
@@ -27,11 +27,19 @@ This operating system is intended to still be used for very low-level programmin
 - **Utilities**:
   - `Mutex`: Class that provides a way to create mutual exclusion locks.
   - `MutexLockGuard`: Class that provides a way to create mutual exclusion blocks of code.
-  - `AtomicGuard`: Class that provides a way to create atomic blocks of code. (Likely will be removed in future versions)
+  - `AtomicGuard`: Class that provides a way to create atomic blocks of code.
 
 ## Threads
 
-Threads are the fundamental unit of execution in this operating system. Each thread is allocated a single 4KB page of memory and is scheduled by the kernel. Threads are not tied to each other, that is, there is no concept of parent and child threads. All threads (except the main startup thread) are created by the user and are managed by the kernel. Threads either run at **EL0** or **EL1**. Threads running at **EL0** are user threads and can only spawn other user threads. Threads running at **EL1** are kernel threads and can spawn both user and kernel threads.
+Threads are the fundamental unit of execution in this operating system. Each thread is allocated a single 4KB page of memory and is scheduled by the kernel. Threads are not tied to each other, that is, there is no concept of parent and child threads. All threads (except the main startup thread) are created by the user and are managed by the kernel.
+
+### User Threads (`EL0`)
+
+User threads run at **EL0** and are intended to be used for user-level code. User threads can only spawn other user threads and cannot spawn kernel threads. Additionally, they are unable to execute privileged instructions such as reading and writing to _special registers_. If they attempt to do so, a _segmentation fault_ will occur and the thread will be terminated.
+
+### Kernel Threads (`EL1`)
+
+Kernel threads run at **EL1** and are intended to be used for kernel-level code. Kernel threads can spawn both user and kernel threads and can execute privileged instructions. Kernel threads are able to access _special registers_ and can read and write to them. The first thread created, the main thread, is a kernel thread.
 
 ## System Calls
 
