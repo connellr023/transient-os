@@ -23,7 +23,7 @@ This operating system is intended to still be used for very low-level programmin
 - **Preemptive Round-Robin Scheduling**: Ensures fair CPU time distribution among threads with configurable time quantums.
 - **System Calls**: Provides essential system calls for memory management and thread control.
 - **Memory Management**: No virtual memory with paging and heap allocation.
-- **Thread Management**: All threads, including the kernel, run at EL1. All threads run on a single core.
+- **Thread Management**: User and kernel-mode threads with no parent-child relationship.
 - **Utilities**:
   - `Mutex`: Class that provides a way to create mutual exclusion locks.
   - `MutexLockGuard`: Class that provides a way to create mutual exclusion blocks of code.
@@ -31,7 +31,7 @@ This operating system is intended to still be used for very low-level programmin
 
 ## Threads
 
-Threads are the fundamental unit of execution in this operating system. Each thread is allocated a single 4KB page of memory and is scheduled by the kernel. Threads are not tied to each other, that is, there is no concept of parent and child threads. All threads (except the main startup thread) are created by the user and are managed by the kernel.
+Threads are the fundamental unit of execution in this operating system. Each thread is allocated a single 4KB page of memory and is scheduled by the kernel. Threads are not tied to each other, that is, there is no concept of parent and child threads. All threads (except the main startup thread) are created by the user and are managed by the kernel. Threads either run at **EL0** or **EL1**. Threads running at **EL0** are user threads and can only spawn other user threads. Threads running at **EL1** are kernel threads and can spawn both user and kernel threads.
 
 ## System Calls
 
@@ -69,9 +69,13 @@ This call exits the current thread and cleans up any resources it was using.
 
 This call sleeps for at least the specified number of microseconds before resuming execution.
 
-### Spawn Thread (`spawn_thread`)
+### Spawn Kernel Thread (`spawn_kernel_thread`)
 
-This call spawns a new thread and populates a `ThreadHandle` that can be used to join the thread later.
+This call spawns a new kernel thread with the specified entry point, argument, and time quantum. Will fail if callee thread is not running at **EL1**.
+
+### Spawn User Thread (`spawn_user_thread`)
+
+This call spawns a new user thread with the specified entry point, argument, and time quantum.
 
 ## System Call Protocol
 

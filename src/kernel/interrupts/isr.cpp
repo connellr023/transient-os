@@ -27,6 +27,7 @@
 #include <kernel/kernel.hpp>
 #include <kernel/scheduler/cpu_scheduler.hpp>
 #include <kernel/sys/sys_call_handler.hpp>
+#include <kernel/thread/thread_allocator.hpp>
 #include <kernel/thread/thread_control_block.hpp>
 
 namespace kernel::interrupts {
@@ -44,12 +45,29 @@ void *irq_exception_handler(void *interrupted_sp) {
 void *synch_exception_handler(SystemCall call_code, void *arg,
                               void *interrupted_sp) {
   // Check if the exception was a system call
-  uint64_t ec;
-  asm volatile("mrs %0, esr_el1" : "=r"(ec));
-  ec >>= 26;
+  uint64_t ec_val;
+  asm volatile("mrs %0, esr_el1" : "=r"(ec_val));
+  ec_val = (ec_val >> 26) & 0x3F;
 
-  if (ec != static_cast<uint64_t>(SynchExceptionClass::SVC)) {
-    panic("Non-SVC synchronous exception occurred");
+  const SynchExceptionClass ec = static_cast<SynchExceptionClass>(ec_val);
+
+  switch (ec) {
+  case SynchExceptionClass::SVC: {
+    // Handle system call
+    break;
+  }
+  case SynchExceptionClass::Unknown:
+  case SynchExceptionClass::InstructionAbort:
+  case SynchExceptionClass::DataAbort: {
+    dbg_putln("Segmentation fault (thread killed)");
+
+    // Kill the current thread
+    call_code = SystemCall::Exit;
+    break;
+  }
+  default: {
+    panic("Unimplemented exception class handler");
+  }
   }
 
   // Special handling for exit system call
@@ -62,11 +80,14 @@ void *synch_exception_handler(SystemCall call_code, void *arg,
     return next_tcb->get_sp();
   }
 
+  // Get the interrupted stack pointer
+  uint64_t *sp = reinterpret_cast<uint64_t *>(interrupted_sp);
+
   // Handle all other system calls
-  void *value = sys::handle_sys_call(call_code, arg);
+  const PSRMode callee_mode = static_cast<PSRMode>(sp[SPSR_EL1_IDX] & 0xF);
+  void *value = sys::handle_sys_call(call_code, callee_mode, arg);
 
   // Write return value to x0 register on the interrupted stack
-  uint64_t *sp = reinterpret_cast<uint64_t *>(interrupted_sp);
   sp[0] = reinterpret_cast<uintptr_t>(value);
 
   // Switch to a different thread

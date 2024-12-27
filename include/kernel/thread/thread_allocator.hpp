@@ -37,9 +37,9 @@
 #define ELR_EL1_IDX 31
 #define SPSR_EL1_IDX 32
 
-enum class PSRExceptionLevel : uint8_t {
-  EL0t = 0x00,
-  EL1t = 0x04,
+enum class PSRMode : uint64_t {
+  EL0t = 0b0000,
+  EL1t = 0b0100,
 };
 
 namespace kernel::thread {
@@ -47,12 +47,13 @@ namespace kernel::thread {
  * @brief Allocates and initializes a page of memory for a new thread.
  * @param handler The handler function for the thread.
  * @param quantum_us The time quantum for the thread.
+ * @param mode Is the initial value of the PSR mode bits.
  * @param arg The argument to pass to the thread handler.
  * @return A pointer to the thread control block for the new thread. Will be
  * nullptr if allocation fails.
  */
 ThreadControlBlock *kernel_thread_alloc(thread_handler_t handler,
-                                        uint32_t quantum_us,
+                                        uint32_t quantum_us, PSRMode mode,
                                         void *arg = nullptr);
 } // namespace kernel::thread
 

@@ -27,7 +27,7 @@
 
 #include <kernel/thread/thread_control_block.hpp>
 
-#define QUEUE_CAPACITY 260
+#define QUEUE_CAPACITY 265
 
 /**
  * @brief A simple queue for the scheduler.

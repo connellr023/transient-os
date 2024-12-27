@@ -30,7 +30,18 @@
 #include <kernel/thread/thread_allocator.hpp>
 
 namespace kernel::sys {
-void *handle_sys_call(SystemCall call_code, const void *arg) {
+bool handle_spawn_thread(AllocThreadArgs *alloc_thread_args, PSRMode mode) {
+  ThreadControlBlock *tcb = thread::kernel_thread_alloc(
+      alloc_thread_args->handler, alloc_thread_args->quantum_us, mode,
+      alloc_thread_args->arg);
+
+  alloc_thread_args->handle->init(tcb);
+
+  return tcb != nullptr && scheduler::enqueue(tcb);
+}
+
+void *handle_sys_call(SystemCall call_code, PSRMode callee_mode,
+                      const void *arg) {
   switch (call_code) {
   case SystemCall::SetOutputHandler: {
     output_handler_t handler =
@@ -40,7 +51,7 @@ void *handle_sys_call(SystemCall call_code, const void *arg) {
   }
   case SystemCall::PutString: {
     const char *str = reinterpret_cast<const char *>(arg);
-    safe_puts(str);
+    dbg_puts(str);
     break;
   }
   case SystemCall::HeapAlloc: {
@@ -66,17 +77,24 @@ void *handle_sys_call(SystemCall call_code, const void *arg) {
     scheduler::sleep_current(sleep_us);
     break;
   }
-  case SystemCall::SpawnThread: {
+  case SystemCall::SpawnKernelThread: {
+    // Non-kernel mode threads can't spawn kernel threads
+    if (callee_mode != PSRMode::EL1t) {
+      return nullptr;
+    }
+
     AllocThreadArgs *alloc_thread_args =
         reinterpret_cast<AllocThreadArgs *>(const_cast<void *>(arg));
 
-    ThreadControlBlock *tcb = thread::kernel_thread_alloc(
-        alloc_thread_args->handler, alloc_thread_args->quantum_us,
-        alloc_thread_args->arg);
+    return reinterpret_cast<void *>(
+        handle_spawn_thread(alloc_thread_args, PSRMode::EL1t));
+  }
+  case SystemCall::SpawnUserThread: {
+    AllocThreadArgs *alloc_thread_args =
+        reinterpret_cast<AllocThreadArgs *>(const_cast<void *>(arg));
 
-    alloc_thread_args->handle->init(tcb);
-
-    return reinterpret_cast<void *>(tcb != nullptr && scheduler::enqueue(tcb));
+    return reinterpret_cast<void *>(
+        handle_spawn_thread(alloc_thread_args, PSRMode::EL0t));
   }
   default:
     // Yield system call does nothing so this case will be hit for it

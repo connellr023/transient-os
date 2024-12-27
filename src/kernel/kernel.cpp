@@ -28,7 +28,6 @@
 #include <kernel/thread/thread_allocator.hpp>
 
 // Link to main function for executing main thread
-// This will essentially serve as the first thread
 extern "C" int main();
 
 namespace kernel {
@@ -45,8 +44,10 @@ bool init_main_thread() {
   constexpr uint32_t main_thread_quantum = 1500;
 
   // Allocate the main thread
-  ThreadControlBlock *main_tcb = thread::kernel_thread_alloc(
-      reinterpret_cast<thread_handler_t>(&main), main_thread_quantum);
+  // Main thread will be first thread run in kernel mode
+  ThreadControlBlock *main_tcb =
+      thread::kernel_thread_alloc(reinterpret_cast<thread_handler_t>(&main),
+                                  main_thread_quantum, PSRMode::EL1t);
 
   return main_tcb != nullptr && scheduler::enqueue(main_tcb);
 }
@@ -74,13 +75,18 @@ void kernel_start() {
   }
 }
 
-void safe_puts(const char *str) {
+void dbg_puts(const char *str) {
   if (kernel_string_output_handler != nullptr) {
     kernel_string_output_handler(str);
   }
 }
 
-void safe_hex(uint64_t value) {
+void dbg_putln(const char *str) {
+  dbg_puts(str);
+  dbg_puts("\n");
+}
+
+void dbg_put_hex(uint64_t value) {
   if (kernel_string_output_handler != nullptr) {
     constexpr const char *digits = "0123456789ABCDEF";
     constexpr uint8_t buffer_size = 17;
@@ -100,9 +106,8 @@ void safe_hex(uint64_t value) {
 void panic(const char *msg) {
   interrupts::disable_preemption();
 
-  safe_puts("Kernel panic: ");
-  safe_puts(msg);
-  safe_puts("\n");
+  dbg_puts("Kernel panic: ");
+  dbg_putln(msg);
 
   while (true) {
     asm volatile("wfe");

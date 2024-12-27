@@ -26,6 +26,7 @@
 #define SYS_CALL_HANDLER_HPP
 
 #include <api/sys/sys_calls.hpp>
+#include <kernel/thread/thread_allocator.hpp>
 
 /**
  * @brief A function pointer type for system call handlers.
@@ -39,10 +40,12 @@ namespace kernel::sys {
  * @brief Handles a system call by invoking the appropriate system call handler.
  * This should only be invoked by the synchronous exception handler.
  * @param call_code The system call code.
+ * @param callee_mode Is the PSR mode of the callee.
  * @param arg The argument to the system call.
  * @return The return value of the system call.
  */
-void *handle_sys_call(SystemCall call_code, const void *arg);
+void *handle_sys_call(SystemCall call_code, PSRMode callee_mode,
+                      const void *arg);
 } // namespace kernel::sys
 
 #endif // SYS_CALL_HANDLER_HPP
