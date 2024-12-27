@@ -93,7 +93,7 @@ When writing code that utilizes this operating system, it is intended that you o
 
 ## High-Level Design
 
-The operating system is intended to be simple but useful. It is designed to be a time-sharing operating system that can run multiple threads concurrently. The system is designed to run on a single core and all threads run at EL1 (as of now). The system is designed to be preemptive and uses round-robin scheduling with configurable time quantums for each thread.
+The operating system is intended to be simple but useful. It is designed to be a time-sharing operating system that can run multiple threads concurrently. The system is designed to run on a single core. The system is designed to be preemptive and uses round-robin scheduling with configurable time quantums for each thread.
 
 ### Thread Memory Layout
 
