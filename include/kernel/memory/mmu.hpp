@@ -1,38 +1,35 @@
 #ifndef MMU_HPP
 #define MMU_HPP
 
-#include <kernel/peripherals/mmio.hpp>
+#define TABLE_SIZE 512             // 2 ^ (9 bits)
+#define PAGE_SIZE (TABLE_SIZE * 8) // 8 bytes (64-bit addresses) per entry (4KB)
+#define SECTION_SIZE (TABLE_SIZE * PAGE_SIZE) // 2MB
 
-#define PAGE_SHIFT 12 // 4KB page size
-#define TABLE_SHIFT 9
-#define SECTION_SHIFT (PAGE_SHIFT + TABLE_SHIFT)
+#define PAGE_GLOBAL_DIRECTORY_SIZE                                             \
+  (3 * PAGE_SIZE) // The size of PGD, PUD, and PMD tables when using section
+                  // mappings. We don't need PTE table since we are only mapping
+                  // 1GB of memory.
 
-#define PAGE_SIZE (1 << PAGE_SHIFT)
-#define SECTION_SIZE (1 << SECTION_SHIFT)
+// #define ACCESS_EL0 (1 << 6) // EL0 (user) can access
+// #define ACCESS_EL1 (0 << 6) // EL1 (kernel) can access
+// #define ACCESS_READ_WRITE (0 << 7)
+// #define ACCESS_READ_ONLY (1 << 7)
+// #define ACCESS_ACCESS_FLAG (1 << 10)
+// #define ACCESS_NO_EXECUTE (1 << 54)
 
-#define LOW_MEMORY (2 * SECTION_SIZE)
-#define HIGH_MEMORY MMIO_BASE
+// #define SHARABILITY_OUTER (2 << 8) // Outer shareable
+// #define SHARABILITY_INNER (3 << 8) // Inner shareable
 
-#define PAGING_MEMORY (HIGH_MEMORY - LOW_MEMORY)
-#define PAGE_COUNT (PAGING_MEMORY / PAGE_SIZE)
+// #define REGION_NORMAL (0 << 2)        // Normal memory
+// #define REGION_DEVICE (1 << 2)        // Device MMIO
+// #define REGION_NON_CACHEABLE (2 << 2) // Non-cacheable
 
-#define TABLE_GRANULE 0b11 // 4KB
-#define TABLE_BLOCK 0b01   // 2MB
-
-#define MAX_ENTRIES_PER_TABLE 512 // For a 4KB page size
-
-#define ACCESS_EL0 (1 << 6) // EL0 (user) can access
-#define ACCESS_EL1 (0 << 6) // EL1 (kernel) can access
-#define ACCESS_READ_WRITE (0 << 7)
-#define ACCESS_READ_ONLY (1 << 7)
-#define ACCESS_ACCESS_FLAG (1 << 10)
-#define ACCESS_NO_EXECUTE (1 << 54)
-
-#define SHARABILITY_OUTER (2 << 8) // Outer shareable
-#define SHARABILITY_INNER (3 << 8) // Inner shareable
-
-#define REGION_NORMAL (0 << 2)        // Normal memory
-#define REGION_DEVICE (1 << 2)        // Device MMIO
-#define REGION_NON_CACHEABLE (2 << 2) // Non-cacheable
+#define MAIR_ATTR_DEVICE_nGnRnE 0x0
+#define MAIR_ATTR_NORMAL_NC 0x1
+#define MAIR_FLAG_DEVICE_nGnRnE 0x0
+#define MAIR_FLAG_NORMAL_NC 0x44
+#define MAIR_VALUE                                                             \
+  (MAIR_FLAG_DEVICE_nGnRnE << (8 * MAIR_ATTR_DEVICE_nGnRnE)) |                 \
+      (MAIR_FLAG_NORMAL_NC << (8 * MAIR_ATTR_NORMAL_NC))
 
 #endif // MMU_HPP

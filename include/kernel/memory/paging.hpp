@@ -25,6 +25,15 @@
 #ifndef PAGING_HPP
 #define PAGING_HPP
 
+#include <kernel/memory/mmu.hpp>
+#include <kernel/peripherals/mmio.hpp>
+
+#define LOW_MEMORY (2 * SECTION_SIZE)
+#define HIGH_MEMORY MMIO_BASE
+
+#define PAGING_MEMORY (HIGH_MEMORY - LOW_MEMORY)
+#define PAGE_COUNT (PAGING_MEMORY / PAGE_SIZE)
+
 #ifndef __ASSEMBLER__
 
 // Pages allocated to threads will have the top half for the stack and the
