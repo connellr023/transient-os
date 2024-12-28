@@ -1,7 +1,7 @@
 #ifndef MMU_HPP
 #define MMU_HPP
 
-#define VIRT_KERNEL_MASK 0xffff000000000000
+#define VIRT_KERNEL_MASK 0x0 // 0xFFFF000000000000
 
 #define PHYS_MEMORY_SIZE 0x40000000 // 1GB
 
@@ -27,20 +27,6 @@
 #define MM_TYPE_BLOCK 1
 #define MM_ACCESS_FLAG (1 << 10)
 #define MM_ACCESS_EL0 (1 << 6)
-
-// #define ACCESS_EL0 (1 << 6) // EL0 (user) can access
-// #define ACCESS_EL1 (0 << 6) // EL1 (kernel) can access
-// #define ACCESS_READ_WRITE (0 << 7)
-// #define ACCESS_READ_ONLY (1 << 7)
-// #define ACCESS_ACCESS_FLAG (1 << 10)
-// #define ACCESS_NO_EXECUTE (1 << 54)
-
-// #define SHARABILITY_OUTER (2 << 8) // Outer shareable
-// #define SHARABILITY_INNER (3 << 8) // Inner shareable
-
-// #define REGION_NORMAL (0 << 2)        // Normal memory
-// #define REGION_DEVICE (1 << 2)        // Device MMIO
-// #define REGION_NON_CACHEABLE (2 << 2) // Non-cacheable
 
 #define MT_DEVICE_nGnRnE 0x0
 #define MT_NORMAL_NC 0x1

@@ -1,7 +1,7 @@
 SECTIONS
 {
     /* Start address for the binary */
-    . = 0x80000; /* 0xffff000000000000 */
+    . = 0x80000; /* 0xFFFF000000080000 */
 
     /* Text section (code) */
     .text : {
@@ -9,10 +9,10 @@ SECTIONS
         *(.text .text.* .gnu.linkonce.t*) /* Main text section */
     }
 
-    . = ALIGN(4096);
-
     /* Read-only data section */
     .rodata : { *(.rodata .rodata.* .gnu.linkonce.r*) }
+
+    . = ALIGN(4096);
 
     /* Data section */
     PROVIDE(_data = .);
@@ -30,6 +30,8 @@ SECTIONS
     /* Define BSS size in bytes */
     __bss_size = (__bss_end - __bss_start);
     
+    . = ALIGN(4096);
+
     /* Define end of binary */
     _end = .;
 

@@ -61,5 +61,5 @@ _create_page_tables:
 .globl _init_page_tables
 _init_page_tables:
     ldr x0, =pgd_table
-    msr ttbr1_el1, x0
+    msr ttbr0_el1, x0
     ret

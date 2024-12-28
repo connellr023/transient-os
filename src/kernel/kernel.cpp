@@ -34,6 +34,21 @@
 // This will essentially serve as the first thread
 extern "C" int main();
 
+void atomic_increment(volatile int *ptr) {
+  int oldValue, result;
+
+  do {
+    asm volatile("ldxr %w[oldValue], [%[ptr]]\n"
+                 "add %w[oldValue], %w[oldValue], #1\n"
+                 "stxr %w[result], %w[oldValue], [%[ptr]]\n"
+                 : [oldValue] "=&r"(oldValue), [result] "=&r"(result)
+                 : [ptr] "r"(ptr)
+                 : "memory");
+
+    uart0::hex(result);
+  } while (result != 0);
+}
+
 namespace kernel {
 /**
  * @brief The output handler for kernel debugging.
@@ -57,10 +72,13 @@ bool init_main_thread() {
 void kernel_start() {
   uart0::init();
 
+  int j = 0;
+
   while (true) {
     uart0::puts("Hello, world!\n");
 
     for (int i = 0; i < 1000000; i++) {
+      atomic_increment(&j);
       asm volatile("nop");
     }
   }

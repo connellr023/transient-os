@@ -32,8 +32,9 @@
 _start:
     // Read cpu id, stop slave cores
     mrs         x0, mpidr_el1
-    tst         x0, 0x3
-    b.eq        _master
+    and         x0, x0, #0xFF
+    cbz         x0, _master
+    b           _hang
 
     // If CPU ID > 0, stop
 _hang:
@@ -41,6 +42,10 @@ _hang:
     b           _hang
 
 _master:
+    // Ensure MMU is disabled
+    ldr         x0, =SCTLR_EL1_MMU_DISABLED_VALUE
+    msr         sctlr_el1, x0
+
     // Clear bss section
     ldr         x1, =__bss_start
     ldr         w2, =__bss_size
@@ -52,9 +57,6 @@ _clear_bss:
     cbnz        w2, _clear_bss
 
 _done_clear:
-    ldr         x0, =SCTLR_EL1_MMU_DISABLED_VALUE
-    msr         sctlr_el1, x0
-
     ldr         x0, =HCR_EL2_VALUE
     msr         hcr_el2, x0
 
@@ -64,7 +66,7 @@ _done_clear:
     adr         x2, _el1_entry
     msr         elr_el2, x2
 
-    ldr         x0, =_start
+    ldr         x0, =LOW_MEMORY
     msr         sp_el0, x0
 
     // Set top of stack for SP_EL1
@@ -78,24 +80,24 @@ _el1_entry:
     msr         spsel, xzr
     mov         sp, x0
 
-    //bl          _create_page_tables
+    bl          _create_page_tables
+    bl          _init_page_tables
+
+    ldr         x0, =TCR_VALUE
+    msr         tcr_el1, x0
+
+    ldr         x0, =MAIR_VALUE
+    msr         mair_el1, x0
 
     // Move stack pointer into virtual address space
     // ldr         x0, =VIRT_KERNEL_MASK
     // add         sp, sp, x0
 
-    //bl          _init_page_tables
-
-    //ldr         x0, =TCR_VALUE
-    //msr         tcr_el1, x0
-
-    //ldr         x0, =MAIR_VALUE
-    //msr         mair_el1, x0
+    ldr         x2, =_kernel_start
 
     // Enable MMU
-    // ldr         x0, =SCTLR_MMU_ENABLED
-    // msr         sctlr_el1, x0
+    ldr         x0, =SCTLR_EL1_MMU_ENABLED_VALUE
+    msr         sctlr_el1, x0
 
     // Enter kernel start function
-    bl          _kernel_start
-    b           _hang
+    br          x2
