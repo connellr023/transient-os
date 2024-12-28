@@ -1,0 +1,3 @@
+[submodule "rpi3-drivers"]
+	path = rpi3-drivers
+	url = https://github.com/connellr023/rpi3-drivers
