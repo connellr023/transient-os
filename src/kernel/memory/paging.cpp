@@ -22,6 +22,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include <kernel/memory/mmu.hpp>
 #include <kernel/memory/paging.hpp>
 
 extern const uint64_t _end;

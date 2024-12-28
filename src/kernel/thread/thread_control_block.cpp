@@ -22,7 +22,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../../include/kernel/thread/thread_control_block.hpp"
+#include <kernel/thread/thread_control_block.hpp>
 
 void ThreadControlBlock::init(uint32_t quantum_us, void *page, void *sp) {
   static volatile uint64_t thread_id_counter = 0;

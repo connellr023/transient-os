@@ -1,3 +1,4 @@
+#include <kernel/memory/mmu.hpp>
 #include <kernel/memory/paging.hpp>
 #include <kernel/memory/virtual_memory.hpp>
 #include <kernel/sys/sys_registers.hpp>
