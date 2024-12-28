@@ -23,6 +23,7 @@
      */
 
 #include <kernel/memory/paging.hpp>
+#include <kernel/memory/mmu.hpp>
 #include <kernel/sys/sys_registers.hpp>
 
 .section .text.boot
@@ -76,6 +77,24 @@ _el1_entry:
     // Switch to using SP_EL0
     msr         spsel, xzr
     mov         sp, x0
+
+    //bl          _create_page_tables
+
+    // Move stack pointer into virtual address space
+    // ldr         x0, =VIRT_KERNEL_MASK
+    // add         sp, sp, x0
+
+    //bl          _init_page_tables
+
+    //ldr         x0, =TCR_VALUE
+    //msr         tcr_el1, x0
+
+    //ldr         x0, =MAIR_VALUE
+    //msr         mair_el1, x0
+
+    // Enable MMU
+    // ldr         x0, =SCTLR_MMU_ENABLED
+    // msr         sctlr_el1, x0
 
     // Enter kernel start function
     bl          _kernel_start

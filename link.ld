@@ -1,13 +1,15 @@
 SECTIONS
 {
     /* Start address for the binary */
-    . = 0x80000;
+    . = 0x80000; /* 0xffff000000000000 */
 
     /* Text section (code) */
     .text : {
         KEEP(*(.text.boot)) /* Keep startup code */
         *(.text .text.* .gnu.linkonce.t*) /* Main text section */
     }
+
+    . = ALIGN(4096);
 
     /* Read-only data section */
     .rodata : { *(.rodata .rodata.* .gnu.linkonce.r*) }

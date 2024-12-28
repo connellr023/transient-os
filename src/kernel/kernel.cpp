@@ -28,6 +28,8 @@
 #include <kernel/scheduler/cpu_scheduler.hpp>
 #include <kernel/thread/thread_allocator.hpp>
 
+#include "../../../rpi3-drivers/include/uart0.hpp"
+
 // Link to main function for executing main thread
 // This will essentially serve as the first thread
 extern "C" int main();
@@ -53,29 +55,39 @@ bool init_main_thread() {
 }
 
 void kernel_start() {
-  // Ensure we are in EL1
-  uint64_t current_el;
-  asm volatile("mrs %0, CurrentEL" : "=r"(current_el));
-  current_el >>= 2;
-
-  if (current_el != 1 || !init_main_thread()) {
-    return;
-  }
-
-  // Initialize the virtual memory system
-  memory::init_virtual_memory();
-
-  // Initialize the interrupt controller and timer
-  interrupts::init_interrupt_vector();
-  interrupts::enable_interrupt_controller();
-  interrupts::enable_preemption();
-
-  // Trigger the first timer interrupt
-  interrupts::prepare_timer_interrupt(15);
+  uart0::init();
 
   while (true) {
-    asm volatile("wfi");
+    uart0::puts("Hello, world!\n");
+
+    for (int i = 0; i < 1000000; i++) {
+      asm volatile("nop");
+    }
   }
+
+  // Ensure we are in EL1
+  // uint64_t current_el;
+  // asm volatile("mrs %0, CurrentEL" : "=r"(current_el));
+  // current_el >>= 2;
+
+  // if (current_el != 1 || !init_main_thread()) {
+  //   return;
+  // }
+
+  // // Initialize the virtual memory system
+  // memory::init_virtual_memory();
+
+  // // Initialize the interrupt controller and timer
+  // interrupts::init_interrupt_vector();
+  // interrupts::enable_interrupt_controller();
+  // interrupts::enable_preemption();
+
+  // // Trigger the first timer interrupt
+  // interrupts::prepare_timer_interrupt(15);
+
+  // while (true) {
+  //   asm volatile("wfi");
+  // }
 }
 
 void safe_puts(const char *str) {
