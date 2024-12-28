@@ -1,54 +1,43 @@
-SRC_DIR_NAME = src
-BUILD_DIR_NAME = build
-INCLUDE_DIR_NAME = include
-
-SRC_DIR = ./$(SRC_DIR_NAME)
-BUILD_DIR = ./$(BUILD_DIR_NAME)
-INCLUDE_DIR = ./$(INCLUDE_DIR_NAME)
-
-# Find all .c, .cpp, and .s files recursively in the source directory
-SRCS = $(shell find $(SRC_DIR) -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.s' \))
-OBJS = $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(SRCS:.c=.o))
-OBJS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(OBJS:.cpp=.o))
-OBJS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(OBJS:.s=.o))
-
-# Compiler and linker flags
-CFLAGS = -fno-exceptions -fno-rtti -Wall -Wextra -I$(INCLUDE_DIR)
-CXXFLAGS = $(CFLAGS)
-LDFLAGS = -nostartfiles -ffreestanding -lgcc
-
-# Output library name
-LIB_NAME = libtransient-os.a
-
-# Default target
-all: $(BUILD_DIR)/$(LIB_NAME)
-
-# Build the static library
-$(BUILD_DIR)/$(LIB_NAME): $(OBJS)
-	@mkdir -p $(BUILD_DIR)
-	llvm-ar rcs $@ $^
-
-# Compile C source files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
-	@mkdir -p $(dir $@)
-	@echo "Compiling $< to $@"
-	clang++ --target=aarch64-elf $(CFLAGS) -c $< -o $@
-
-# Compile C++ source files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
-	@mkdir -p $(dir $@)
-	@echo "Compiling $< to $@"
-	clang++ --target=aarch64-elf $(CXXFLAGS) -c $< -o $@
-
-# Compile assembly source files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.s | $(BUILD_DIR)
-	@mkdir -p $(dir $@)
-	@echo "Compiling $< to $@"
-	clang++ --target=aarch64-elf -x assembler-with-cpp $(CFLAGS) -c $< -o $@
-
 # Ensure build directory exists
+BUILD_DIR := build
+
 $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)
+
+# Compiler and linker settings
+CXX := aarch64-linux-gnu-g++
+CXXFLAGS := -fno-exceptions -fno-rtti -Wall -Wextra -fno-stack-protector
+ASFLAGS :=
+LDFLAGS := -T link.ld
+LINKFILE := link.ld
+
+# Dynamically find source and include directories
+SRC_FILES := $(shell find . -name '*.cpp')
+ASM_FILES := $(shell find . -name '*.S')
+OBJ_FILES := $(patsubst ./%, $(BUILD_DIR)/%, $(SRC_FILES:.cpp=.o) $(ASM_FILES:.S=.o))
+
+# Include directories
+INCLUDE_FLAGS := -I.
+
+# Output executable
+TARGET := $(BUILD_DIR)/kernel8.img
+
+# Default target
+all: $(TARGET)
+
+# Ensure build directory structure matches source directories
+build/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(INCLUDE_FLAGS) -c $< -o $@
+
+build/%.o: %.S
+	@mkdir -p $(dir $@)
+	$(CXX) $(ASFLAGS) $(INCLUDE_FLAGS) -c $< -o $@
+
+# Link object files into ELF executable
+$(TARGET): $(OBJ_FILES)
+	ld.lld -m aarch64elf $(OBJ_FILES) -T $(LINKFILE) -o $(BUILD_DIR)/kernel8.elf
+	llvm-objcopy -O binary $(BUILD_DIR)/kernel8.elf $(TARGET)
 
 # Clean build artifacts
 clean:

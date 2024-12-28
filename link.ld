@@ -36,4 +36,4 @@ SECTIONS
 }
 
 /* Define entry point */
-ENTRY(_start)
+ENTRY(_kernel_entry)
